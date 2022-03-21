@@ -3,7 +3,7 @@ class PekoMiniBoss extends Actor {
 
     size = new Vector2(16 * 16, 6 * 16);
 
-    maxHealth = 4;
+    maxHealth = 20;
 
     moveSpeed = 4;
 
@@ -99,6 +99,7 @@ class PekoMiniBoss extends Actor {
                 this.laserTarget = this.middleParts[3].pos;
             } else {
                 this.phase = 'move';
+                game.playSound("boss_move");
                 this.middleVel = new Vector2(this.moveSpeed * (this.middleParts[3].pos.x < this.pos.x + this.size.x / 2 ? 1 : -1), 0);
             }
         }
@@ -125,7 +126,7 @@ class PekoMiniBoss extends Actor {
     }
 
     releasePhase = game => {
-        if (this.phaseBuffer > 10 && !(this.phaseBuffer % 4)) {
+        if (this.phaseBuffer > 10 && !(this.phaseBuffer % 4) && this.laserTarget) {
             const core = this.middleParts[3];
             const p1 = this.laserTarget;
             const p2 = CollisionBox.center(core);
@@ -152,7 +153,6 @@ class PekoMiniBoss extends Actor {
         this.hitBuffer = 20;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
-        console.log('hit', this.health);
     }
 
     update = game => {

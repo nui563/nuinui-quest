@@ -11,15 +11,20 @@ class Assets {
         'sp_flare_wink',
         'sp_flare_look',
         'sp_flare_bow',
+        'sp_flare_bow_jump',
+        'sp_flare_bow_fall',
 
         'sp_elfriend_idle',
         'sp_pekora_idle',
 
+        'sp_nousabot',
         'sp_nousagi_dark',
         'sp_bow_pickup',
         'sp_arrow',
         'sp_peko_mini_boss',
         'sp_laser_target',
+
+        'sp_vending_machine',
 
         // Stage
         'ts_forest',
@@ -33,6 +38,7 @@ class Assets {
         'sp_speech_bubble',
         'sp_kintsuba',
         'ui_forest_label',
+        'ui_healthbar',
 
         // Particles
         'vfx_explosion',
@@ -63,8 +69,11 @@ class Assets {
         'bow_shoot',
         'hit',
         'no_damage',
+        'damage',
         'rumble',
-        'charge'
+        'charge',
+        'pew',
+        'boss_move'
     ]
     
     constructor() {

@@ -62,6 +62,7 @@ const FOREST_EVENTS = {
                             event.flare.playerControl = true;
                             event.flare.animationLocked = false;
                             event.end = true;
+                            scene.enableHUD = true;
             
                             // const a = new Audio('./sound/terminal.mp3');
                             // a.volume = .25;
@@ -168,6 +169,8 @@ const FOREST_EVENTS = {
                         event.boss.phase = 'death';
                     }
                     
+                    if (!(event.timelineFrame % 32)) game.playSound('rumble');
+                    
                     if (event.timelineFrame === 180) {
                         
                         for (let i = 0; i < event.boss.size.x / 16; i++) {
@@ -175,13 +178,24 @@ const FOREST_EVENTS = {
                         }
 
                         scene.actors = scene.actors.filter(actor => actor !== event.boss);
-
-                        console.log(scene.currentSection.collisions);
                         
-                        scene.currentSection.collisions = scene.currentSection.collisions.filter(collision => collision.pos.y > 96 || collision.pos.x < 1312 || collision.pos.x > 1536);
+                        scene.currentSection.collisions = scene.currentSection.collisions.filter(collision => collision.pos.y > 96 || collision.pos.x <= 1312 || collision.pos.x > 1536);
+                        
+                        game.playSound('rumble');
+
+                        const pos = scene.view.pos.times(1 / 16).floor();
+                        for (let y = pos.y; y < pos.y + 1 + scene.view.size.y / 16; y++) {
+                            for (let x = pos.x; x < pos.x + 1 + scene.view.size.x / 16; x++) {
+                                if (x > 82 && x <= 96 && y === 6) delete scene.foreground[`${x}_${y}`];
+                            }
+                        }
+                        scene.drawView = true;
+
                         flare.playerControl = true;
                         event.end = true;
                     }
+                    
+                    scene.shakeBuffer = 2;
                 }
             ]
         }

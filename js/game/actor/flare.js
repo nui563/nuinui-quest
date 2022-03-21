@@ -1,7 +1,7 @@
 class Flare extends Actor {
     vel = new Vector2(0, 0);
     runSpeed = .35;
-    jumpSpeed = 5;
+    jumpSpeed = 2.75;
     velLoss = new Vector2(0.8, 1);
     gravity = .2;
     dir = true;
@@ -10,7 +10,12 @@ class Flare extends Actor {
 
     isGrounded = true;
 
+    jumpInput = false;
+    jumpPower = 0;
+
     hasBow = false;
+
+    maxHealth = 32;
 
     // Flare animations
     animations = {
@@ -67,11 +72,25 @@ class Flare extends Actor {
             size: new Vector2(32, 40),
             speed: .25,
             frames: 3
+        },
+        bow_jump: {
+            offset: new Vector2(-9, -6),
+            size: new Vector2(32, 40),
+            speed: .25,
+            frames: 3
+        },
+        bow_fall: {
+            offset: new Vector2(-9, -6),
+            size: new Vector2(32, 40),
+            speed: .25,
+            frames: 3
         }
     }
 
     constructor(pos, size) {
         super(pos, size);
+
+        this.health = this.maxHealth;
     }
 
     update = game => {
@@ -89,9 +108,18 @@ class Flare extends Actor {
         this.isJumping = false;
         if (this.jumpBuffer && !keys.jump) this.jumpBuffer = false; 
         if (this.isGrounded && keys.jump && !this.jumpBuffer && !this.vel.y) {
-            this.vel.y = -this.jumpSpeed;
+            this.jumpPower = this.jumpSpeed;
             this.jumpBuffer = true;
             this.isJumping = true;
+            this.jumpInput = true;
+        }
+
+        if (this.jumpInput && keys.jump) {
+            this.vel.y -= this.jumpPower;
+            this.jumpPower /= 2;
+        }
+        else {
+            this.jumpInput = false;
         }
 
         // Land
@@ -144,7 +172,7 @@ class Flare extends Actor {
         if (this.attackCooldown) this.attackCooldown--;
         const isAttacking = this.hasBow && keys.attack && !this.attackBuffer && !this.attackCooldown;
         if (isAttacking) {
-            game.scene.actors.push(new Arrow(this.pos.plus(new Vector2(0, 10)), new Vector2(20, 7), new Vector2(5 * (this.dir ? 1 : -1), 0), this));
+            game.scene.actors.push(new Arrow(this.pos.plus(new Vector2(0, 8)), new Vector2(20, 7), new Vector2(5 * (this.dir ? 1 : -1), 0), this));
             game.playSound("bow_shoot");
             this.attackBuffer = true;
             this.attackCooldown = 12;
@@ -154,14 +182,34 @@ class Flare extends Actor {
         if (!this.attackCooldown) {
             if (this.isGrounded) newAnimation = Math.abs(this.vel.x) < this.runSpeed ? 'idle' : 'run';
             else newAnimation = this.vel.y < 0 ? 'jump' : 'fall';
-        } else if (isAttacking) newAnimation = 'bow';
+        } else if (isAttacking) {
+            if (!this.isGrounded) newAnimation = this.vel.y > 0 ? 'bow_fall' : 'bow_jump';
+            else newAnimation = 'bow';
+        }
 
         if (newAnimation && !this.animationLocked && newAnimation !== this.animation) this.setAnimation(newAnimation);
         else this.animationFrame++;
 
+        if (this.vel.y > 0) this.jumpPower = 0;
+
         this.lastMovement = movement;
+        if (this.invicibility) this.invicibility--;
 
         this.frameCount++;
+    }
+
+    takeHit = (game, other) => {
+        if (!this.invicibility) {
+            game.playSound('damage');
+            const damage = 1;
+            this.health = Math.max(0, this.health - damage);
+            this.invicibility = 15;
+            game.scene.shakeBuffer = 8;
+            game.scene.particles.ray(this.checkHit(game, other).pos);
+            game.scene.particles.impact(this.checkHit(game, other).pos);
+        }
+
+        if (!this.health) location.reload();
     }
 
     setAnimation = animation => {
@@ -176,6 +224,7 @@ class Flare extends Actor {
     }
 
     draw = (game, cx) => {
+        if (this.invicibility % 2) return;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (!this.dir) {

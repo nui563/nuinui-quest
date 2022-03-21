@@ -17,16 +17,19 @@ class Scene {
     events = [];
     event = null;
 
+    enableHUD = false;
+
     shakeBuffer = 0;
 
     constructor(game, data) {
         
         this.sections = [];
-        data.sections.forEach(({pos, size}) => {
+        data.sections.forEach(({pos, size, actors}) => {
             this.sections.push({
                 pos: new Vector2(pos.x * 16, pos.y * 16),
                 size: new Vector2(size.x * 16, size.y * 16),
                 events: this.sectionEvents[`${pos.x / 20}_${pos.y / 12}`],
+                actors: actors,
                 collisions: []
             });
         });
@@ -46,11 +49,12 @@ class Scene {
         this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline)));
 
         // DEBUG
-        // const flare = new Flare(new Vector2(91 * 16, 64), new Vector2(16, 32));
+        // const flare = new Flare(new Vector2(91 * 16, 36 * 16), new Vector2(16, 32));
         // flare.playerControl = true;
         // flare.dir = false;
         // this.view.target = flare;
         // flare.hasBow = true;
+        // this.enableHUD = true;
         // this.actors.push(flare);
         // -----
 
@@ -70,13 +74,14 @@ class Scene {
         if (!center.inBox(this.currentSection)) {
             const newSection = this.sections.find(section => center.inBox(section));
             if (newSection) {
-                this.section = {
-
-                }
                 this.currentSection = newSection;
                 if (this.currentSection.events) {
                     this.currentSection.events.filter(event => event.condition(game)).forEach(event => this.events.push(new GameEvent(event.timeline)));
                 }
+                this.actors = this.actors.filter(actor => actor instanceof Flare);
+                this.currentSection.actors.forEach(event => {
+                    this.actors.push(eval("new " + event.className + "(...event.data)"));
+                });
             }
         }
     }
@@ -116,7 +121,7 @@ class Scene {
             for (let x = pos.x; x < pos.x + 1 + this.view.size.x / 16; x++) {
                 let tile = parseInt(tiles[`${x}_${y}`], 16);
                 if (tile) {
-                    if (tile > 63) tile += 8 * (Math.floor(this.frameCount / 6) % 3);
+                    if (tile > 63) tile += 8 * (Math.floor(this.frameCount / (tile === 69 ? 12 : 6)) % 3);
                     ctx.drawImage(game.assets.images['ts_forest'], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16, 16, 16);
                 }
             }
@@ -133,6 +138,19 @@ class Scene {
     drawBackground = (game, cx) => {
         const img = this.sakugaEffect ? 'bg_forest_sakuga' : 'bg_forest';
         cx.drawImage(game.assets.images[img], this.sakugaEffect ? game.width * (Math.floor(this.frameCount / 4) % 2) : 0, 0, game.width, game.height, 0, 0, game.width, game.height);
+    }
+
+    displayHUD = (game, cx) => {
+        const flare = this.actors.find(actor => actor instanceof Flare);
+        if (flare) {
+            const maxHealthWidth = 64;
+            const healthWidth = flare.health * maxHealthWidth / flare.maxHealth;
+            cx.fillStyle = '#000';
+            cx.fillRect(9, 16, 6, maxHealthWidth);
+            cx.fillStyle = '#f06';
+            cx.fillRect(9, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
+            cx.drawImage(game.assets.images['ui_healthbar'], 4, 0);
+        }
     }
     
     draw = game => {
@@ -163,14 +181,15 @@ class Scene {
                     this.particles.update(cx, game.assets, 1);
                     break;
                 case 2:
-                    if (this.drawView) {
+                    // if (this.drawView) {
                         cx.clearRect(0, 0, game.width, game.height);
                         cx.translate(-this.view.pos.x, -this.view.pos.y);
                         this.drawTiles(game, cx, this.foreground);
-                    }
+                    // }
                     break;
                 case 3:
                     cx.clearRect(0, 0, game.width, game.height);
+                    if (this.enableHUD) this.displayHUD(game, cx)
                     break;
             }
             cx.restore();
