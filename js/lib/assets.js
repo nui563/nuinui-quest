@@ -18,7 +18,7 @@ class Assets {
         'sp_pekora_idle',
 
         'sp_nousabot',
-        'sp_nousagi_dark',
+        'sp_robot',
         'sp_bow_pickup',
         'sp_arrow',
         'sp_peko_mini_boss',

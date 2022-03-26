@@ -166,8 +166,6 @@ class Flare extends Actor {
         }
         if (this.isJumping && this.vel.y) game.scene.particles.jump(this);
 
-        if (DEBUGMODE) console.log(this.pos.x, this.pos.y);
-
         if (this.attackBuffer && !keys.attack) this.attackBuffer = false;
         if (this.attackCooldown) this.attackCooldown--;
         const isAttacking = this.hasBow && keys.attack && !this.attackBuffer && !this.attackCooldown;
@@ -207,6 +205,7 @@ class Flare extends Actor {
             game.scene.shakeBuffer = 8;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            this.vel.x += (this.dir ? -1 : 1) * 2;
         }
 
         if (!this.health) location.reload();
@@ -245,7 +244,5 @@ class Flare extends Actor {
         // }
 
         cx.restore();
-
-        if (DEBUGMODE) this.displayCollisionBox(game);
     }
 }
