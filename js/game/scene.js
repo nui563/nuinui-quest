@@ -44,18 +44,18 @@ class Scene {
             if (section) section.collisions.push(collision);
         });
 
-        // this.currentSection = this.sections[0];
-        console.log(this.sections)
-        this.currentSection = this.sections[5];
+        this.currentSection = this.sections[0];
+        //console.log(this.sections)
+        //this.currentSection = this.sections[5];
         this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline)));
 
         // DEBUG
-        const flare = new Flare(new Vector2(196 * 16, 40 * 16), new Vector2(16, 32));
-        flare.playerControl = true;
-        this.view.target = flare;
-        flare.hasBow = true;
-        this.enableHUD = true;
-        this.actors.push(flare);
+        //const flare = new Flare(new Vector2(196 * 16, 40 * 16), new Vector2(16, 32));
+        //flare.playerControl = true;
+        //this.view.target = flare;
+        //flare.hasBow = true;
+        //this.enableHUD = true;
+        //this.actors.push(flare);
         // -----
 
         this.view.size = new Vector2(game.width, game.height);
