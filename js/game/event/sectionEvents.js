@@ -214,6 +214,50 @@ const FOREST_EVENTS = {
             ]
         }
     ],
+    "7_1": [
+        {
+            condition: game => {
+                const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                return flare && flare.health !== flare.maxHealth;
+            },
+            timeline: [
+                (game, event) => {
+                    const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                    
+                    if (!(event.timelineFrame % 4)) game.scene.particles.charge(new Vector2(150 * 16, 16 * 16));
+
+                    if (flare.pos.x < 151 * 16 && flare.pos.x > 149 * 16) {
+                        flare.health = flare.maxHealth;
+                        game.playSound('level_start');
+
+                        event.end = true;
+                    }
+                }
+            ]
+        }
+    ],
+    "7_3": [
+        {
+            condition: game => {
+                const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                return flare && flare.health !== flare.maxHealth;
+            },
+            timeline: [
+                (game, event) => {
+                    const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                    
+                    if (!(event.timelineFrame % 4)) game.scene.particles.charge(new Vector2(150 * 16, 40 * 16));
+
+                    if (flare.pos.x < 151 * 16 && flare.pos.x > 149 * 16) {
+                        flare.health = flare.maxHealth;
+                        game.playSound('level_start');
+
+                        event.end = true;
+                    }
+                }
+            ]
+        }
+    ],
     "6_1": [
         {
             condition: game => true,
