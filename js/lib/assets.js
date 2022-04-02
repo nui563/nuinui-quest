@@ -14,8 +14,14 @@ class Assets {
         'sp_flare_bow_jump',
         'sp_flare_bow_fall',
 
+        'sp_ponytail',
+        'sp_ribbon',
+
         'sp_elfriend_idle',
+        
         'sp_pekora_idle',
+        'sp_pekora_think',
+        'sp_pekora_laugh',
 
         'sp_nousabot',
         'sp_robot',
@@ -39,6 +45,9 @@ class Assets {
         'sp_kintsuba',
         'ui_forest_label',
         'ui_healthbar',
+        'ui_healthbar_pekora',
+        'ui_slot',
+        'ui_level_cleared',
 
         // Particles
         'vfx_explosion',
@@ -73,7 +82,10 @@ class Assets {
         'rumble',
         'charge',
         'pew',
-        'boss_move'
+        'boss_move',
+        'peko',
+        'fanfare',
+        'jump'
     ]
     
     constructor() {

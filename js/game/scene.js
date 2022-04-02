@@ -45,17 +45,16 @@ class Scene {
         });
 
         this.currentSection = this.sections[0];
-        //console.log(this.sections)
-        //this.currentSection = this.sections[5];
+        // this.currentSection = this.sections[5];
         this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline)));
 
         // DEBUG
-        //const flare = new Flare(new Vector2(196 * 16, 40 * 16), new Vector2(16, 32));
-        //flare.playerControl = true;
-        //this.view.target = flare;
-        //flare.hasBow = true;
-        //this.enableHUD = true;
-        //this.actors.push(flare);
+        // const flare = new Flare(new Vector2(142 * 16, 16 * 16), new Vector2(16, 32));
+        // flare.playerControl = true;
+        // this.view.target = flare;
+        // flare.hasBow = true;
+        // this.enableHUD = true;
+        // this.actors.push(flare);
         // -----
 
         this.view.size = new Vector2(game.width, game.height);
@@ -121,7 +120,7 @@ class Scene {
             for (let x = pos.x; x < pos.x + 1 + this.view.size.x / 16; x++) {
                 let tile = parseInt(tiles[`${x}_${y}`], 16);
                 if (tile) {
-                    if (tile > 63) tile += 8 * (Math.floor(this.frameCount / (tile === 69 ? 12 : 6)) % 3);
+                    if (tile > 63) tile += 8 * (Math.floor(this.frameCount / (tile === 69 ? 12 : tile > 69 ? 24 : 6)) % 3);
                     ctx.drawImage(game.assets.images['ts_forest'], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16, 16, 16);
                 }
             }
@@ -150,6 +149,27 @@ class Scene {
             cx.fillStyle = '#f06';
             cx.fillRect(9, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
             cx.drawImage(game.assets.images['ui_healthbar'], 4, 0);
+
+            cx.drawImage(game.assets.images['ui_slot'], 0, game.height - 32);
+
+            if (flare.hasBow) {
+                cx.drawImage(game.assets.images['sp_bow_pickup'], 2, game.height - 22);
+            }
+        }
+
+        const pekora = this.actors.find(a => a instanceof Pekora);
+        if (pekora) {
+            const maxHealthWidth = 64;
+            const healthWidth = pekora.health * maxHealthWidth / pekora.maxHealth;
+            cx.fillStyle = '#000';
+            cx.fillRect(29, 16, 6, maxHealthWidth);
+            cx.fillStyle = '#8FAFFF';
+            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
+            cx.drawImage(game.assets.images['ui_healthbar_pekora'], 24, 0);
+        }
+
+        if (this.cleared) {
+            cx.drawImage(game.assets.images['ui_level_cleared'], 0, game.height / 2 - 7);
         }
     }
     

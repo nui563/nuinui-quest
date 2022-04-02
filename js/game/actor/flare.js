@@ -15,7 +15,7 @@ class Flare extends Actor {
 
     hasBow = false;
 
-    maxHealth = 32;
+    maxHealth = 16;
 
     // Flare animations
     animations = {
@@ -218,6 +218,31 @@ class Flare extends Actor {
 
     playAnimation = (game, cx) => {
         const {offset, size, speed, frames} = this.animations[this.animation];
+
+        if (!['sleep', 'wakeup'].includes(this.animation)) {
+            const velX = this.vel.x;
+            const side = Math.round(velX) || ['bow', 'bow_fall', 'bow_jump'].includes(this.animation);
+            const spd = Math.round(16 / (1 + Math.abs(velX)));
+            const fallOffset = (this.vel.y > 0 ? -2 : 0);
+            cx.drawImage(game.assets.images['sp_ponytail'],
+                (Math.floor(this.animationFrame / spd) % 3) * 24, (side ? 24 : 0), 24, 24,
+                side ? -18 : -14, 2 + fallOffset, 24, 24);
+            
+            cx.drawImage(game.assets.images['sp_ribbon'],
+                (Math.floor(this.animationFrame / spd * 1.5) % 3) * 16, side ? 16 : 0, 16, 16,
+                side ? (this.animation === 'run' ? -14 : -9) : -8, (side ? 16 : 18) + fallOffset * 2, 16, 16);
+            
+            if (this.animation !== 'run') {
+                cx.save();
+                cx.translate(this.size.x / 2, 0);
+                cx.scale(-1, 1);
+                cx.drawImage(game.assets.images['sp_ribbon'],
+                    (Math.floor(this.animationFrame / spd * 1.5) % 3) * 16, side ? 16 : 0, 16, 16,
+                    side ? (this.animation === 'run' ? -12 : -9) : -8, (side ? 16 : 18) + fallOffset, 16, 16);
+                cx.restore();
+            }
+        }
+
         cx.drawImage(game.assets.images[`sp_flare_${this.animation}`], (Math.floor(this.animationFrame * speed) % frames) * size.x, 0, size.x, size.y,
             offset.x, offset.y, size.x, size.y);
     }

@@ -29,8 +29,8 @@ const FOREST_EVENTS = {
                     if (game.keys.jump) event.next = true;
             
                     scene.customDraw.push(game => {
-                        game.ctx0.drawImage(game.assets.images['ui_title_screen'], 24, 8);
-                        game.ctx3.drawImage(game.assets.images['ui_start_label'], 0, 0, 96, 16, 192, 166, 96, 16);
+                        // game.ctx3.drawImage(game.assets.images['ui_title_screen'], 2, 2);
+                        game.ctx0.drawImage(game.assets.images['ui_start_label'], 0, 0, 96, 16, 192, 166, 96, 16);
                     });
                 },
                 (game, event) => {
@@ -210,6 +210,75 @@ const FOREST_EVENTS = {
                 (game, event) => {
                     game.scene.actors.push(new BowPickup(new Vector2(116 * 16 - 2, 62), new Vector2(20, 20)));
                     event.end = true;
+                }
+            ]
+        }
+    ],
+    "6_1": [
+        {
+            condition: game => true,
+            timeline: [
+                (game, event) => {
+                    const scene = game.scene;
+
+                    const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                    if (event.timelineFrame === 0) {
+                        flare.playerControl = false;
+                        event.pekora = new Pekora(new Vector2(123 * 16, 20 * 16));
+                        event.pekora.setAnimation('think');
+                        scene.actors.push(event.pekora);
+                    }
+
+                    if (event.timelineFrame === 30) {
+                        event.pekora.setAnimation('idle');
+                    }
+                    
+                    game.cpuKeys.left = true;
+
+                    if (flare.pos.x < 133 * 16) {
+                        // flare.playerControl = true;
+                        game.cpuKeys = new Object;
+
+                        event.collision = { pos: { x: 139 * 16, y: 15 * 16 }, size: { x: 16, y: 48 }};
+                        scene.currentSection.collisions.push(event.collision);
+
+                        const pos = scene.view.pos.times(1 / 16).floor();
+                        for (let y = pos.y; y < pos.y + 1 + scene.view.size.y / 16; y++) {
+                            for (let x = pos.x; x < pos.x + 1 + scene.view.size.x / 16; x++) {
+                                if (x === 139 && [15, 16, 17].includes(y)) scene.foreground[`${x}_${y}`] = "6";
+                            }
+                        }
+
+                        scene.shakeBuffer = 4;
+                        game.playSound("rumble");
+
+                        event.next = true;
+                    }
+                },
+                (game, event) => {
+                    const scene = game.scene;
+
+                    const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                    if (event.timelineFrame === 60) {
+                        event.pekora.dir = true;
+                    }
+
+                    if (event.timelineFrame === 90) {
+                        event.pekora.dir = true;
+                        game.playSound('peko');
+                        event.pekora.setAnimation('laugh');
+                    }
+                    
+
+                    if (event.timelineFrame === 160) {
+                        flare.playerControl = true;
+                        event.pekora.setAnimation('idle');
+                        scene.bossFight = true;
+                        event.pekora.phase = 'idle';
+                        event.end = true;
+                    }
                 }
             ]
         }

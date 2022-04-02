@@ -118,7 +118,7 @@ class Robot extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= 80) {
+        if (this.phaseBuffer >= 63) {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
@@ -126,7 +126,7 @@ class Robot extends Actor {
             if (p1.distance(p2) < 16 * 10) this.aggro = true;
 
             if (this.aggro) {
-                if (Math.random() > .4) {
+                if (Math.abs(p1.y - p2.y) < flare.size.y) {
                     this.phase = 'attack';
                 } else {
                     this.phase = 'move';
@@ -142,7 +142,7 @@ class Robot extends Actor {
             game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 22), new Vector2(8, 8), new Vector2(4 * (this.dir ? 1 : -1), 0), this));
             game.playSound("pew");
         }
-        if (this.phaseBuffer === 47) this.phase = 'idle';
+        if (this.phaseBuffer === 31) this.phase = 'idle';
     }
 
     movePhase = game => {
