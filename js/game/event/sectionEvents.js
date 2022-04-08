@@ -2,6 +2,7 @@ const FOREST_EVENTS = {
     "0_0": [
         {
             condition: game => game.scene.frameCount === 0,
+            isPersistent: true,
             timeline: [
                 // Wait for player input
                 (game, event) => {
@@ -30,7 +31,11 @@ const FOREST_EVENTS = {
             
                     scene.customDraw.push(game => {
                         // game.ctx3.drawImage(game.assets.images['ui_title_screen'], 2, 2);
-                        game.ctx0.drawImage(game.assets.images['ui_start_label'], 0, 0, 96, 16, 192, 166, 96, 16);
+                        game.ctx0.drawImage(game.assets.images['ui_start_label'], 204, 165);
+                        if (!(Math.floor(scene.frameCount / 32) % 2)) {
+                            game.ctx0.fillStyle = "#0008";
+                            game.ctx0.fillRect(208, 167, 104, 20);
+                        }
                     });
                 },
                 (game, event) => {
@@ -100,12 +105,29 @@ const FOREST_EVENTS = {
             ]
         }
     ],
+    "2_1": [
+        {
+            condition: game => true,
+            isPersistent: false,
+            timeline: [
+                (game, event) => {
+                    game.scene.customDraw.push(game => {
+                        game.ctx0.save();
+                        game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                        game.ctx0.drawImage(game.assets.images['sp_carrots'], 45 * 16, 18 * 16);
+                        game.ctx0.restore();
+                    });
+                }
+            ]
+        }
+    ],
     "4_0": [
         {
             condition: game => {
                 const flare = game.scene.actors.find(actor => actor instanceof Flare);
                 return flare && flare.hasBow && !game.scene.miniBossStarted && !game.scene.miniBossCleared;
             },
+            isPersistent: true,
             timeline: [
                 (game, event) => {
                     game.scene.miniBossStarted = true;
@@ -186,7 +208,7 @@ const FOREST_EVENTS = {
                         const pos = scene.view.pos.times(1 / 16).floor();
                         for (let y = pos.y; y < pos.y + 1 + scene.view.size.y / 16; y++) {
                             for (let x = pos.x; x < pos.x + 1 + scene.view.size.x / 16; x++) {
-                                if (x > 82 && x <= 96 && y === 6) delete scene.foreground[`${x}_${y}`];
+                                if ((x > 81 && x <= 97 && y === 5) || (x > 82 && x <= 96 && y === 6)) delete scene.foreground[`${x}_${y}`];
                             }
                         }
                         scene.drawView = true;
@@ -204,8 +226,9 @@ const FOREST_EVENTS = {
         {
             condition: game => {
                 const flare = game.scene.actors.find(actor => actor instanceof Flare);
-                return flare && !flare.hasBow;
+                return flare && !flare.hasBow && !game.scene.actors.find(actor => actor instanceof BowPickup);
             },
+            isPersistent: true,
             timeline: [
                 (game, event) => {
                     game.scene.actors.push(new BowPickup(new Vector2(116 * 16 - 2, 62), new Vector2(20, 20)));
@@ -220,6 +243,7 @@ const FOREST_EVENTS = {
                 const flare = game.scene.actors.find(actor => actor instanceof Flare);
                 return flare && flare.health !== flare.maxHealth;
             },
+            isPersistent: false,
             timeline: [
                 (game, event) => {
                     const flare = game.scene.actors.find(actor => actor instanceof Flare);
@@ -242,6 +266,7 @@ const FOREST_EVENTS = {
                 const flare = game.scene.actors.find(actor => actor instanceof Flare);
                 return flare && flare.health !== flare.maxHealth;
             },
+            isPersistent: false,
             timeline: [
                 (game, event) => {
                     const flare = game.scene.actors.find(actor => actor instanceof Flare);
@@ -260,7 +285,8 @@ const FOREST_EVENTS = {
     ],
     "6_1": [
         {
-            condition: game => true,
+            condition: game => !game.scene.bossCleared,
+            isPersistent: true,
             timeline: [
                 (game, event) => {
                     const scene = game.scene;
@@ -319,9 +345,80 @@ const FOREST_EVENTS = {
                     if (event.timelineFrame === 160) {
                         flare.playerControl = true;
                         event.pekora.setAnimation('idle');
-                        scene.bossFight = true;
                         event.pekora.phase = 'idle';
+                    }
+
+                    if (!event.pekora.health) {
+                        event.next = true;
+                        flare.playerControl = false;
+                        event.pekora.phase = 'defeated';
+                        event.pekora.dir = false;
+                        event.pekora.setAnimation('idle');
+                        scene.bossCleared = true;
+                    }
+                },
+                (game, event) => {
+                    const scene = game.scene;
+
+                    if (event.timelineFrame === 60) {
+                        scene.currentSection.collisions = scene.currentSection.collisions.filter(collision => collision !== event.collision && (collision.pos.x !== 1920 || collision.pos.y < 304 || collision.pos.y === 352));
+
+                        scene.shakeBuffer = 4;
+                        game.playSound("rumble");
+
+                        const pos = scene.view.pos.times(1 / 16).floor();
+                        for (let y = pos.y; y < pos.y + 1 + scene.view.size.y / 16; y++) {
+                            for (let x = pos.x; x < pos.x + 1 + scene.view.size.x / 16; x++) {
+                                if ((x === 120 && [19, 20, 21].includes(y)) || (x === 139 && [15, 16, 17].includes(y))) delete scene.foreground[`${x}_${y}`];
+                            }
+                        }
+                        scene.drawView = true;
+                    }
+
+                    if (event.timelineFrame === 120) {
+                        event.next = true;
+                    }
+                },
+                (game, event) => {
+                    const scene = game.scene;
+                    const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                    if (event.timelineFrame > 60 && CollisionBox.includedIn(event.pekora, scene.currentSection)) {
+                        if (event.pekora.isGrounded) {
+                            event.pekora.vel = new Vector2(-2, -1);
+                        }
+                    }
+
+                    if (!CollisionBox.intersects(event.pekora, scene.currentSection)) {
+                        scene.actors = scene.actors.filter(actor => actor !== event.pekora);
+                        flare.playerControl = true;
                         event.end = true;
+                    }
+                }
+            ]
+        }
+    ],
+    "5_1": [
+        {
+            condition: game => true,
+            isPersistent: true,
+            timeline: [
+                (game, event) => {
+                    const scene = game.scene;
+                    const flare = scene.actors.find(actor => actor instanceof Flare);
+                    
+                    if (event.timelineFrame === 0) {
+                        flare.playerControl = false;
+                    }
+                    
+                    game.cpuKeys.left = true;
+
+                    if (flare.pos.x < 109 * 16) {
+                        game.cpuKeys = new Object;
+                        event.end = true;
+                        
+                        scene.nextScene = new StageSelect(game, null, 0);
+                        // scene.nextScene = new StageSelect(game, 0, 1);
                     }
                 }
             ]

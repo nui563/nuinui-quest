@@ -201,7 +201,7 @@ class Flare extends Actor {
             game.playSound('damage');
             const damage = 1;
             this.health = Math.max(0, this.health - damage);
-            this.invicibility = 15;
+            this.invicibility = 20;
             game.scene.shakeBuffer = 8;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);

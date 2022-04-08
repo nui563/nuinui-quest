@@ -1,5 +1,6 @@
 class Scene {
     frameCount = 0;
+    sectionFrame = 0;
 
     view = {
         pos: null,
@@ -45,27 +46,38 @@ class Scene {
         });
 
         this.currentSection = this.sections[0];
-        //this.currentSection = this.sections[5];
-        this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline)));
+        // this.currentSection = this.sections[5];
+        this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
 
         // DEBUG
-        //const flare = new Flare(new Vector2(142 * 16, 16 * 16), new Vector2(16, 32));
-        //flare.playerControl = true;
-        //this.view.target = flare;
-        //flare.hasBow = true;
-        //this.enableHUD = true;
-        //this.actors.push(flare);
+        // const flare = new Flare(new Vector2(142 * 16, 16 * 16), new Vector2(16, 32));
+        // flare.setAnimation('idle');
+        // flare.playerControl = true;
+        // this.view.target = flare;
+        // flare.hasBow = true;
+        // flare.dir = false;
+        // this.enableHUD = true;
+        // this.actors.push(flare);
         // -----
 
         this.view.size = new Vector2(game.width, game.height);
+        this.setViewPos();
+        
+        game.resetCanvas();
     }
 
     setViewPos = () => {
-        const center = CollisionBox.center(this.view.target);
-        this.view.pos = new Vector2(
-            Math.max(this.currentSection.pos.x, Math.min(this.currentSection.pos.x + this.currentSection.size.x - this.view.size.x, center.x - this.view.size.x / 2)),
-            Math.max(this.currentSection.pos.y, Math.min(this.currentSection.pos.y + this.currentSection.size.y - this.view.size.y, center.y - this.view.size.y / 2))
-        ).round();
+        let pos;
+        if (!this.view.target) {
+            pos = this.currentSection.pos;
+        } else {
+            const center = CollisionBox.center(this.view.target);
+            pos = new Vector2(
+                Math.max(this.currentSection.pos.x, Math.min(this.currentSection.pos.x + this.currentSection.size.x - this.view.size.x, center.x - this.view.size.x / 2)),
+                Math.max(this.currentSection.pos.y, Math.min(this.currentSection.pos.y + this.currentSection.size.y - this.view.size.y, center.y - this.view.size.y / 2))
+            ).round();
+        }
+        this.view.pos = pos;
     }
 
     updateSection = game => {
@@ -74,8 +86,10 @@ class Scene {
             const newSection = this.sections.find(section => center.inBox(section));
             if (newSection) {
                 this.currentSection = newSection;
+                this.sectionFrame = 0;
+                this.events = this.events.filter(event => event.isPersistent);
                 if (this.currentSection.events) {
-                    this.currentSection.events.filter(event => event.condition(game)).forEach(event => this.events.push(new GameEvent(event.timeline)));
+                    this.currentSection.events.filter(event => event.condition(game)).forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
                 }
                 this.actors = this.actors.filter(actor => actor instanceof Flare);
                 this.currentSection.actors.forEach(event => {
@@ -111,7 +125,10 @@ class Scene {
 
         if (this.shakeBuffer) this.shakeBuffer--;
 
+        this.sectionFrame++;
         this.frameCount++;
+
+        if (this.nextScene) game.scene = this.nextScene;
     }
 
     drawTiles = (game, ctx, tiles) => {
@@ -210,7 +227,12 @@ class Scene {
                     break;
                 case 3:
                     cx.clearRect(0, 0, game.width, game.height);
-                    if (this.enableHUD) this.displayHUD(game, cx)
+                    if (this.enableHUD) this.displayHUD(game, cx);
+                    if (this.frameCount < 30) {
+                        cx.fillStyle = '#000';
+                        cx.globalAlpha = 1 - this.frameCount / 30;
+                        cx.fillRect(0, 0, game.width, game.height);
+                    }
                     break;
             }
             cx.restore();

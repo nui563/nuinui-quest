@@ -81,7 +81,7 @@ class Robot extends Actor {
     size = new Vector2(16, 38);
     vel = new Vector2(0, 0);
 
-    maxHealth = 8;
+    maxHealth = 6;
 
     moveSpeed = 4;
 

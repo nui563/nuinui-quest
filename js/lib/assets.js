@@ -31,6 +31,7 @@ class Assets {
         'sp_laser_target',
 
         'sp_vending_machine',
+        "sp_carrots",
 
         // Stage
         'ts_forest',
@@ -48,6 +49,9 @@ class Assets {
         'ui_healthbar_pekora',
         'ui_slot',
         'ui_level_cleared',
+        'ui_level_icon',
+        'ui_level_label',
+        'ui_arrow_down',
 
         // Particles
         'vfx_explosion',
@@ -85,7 +89,8 @@ class Assets {
         'boss_move',
         'peko',
         'fanfare',
-        'jump'
+        'jump',
+        'select'
     ]
     
     constructor() {

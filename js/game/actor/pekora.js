@@ -4,7 +4,8 @@ class Pekora extends Actor {
     dir = false;
 
     gravity = .2;
-    maxHealth = 64;
+    maxHealth = 32;
+    // maxHealth = 2;
 
     moveSpeed = 3;
 
@@ -23,21 +24,28 @@ class Pekora extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health--;
-        game.scene.shakeBuffer = 15;
-        this.hitBuffer = 20;
-        game.scene.particles.ray(this.checkHit(game, other).pos);
-        game.scene.particles.impact(this.checkHit(game, other).pos);
-        
-        if (!this.health) {
-            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.scene.particles.explosion(CollisionBox.center(this));
-            game.playSound("fanfare");
-            game.scene.cleared = true;
-            game.scene.actors = game.scene.actors.filter(a => !(a instanceof Bullet));
-        } else {
-            game.playSound('damage');
+        if (!this.invicibility) {
+            this.health--;
+            game.scene.shakeBuffer = 15;
+            this.invicibility = 30;
+            this.hitBuffer = 20;
+            game.scene.particles.ray(this.checkHit(game, other).pos);
+            game.scene.particles.impact(this.checkHit(game, other).pos);
+            
+            if (!this.health) {
+                // game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+                // game.scene.particles.explosion(CollisionBox.center(this));
+                game.playSound("fanfare");
+                // game.scene.cleared = true;
+                game.scene.actors = game.scene.actors.filter(a => !(a instanceof Bullet));
+            } else {
+                game.playSound('damage');
+            }
         }
+    }
+
+    defeatedPhase = game => {
+
     }
 
     idlePhase = game => {
@@ -102,7 +110,7 @@ class Pekora extends Actor {
     }
     
     attack3Phase = game => {
-        if (!(this.phaseBuffer % 32)) {
+        if (!(this.phaseBuffer % 64)) {
             for (let i = 0; i <= 5; i++) {
                 const angle = (i / 5) * Math.PI * (this.dir ? 1 : -1) + (!this.dir ? Math.PI : 0);
                 const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-1);
@@ -111,7 +119,7 @@ class Pekora extends Actor {
             game.playSound("pew");
         }
         if (!(this.phaseBuffer % 4)) game.scene.particles.charge(CollisionBox.center(this));
-        if (this.phaseBuffer === 32) {
+        if (this.phaseBuffer === 64) {
             this.lastPhase = this.phase;
             this.phase = 'idle';
             this.setAnimation('idle');
@@ -149,13 +157,13 @@ class Pekora extends Actor {
             this.vel.x = 0;
         }
 
-        const isGrounded = game.scene.currentSection.collisions.find(collision => 
+        this.isGrounded = game.scene.currentSection.collisions.find(collision => 
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y+this.size.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(newCollisionBox, collision, 'x'));
 
         this.pos.x = Math.round((this.pos.x + this.vel.x) * 100) / 100;
 
-        if (!isGrounded) this.vel.y += this.gravity;
+        if (!this.isGrounded) this.vel.y += this.gravity;
         this.pos.y += this.vel.y;
         
         if (this.pos.y > 20 * 16) this.pos.y = 20 * 16;
@@ -179,17 +187,19 @@ class Pekora extends Actor {
         //     }
         // }
 
-        if (game.scene.bossFight) this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
+        if (this.health) this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
 
+        if (this.invicibility) this.invicibility--;
         this.animationFrame++;
         this.frameCount++;
     }
 
     draw = (game, cx) => {
+        if (this.invicibility % 2) return;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (!this.dir) {

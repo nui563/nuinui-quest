@@ -8,12 +8,14 @@ class Game {
     lastKeys = null;
     cpuKeys = new Object;
 
+    currentStage = 0;
+
     constructor(assets, data) {
         // Assets
         this.assets = assets;
 
-        // Data
-        this.stages = data.game.stages;
+        // JSON data
+        this.data = data;
 
         // Controller
         this.keys = new KeyboardListener().keys;
@@ -44,8 +46,9 @@ class Game {
         this.startTime = performance.now();
         this.nextGameTick = this.startTime;
 
-        // Init scene
-        this.scene = new Scene(this, this.stages['forest']);
+        // Init stage selection
+        // this.scene = new StageSelect(null, 0);
+        this.scene = new Scene(this, JSON.parse(this.data).game.stages[0]);
     }
 
     start = () => {
@@ -57,13 +60,13 @@ class Game {
     }
 
     pause = () => {
-        console.log('paused')
+        console.log('game paused');
         this.isPaused = true;
         cancelAnimationFrame(this.animation);
     }
 
     resume = () => {
-        console.log('resumed')
+        console.log('resumed');
         this.isPaused = false;
         this.nextGameTick = performance.now();
         this.run();
@@ -75,8 +78,13 @@ class Game {
 
     update = () => {
         this.scene.update(this);
-        this.lastKeys = 
         this.frameCount++;
+    }
+
+    resetCanvas = () => {
+        for (let i = 0; i < 4; i++) {
+            this[`ctx${i}`].clearRect(0, 0, this.width, this.height);
+        }
     }
 
     draw = () => {

@@ -122,6 +122,7 @@ class PekoMiniBoss extends Actor {
 
         if (this.phaseBuffer >= 180) {
             this.phase = 'release';
+            game.playSound("level_start");
         } else if (!(this.phaseBuffer % 60)) game.playSound("charge");
     }
 
@@ -148,7 +149,7 @@ class PekoMiniBoss extends Actor {
 
     takeHit = (game, other) => {
         this.health--;
-        game.playSound('hit');
+        game.playSound('damage');
         game.scene.shakeBuffer = 15;
         this.hitBuffer = 20;
         game.scene.particles.ray(this.checkHit(game, other).pos);

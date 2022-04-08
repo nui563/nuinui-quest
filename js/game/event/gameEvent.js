@@ -6,8 +6,9 @@ class GameEvent {
     next = false;
     end = false;
 
-    constructor(timeline) {
+    constructor(timeline, isPersistent) {
         this.timeline = timeline;
+        this.isPersistent = isPersistent;
     }
 
     update = game => {
