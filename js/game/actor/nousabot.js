@@ -18,7 +18,6 @@ class Nousabot extends Actor {
     takeHit = (game, other) => {
         this.health--;
         game.scene.shakeBuffer = 15;
-        this.hitBuffer = 20;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
@@ -104,7 +103,6 @@ class Robot extends Actor {
     takeHit = (game, other) => {
         this.health--;
         game.scene.shakeBuffer = 15;
-        this.hitBuffer = 20;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         

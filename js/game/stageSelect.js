@@ -17,13 +17,15 @@ class StageSelect {
 
         if (this.frameCount === 90) game.playSound('select');
 
-        if (this.frameCount === 180) game.scene = new Scene(game, JSON.parse(game.data).game.stages[this.selectedStage]);
+        if (this.frameCount === 180) {
+            game.currentStage = this.selectedStage;
+            game.scene = new Scene(game, JSON.parse(game.data).game.stages[this.selectedStage]);
+        }
 
         this.frameCount++;
     }
 
     draw = game => {
-        console.log(this.transitionAlpha)
         for (let i = 0; i < 4; i++) {
             const cx = game[`ctx${i}`];
             cx.save();

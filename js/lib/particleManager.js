@@ -73,31 +73,6 @@ class ParticleManager {
         }));
     }
 
-    // scrap = actor => {
-    //     for (let i = 0; i < 16; i++) {
-    //         this.pool.push(new Particle(
-    //             actor.pos.plus(actor.size.times(.5)),
-    //             new Vector2(10, 10),
-    //             new Vector2(-1 - Math.random(), Math.random() * 2 - 1),
-    //             1,
-    //             0.01 + Math.random() * 0.025,
-    //             `scrap_${Math.ceil(Math.random() * 5)}`,
-    //             null,
-    //             activity => (activity.frameCount % 360) * (Math.PI / 180) * Math.round(Math.random() * 2) * (Math.random() > .5 ? 1 : -1),
-    //             activity => [
-    //                 Math.sin(((Math.round(Math.random() * 360) + actor.frameCount) % 360) * (Math.PI / 180) * (Math.random() > .5 ? 1 : -1) / 2),
-    //                 Math.cos(((Math.round(Math.random() * 360) + actor.frameCount) % 360) * (Math.PI / 180) * (Math.random() > .5 ? 1 : -1) / 2)],
-    //             1
-    //         ));
-    //     }
-    // }
-
-    // smoke = (actor, vel) => {
-    //     this.pool.push(new Particle(
-    //         new Vector2(Math.round(actor.pos.x) + Math.round(Math.random() * 8 - 4), Math.round(actor.pos.y + 9) + Math.round(Math.random() * 10 - 5)),
-    //         new Vector2(8, 8), new Vector2(vel.x, vel.y), 1, 0.05 + Math.random() * 0.025, 'smoke_white', null, null, null, 0));
-    // }
-
     smoke_white = (pos, vel, zIndex) => {
         this.pool.push(new Particle({
             type: `smoke_white`,

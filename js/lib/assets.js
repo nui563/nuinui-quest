@@ -19,9 +19,15 @@ class Assets {
 
         'sp_elfriend_idle',
         
+        'sp_kintsuba',
+        'sp_kintsuba2',
+        'sp_kintsuba_idle',
+
         'sp_pekora_idle',
         'sp_pekora_think',
         'sp_pekora_laugh',
+        'sp_pekora_jump',
+        'sp_pekora_hit',
 
         'sp_nousabot',
         'sp_robot',
@@ -32,26 +38,34 @@ class Assets {
 
         'sp_vending_machine',
         "sp_carrots",
+        "sp_statue",
+        "sp_skulls",
+
+        "sp_clock",
 
         // Stage
         'ts_forest',
         'bg_forest',
         'bg_forest_sakuga',
 
+        'ts_casino',
+        'bg_casino',
 
         // HUD
         'ui_title_screen',
         'ui_start_label',
         'sp_speech_bubble',
-        'sp_kintsuba',
         'ui_forest_label',
         'ui_healthbar',
         'ui_healthbar_pekora',
         'ui_slot',
+        'ui_slot2',
         'ui_level_cleared',
         'ui_level_icon',
         'ui_level_label',
         'ui_arrow_down',
+        'ui_warning',
+        'ui_focus',
 
         // Particles
         'vfx_explosion',
@@ -90,7 +104,9 @@ class Assets {
         'peko',
         'fanfare',
         'jump',
-        'select'
+        'select',
+        'elevator',
+        'focus'
     ]
     
     constructor() {

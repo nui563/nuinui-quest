@@ -7,7 +7,7 @@ class Pekora extends Actor {
     maxHealth = 32;
     // maxHealth = 2;
 
-    moveSpeed = 3;
+    moveSpeed = 2.75;
 
     phaseBuffer = 0;
 
@@ -27,34 +27,41 @@ class Pekora extends Actor {
         if (!this.invicibility) {
             this.health--;
             game.scene.shakeBuffer = 15;
-            this.invicibility = 30;
-            this.hitBuffer = 20;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.playSound('damage');
             
             if (!this.health) {
                 // game.scene.actors = game.scene.actors.filter(actor => actor !== this);
                 // game.scene.particles.explosion(CollisionBox.center(this));
-                game.playSound("fanfare");
+                // game.playSound("fanfare");
                 // game.scene.cleared = true;
                 game.scene.actors = game.scene.actors.filter(a => !(a instanceof Bullet));
+                this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
             } else {
-                game.playSound('damage');
+                this.invicibility = 30;
             }
         }
     }
 
-    defeatedPhase = game => {
+    fleePhase = game => {
+        this.setAnimation(!this.isGrounded? 'jump' : 'idle');
+        if (this.pos.y === 16 * 22 - this.size.y) {
+            game.playSound('land');
+            game.scene.particles.land(this);
+            this.vel = new Vector2(-3, -2);
+        }
+    }
 
+    defeatedPhase = game => {
+        //velloss
+        this.setAnimation(!this.isGrounded? 'hit' : 'idle');
+        this.vel = this.vel.mult(new Vector2(0.9, 1));
     }
 
     idlePhase = game => {
         if (this.phaseBuffer >= 31) {
-            const flare = game.scene.actors.find(actor => actor instanceof Flare);
-            const p1 = CollisionBox.center(this);
-            const p2 = CollisionBox.center(flare);
-
-            if (Math.random() < (!this.lastPhase ? 0 : this.lastPhase === 'move' ? .4 : .8)) {
+            if (Math.random() < (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .2)) {
                 if (this.health < this.maxHealth / 2 && Math.random() > .5) {
                     this.phase = 'attack3';
                     this.setAnimation('think');
@@ -67,6 +74,8 @@ class Pekora extends Actor {
                     }
                     else {
                         this.phase = 'attack';
+                        this.setAnimation('laugh');
+                        game.playSound('peko');
                     }
                 }
             } else {
@@ -90,7 +99,7 @@ class Pekora extends Actor {
             game.playSound("pew");
         }
         if (this.phaseBuffer === 59) {
-            this.lastPhase = this.phase;
+            this.lastMove = this.phase;
             this.phase = 'idle';
         }
     }
@@ -103,7 +112,7 @@ class Pekora extends Actor {
             game.playSound("pew");
         }
         if (this.phaseBuffer === 64) {
-            this.lastPhase = this.phase;
+            this.lastMove = this.phase;
             this.phase = 'idle';
             this.setAnimation('idle');
         }
@@ -120,7 +129,7 @@ class Pekora extends Actor {
         }
         if (!(this.phaseBuffer % 4)) game.scene.particles.charge(CollisionBox.center(this));
         if (this.phaseBuffer === 64) {
-            this.lastPhase = this.phase;
+            this.lastMove = this.phase;
             this.phase = 'idle';
             this.setAnimation('idle');
         }
@@ -130,10 +139,11 @@ class Pekora extends Actor {
         if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
         this.vel.x = this.moveDir * this.moveSpeed;
         if (this.phaseBuffer > 3 && this.pos.y >= 20 * 16) {
-            this.lastPhase = this.phase;
+            this.lastMove = this.phase;
             this.phase = 'idle';
             this.vel = new Vector2(0, 0);
         }
+        this.setAnimation(this.vel.y ? 'jump' : 'idle');
     }
     
     setAnimation = animation => {
@@ -187,7 +197,7 @@ class Pekora extends Actor {
         //     }
         // }
 
-        if (this.health) this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
+        if (flare.playerControl && this.health) this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;

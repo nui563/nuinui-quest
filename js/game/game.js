@@ -48,7 +48,7 @@ class Game {
 
         // Init stage selection
         // this.scene = new StageSelect(null, 0);
-        this.scene = new Scene(this, JSON.parse(this.data).game.stages[0]);
+        this.scene = new Scene(this, JSON.parse(this.data).game.stages[this.currentStage]);
     }
 
     start = () => {

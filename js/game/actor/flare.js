@@ -1,10 +1,14 @@
 class Flare extends Actor {
     vel = new Vector2(0, 0);
     runSpeed = .35;
-    jumpSpeed = 2.75;
+    jumpSpeed = 1.9;
     velLoss = new Vector2(0.8, 1);
     gravity = .2;
     dir = true;
+
+    focusCooldownTime = 6 * 60;
+    focusCooldown = 0;
+    focusTime = 6 * 60;
 
     playerControl = false;
 
@@ -14,6 +18,7 @@ class Flare extends Actor {
     jumpPower = 0;
 
     hasBow = false;
+    hasKintsuba = false;
 
     maxHealth = 16;
 
@@ -116,16 +121,20 @@ class Flare extends Actor {
 
         if (this.jumpInput && keys.jump) {
             this.vel.y -= this.jumpPower;
-            this.jumpPower /= 2;
+            this.jumpPower /= 1.5;
         }
         else {
             this.jumpInput = false;
         }
 
-        // Land
+        // Land (landbuffer for event teleportation)
         if (!wasGrounded && this.isGrounded) {
-            game.playSound('land');
-            game.scene.particles.land(this);
+            if (this.landBuffer) {
+                this.landBuffer = false;
+            } else {
+                game.playSound('land');
+                game.scene.particles.land(this);
+            }
         }
 
         // Direction
@@ -192,6 +201,7 @@ class Flare extends Actor {
 
         this.lastMovement = movement;
         if (this.invicibility) this.invicibility--;
+        if (this.focusCooldown && !game.scene.isFocus) this.focusCooldown--;
 
         this.frameCount++;
     }
@@ -208,7 +218,7 @@ class Flare extends Actor {
             this.vel.x += (this.dir ? -1 : 1) * 2;
         }
 
-        if (!this.health) location.reload();
+        if (!this.health) game.scene.nextScene = new StageSelect(game, null, game.currentStage);
     }
 
     setAnimation = animation => {
