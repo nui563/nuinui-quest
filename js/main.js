@@ -6,7 +6,7 @@ window.onload = () => {
     // Game
     const rawFile = new XMLHttpRequest();
     rawFile.overrideMimeType("application/json");
-    rawFile.open("GET", "../../save.json", true);
+    rawFile.open("GET", "save.json", true);
     rawFile.onreadystatechange = () => {
         if (rawFile.readyState === 4 && rawFile.status == "200") {
             const data = rawFile.responseText;
