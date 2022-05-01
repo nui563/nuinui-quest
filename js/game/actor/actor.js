@@ -17,6 +17,12 @@ class Actor {
     }
 
     takeHit = game => {}
+    
+    dropHeart = game => {
+        if (Math.random() > .6) {
+            game.scene.actors.push(new Heart(CollisionBox.center(this).plus(new Vector2(-4, -4))));
+        }
+    }
 
     displayAnimation = (cx, animation, asset) => {
         cx.save();
@@ -148,7 +154,7 @@ class Arrow extends Projectile {
         // if (this.frameCount % 2) game.scene.particles.smoke2(CollisionBox.center(this), new Vector2(-Math.sign(this.vel.x), -(Math.sign(this.vel.y) + 1)), 0);
 
         let collision = false;
-        const actorCollisions = game.scene.actors.filter(actor => !(actor instanceof Projectile) && ![this.originActor].includes(actor) && actor.checkHit(game, this));
+        const actorCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || actor instanceof Rocket) && ![this.originActor].includes(actor) && actor.checkHit(game, this));
         if (actorCollisions.length) {
             actorCollisions.forEach(collision => {
                 collision.takeHit(game, this);
@@ -183,8 +189,9 @@ class Arrow extends Projectile {
 }
 
 class Bullet extends Projectile {
-    constructor(pos, size, vel, originActor) {
-        super(pos, size, vel, originActor);
+
+    constructor(pos, vel, originActor) {
+        super(pos, new Vector2(4, 4), vel, originActor);
     }
 
     update = game => {
@@ -218,7 +225,66 @@ class Bullet extends Projectile {
     draw = (game, cx) => {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
-        cx.drawImage(game.assets.images['vfx_smoke_white'], 0, 0, 8, 8, 0, 0, 8, 8);
+        cx.drawImage(game.assets.images['sp_bullet'], Math.floor(this.frameCount / 4) % 2 ? 0 : 8, 0, 8, 8, -2, -2, 8, 8);
+        cx.restore();
+    }
+}
+
+class Rocket extends Projectile {
+
+    constructor(pos, vel, originActor) {
+        super(pos, new Vector2(8, 8), vel, originActor);
+    }
+
+    takeHit = (game, other) => {
+        game.scene.particles.ray(this.checkHit(game, other).pos);
+        game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.actors = game.scene.actors.filter(a => a !== this);
+        
+        game.scene.particles.explosion(CollisionBox.center(this));
+        game.scene.shakeBuffer = 4;
+        game.playSound("rumble");
+    }
+
+    update = game => {
+        const flare = game.scene.actors.find(actor => actor instanceof Flare);
+        const p1 = CollisionBox.center(flare);
+        const p2 = CollisionBox.center(this);
+        this.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+        const vel = new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(-1);
+
+        this.pos = this.pos.plus(vel);
+        game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(this.vel.x > 0 ? -4 : 4, 0)), new Vector2(0, 0), 0);
+
+        let collision = false;
+        const actorCollisions = game.scene.actors.filter(actor => actor instanceof Flare && actor.checkHit(game, this));
+        if (actorCollisions.length) {
+            actorCollisions.forEach(collision => {
+                collision.takeHit(game, this);
+            });
+            for (let i = 0; i < 3; i++) game.scene.particles.smoke_white(this.pos, new Vector2(0, 0), 1);
+            collision = true;
+        }
+        else if (CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
+            collision = true;
+        }
+        else if (!CollisionBox.intersects(this, game.scene.currentSection)) collision = true;
+
+        if (collision) {
+            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+            game.scene.particles.explosion(CollisionBox.center(this));
+            game.scene.shakeBuffer = 4;
+            game.playSound("rumble");
+        }
+
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x + 4), Math.round(this.pos.y + 4));
+        cx.rotate(this.angle - Math.PI)
+        cx.drawImage(game.assets.images['sp_peko_rocket'], -8, -8);
         cx.restore();
     }
 }

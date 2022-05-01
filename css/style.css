@@ -18,3 +18,26 @@ body {
 canvas {
   position: absolute;
 }
+
+#volume-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 32px;
+  display: flex;
+}
+
+#volume {
+  cursor: pointer;
+  margin: auto 4px;
+}
+
+.material-icons {
+  color: rgba(255, 255, 255, .75);
+  cursor: pointer;
+  margin: 4px;
+}
+
+.material-icons:hover {
+  color: rgba(255, 255, 255, 1);
+}

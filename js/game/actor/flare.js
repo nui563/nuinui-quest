@@ -185,6 +185,10 @@ class Flare extends Actor {
             this.attackCooldown = 12;
         }
 
+        //hit
+        const actorCollisions = game.scene.actors.filter(actor => [Robot, Nousabot, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko].some(e => actor instanceof e) && actor.checkHit(game, this));
+        if (actorCollisions.length) actorCollisions.forEach(collision => this.takeHit(game, collision));
+
         let newAnimation;
         if (!this.attackCooldown) {
             if (this.isGrounded) newAnimation = Math.abs(this.vel.x) < this.runSpeed ? 'idle' : 'run';
@@ -211,7 +215,7 @@ class Flare extends Actor {
             game.playSound('damage');
             const damage = 1;
             this.health = Math.max(0, this.health - damage);
-            this.invicibility = 20;
+            this.invicibility = 30;
             game.scene.shakeBuffer = 8;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);

@@ -28,6 +28,16 @@ class Assets {
         'sp_pekora_laugh',
         'sp_pekora_jump',
         'sp_pekora_hit',
+        'sp_pekora_rocket',
+        
+        'sp_peko_rocket',
+
+        'sp_miko_idle',
+        'sp_miko_hit',
+        'sp_miko_jump',
+        'sp_miko_sniper',
+        'sp_miko_chant',
+        'sp_miko_kick',
 
         'sp_nousabot',
         'sp_robot',
@@ -36,12 +46,19 @@ class Assets {
         'sp_peko_mini_boss',
         'sp_laser_target',
 
+        'sp_nousagi',
+        'sp_35p',
+        'sp_bullet',
+        'sp_heart',
         'sp_vending_machine',
         "sp_carrots",
         "sp_statue",
         "sp_skulls",
+        "sp_mikobell",
+        "sp_casino_chip",
 
         "sp_clock",
+        "sp_moon",
 
         // Stage
         'ts_forest',
@@ -58,11 +75,12 @@ class Assets {
         'ui_forest_label',
         'ui_healthbar',
         'ui_healthbar_pekora',
+        'ui_healthbar_miko',
         'ui_slot',
         'ui_slot2',
-        'ui_level_cleared',
         'ui_level_icon',
         'ui_level_label',
+        'ui_level_cleared',
         'ui_arrow_down',
         'ui_warning',
         'ui_focus',
@@ -106,7 +124,12 @@ class Assets {
         'jump',
         'select',
         'elevator',
-        'focus'
+        'focus',
+        'heal',
+        'noise',
+        'miko_chant',
+        'miko_kick',
+        'warning'
     ]
     
     constructor() {

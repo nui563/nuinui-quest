@@ -9,6 +9,7 @@ class Game {
     cpuKeys = new Object;
 
     currentStage = 0;
+    stage2cleared = false;
 
     constructor(assets, data) {
         // Assets
@@ -27,13 +28,13 @@ class Game {
         container.style.width = `${this.width}px`;
         container.style.height = `${this.height}px`;
         for (let i = 0; i < 4; i++) {
-            const canvas = document.createElement("canvas");
-            container.appendChild(canvas);
-            canvas.id = `layer${i}`;
-            canvas.style.zIndex = i;
-            canvas.width = this.width;
-            canvas.height = this.height;
-            this[`ctx${i}`] = canvas.getContext('2d');
+            this[`canvas${i}`] = document.createElement("canvas");
+            container.appendChild(this[`canvas${i}`]);
+            this[`canvas${i}`].id = `layer${i}`;
+            this[`canvas${i}`].style.zIndex = i;
+            this[`canvas${i}`].width = this.width;
+            this[`canvas${i}`].height = this.height;
+            this[`ctx${i}`] = this[`canvas${i}`].getContext('2d');
             this[`ctx${i}`].imageSmoothingEnabled = false;
         }
 
@@ -93,9 +94,10 @@ class Game {
     }
 
     playSound = sound => {
+        if (MUTED) return;
         const audio = this.assets.audios[sound];
         audio.currentTime = 0;
-        audio.volume = .5;
+        audio.volume = VOLUME;
         audio.play();
     }
 

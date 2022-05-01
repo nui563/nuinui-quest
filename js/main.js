@@ -1,9 +1,12 @@
 let DEBUGMODE = false;
+let MUTED = false;
+let VOLUME = 0.5;
 
 window.onload = () => {
+    // Game
     const rawFile = new XMLHttpRequest();
     rawFile.overrideMimeType("application/json");
-    rawFile.open("GET", "save.json", true);
+    rawFile.open("GET", "../../save.json", true);
     rawFile.onreadystatechange = () => {
         if (rawFile.readyState === 4 && rawFile.status == "200") {
             const data = rawFile.responseText;
@@ -13,4 +16,11 @@ window.onload = () => {
         }
     }
     rawFile.send(null);
+
+    // Sound volume
+    document.getElementById("volume").onchange = e => VOLUME = e.target.value;
+    document.getElementById("muted").onclick = e => {
+        MUTED = !MUTED;
+        document.getElementById("muted").innerHTML = MUTED ? "volume_off" : "volume_up";
+    }
 }

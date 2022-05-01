@@ -48,12 +48,13 @@ class Scene {
         });
 
         this.currentSection = this.sections[0];
-        // this.currentSection = this.sections[5];
+        // this.currentSection = this.sections[9];
         this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
 
         // DEBUG
         // if (game.currentStage === 1) {
-        //     const flare = new Flare(new Vector2(146 * 16, 4 * 16), new Vector2(16, 32));
+        //     const flare = new Flare(new Vector2(275 * 16, 31 * 16), new Vector2(16, 32)); // start
+        //     // const flare = new Flare(new Vector2(146 * 16, 4 * 16), new Vector2(16, 32)); // miniboss
         //     flare.setAnimation('idle');
         //     flare.playerControl = true;
         //     this.view.target = flare;
@@ -82,6 +83,7 @@ class Scene {
                 Math.max(this.currentSection.pos.y, Math.min(this.currentSection.pos.y + this.currentSection.size.y - this.view.size.y, center.y - this.view.size.y / 2))
             ).round();
         }
+        // this.view.pos = this.view.pos ? this.view.pos.lerp(pos, .1) : pos;
         this.view.pos = pos;
     }
 
@@ -113,7 +115,8 @@ class Scene {
             })
         }
 
-        const boss = this.actors.find(actor => actor instanceof Pekora);
+        const bossClass = (this.name === 'forest' ? Pekora : Miko);
+        const boss = this.actors.find(actor => actor instanceof bossClass);
         this.bossKillEffect = boss && !boss.health && !this.bossCleared;
 
         
@@ -178,7 +181,8 @@ class Scene {
         const flare = this.actors.find(actor => actor instanceof Flare);
         if (flare) {
             const maxHealthWidth = 64;
-            const healthWidth = flare.health * maxHealthWidth / flare.maxHealth;
+            flare.healthBar = flare.healthBar ? (1 - .1) * flare.healthBar + .1 * flare.health : flare.health;
+            const healthWidth = flare.healthBar * maxHealthWidth / flare.maxHealth;
             cx.fillStyle = '#000';
             cx.fillRect(9, 16, 6, maxHealthWidth);
             cx.fillStyle = '#f06';
@@ -206,16 +210,25 @@ class Scene {
         const pekora = this.actors.find(a => a instanceof Pekora);
         if (pekora) {
             const maxHealthWidth = 64;
-            const healthWidth = pekora.health * maxHealthWidth / pekora.maxHealth;
+            pekora.healthBar = pekora.healthBar ? (1 - .1) * pekora.healthBar + .1 * pekora.health : pekora.health;
+            const healthWidth = pekora.healthBar * maxHealthWidth / pekora.maxHealth;
             cx.fillStyle = '#000';
             cx.fillRect(29, 16, 6, maxHealthWidth);
             cx.fillStyle = '#8FAFFF';
             cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
             cx.drawImage(game.assets.images['ui_healthbar_pekora'], 24, 0);
         }
-
-        if (this.cleared) {
-            cx.drawImage(game.assets.images['ui_level_cleared'], 0, game.height / 2 - 7);
+        
+        const miko = this.actors.find(a => a instanceof Miko);
+        if (miko) {
+            const maxHealthWidth = 64;
+            miko.healthBar = miko.healthBar ? (1 - .1) * miko.healthBar + .1 * miko.health : miko.health;
+            const healthWidth = miko.healthBar * maxHealthWidth / miko.maxHealth;
+            cx.fillStyle = '#000';
+            cx.fillRect((pekora ? 44 : 24) + 5, 16, 6, maxHealthWidth);
+            cx.fillStyle = '#FC78FC';
+            cx.fillRect((pekora ? 44 : 24) + 5, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
+            cx.drawImage(game.assets.images['ui_healthbar_miko'], pekora ? 44 : 24, 0);
         }
     }
 

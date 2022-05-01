@@ -133,7 +133,7 @@ class PekoMiniBoss extends Actor {
             const p2 = CollisionBox.center(core);
             const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-10);
-            game.scene.actors.push(new Bullet(core.pos.plus(new Vector2(8, 8)), new Vector2(8, 8), vel, this));
+            game.scene.actors.push(new Bullet(core.pos.plus(new Vector2(8, 8)), vel, this));
         }
 
         if (this.phaseBuffer >= 60 * 3) {

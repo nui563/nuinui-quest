@@ -3,8 +3,9 @@
 <html>
 
 <head>
-    <title>GAME</title>
+    <title>FLARE NUINUI QUEST</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
@@ -18,10 +19,13 @@
     <script src="js/game/event/gameEvent.js"></script>
     <script src="js/game/event/sectionEvents.js"></script>
     <script src="js/game/actor/actor.js"></script>
+    <script src="js/game/actor/drop.js"></script>
     <script src="js/game/actor/flare.js"></script>
     <script src="js/game/actor/pekora.js"></script>
+    <script src="js/game/actor/miko.js"></script>
     <script src="js/game/actor/kintsuba.js"></script>
-    <script src="js/game/actor/nousabot.js"></script>
+    <script src="js/game/actor/falls.js"></script>
+    <script src="js/game/actor/casino.js"></script>
     <script src="js/game/actor/bowPickup.js"></script>
     <script src="js/game/actor/pekoMiniBoss.js"></script>
     <script src="js/game/scene.js"></script>
@@ -30,5 +34,12 @@
 
     <script src="js/main.js"></script>
 </head>
+
+<body>
+    <div id="volume-container">
+        <span id="muted" class="material-icons">volume_up</span>
+        <input id="volume" type="range" min="0" max="1" step="0.05" value="0.5">
+    </div>
+</body>
 
 </html>
