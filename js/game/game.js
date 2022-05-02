@@ -85,6 +85,7 @@ class Game {
     resetCanvas = () => {
         for (let i = 0; i < 4; i++) {
             this[`ctx${i}`].clearRect(0, 0, this.width, this.height);
+            this[`canvas${i}`].style.filter = 'none';
         }
     }
 
