@@ -77,7 +77,9 @@ class Pekora extends Actor {
             } else {
                 this.phase = 'move';
                 game.playSound("jump");
-                this.moveDir = Math.random() > .5 ? 1 : -1;
+                const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
+                else this.moveDir = Math.random() > .5 ? 1 : -1;
                 this.vel.y = -4;
             }
         }

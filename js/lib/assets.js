@@ -144,6 +144,6 @@ class Assets {
 
     load = () => Promise.all([
         ...Object.keys(this.images).map(id => new Promise(resolve => this.images[id].onload = () => resolve())),
-        ...Object.keys(this.audios).map(id => new Promise(resolve => this.audios[id].oncanplaythrough = () => resolve()))
+        // ...Object.keys(this.audios).map(id => new Promise(resolve => this.audios[id].oncanplaythrough = () => resolve()))
     ]);
 }

@@ -71,7 +71,9 @@ class Miko extends Actor {
             } else {
                 this.phase = 'move';
                 game.playSound("jump");
-                this.moveDir = Math.random() > .5 ? 1 : -1;
+                const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
+                else this.moveDir = Math.random() > .5 ? 1 : -1;
                 this.vel.y = -4;
             }
         }
@@ -100,11 +102,11 @@ class Miko extends Actor {
     }
 
     sniperPhase = game => {
-        if (!(this.phaseBuffer % 20)) {
-            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 14), new Vector2(2 * (this.dir ? 1 : -1), 0), this));
+        if (this.phaseBuffer > 19 && !(this.phaseBuffer % 10)) {
+            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 14), new Vector2(3 * (this.dir ? 1 : -1), 0), this));
             game.playSound("pew");
         }
-        if (this.phaseBuffer === 19) {
+        if (this.phaseBuffer === 59) {
             this.lastMove = this.phase;
             this.phase = 'idle';
         }

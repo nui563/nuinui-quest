@@ -25,7 +25,7 @@ class Nousabot extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.explosion(CollisionBox.center(this));
             game.playSound("rumble");
-            this.dropHeart(game);
+            this.dropHeart(game, .7);
         } else {
             game.playSound('damage');
         }
@@ -57,6 +57,10 @@ class Nousabot extends Actor {
                 game.scene.actors.push(new Bullet(p1, vel, this));
                 game.playSound("pew");
             }
+        }
+
+        if (this.health < this.maxHealth / 2) {
+            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
@@ -111,7 +115,7 @@ class Robot extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.explosion(CollisionBox.center(this));
             game.playSound("rumble");
-            this.dropHeart(game);
+            this.dropHeart(game, .3);
         } else {
             game.playSound('damage');
         }
@@ -138,11 +142,11 @@ class Robot extends Actor {
     }
 
     attackPhase = game => {
-        if (!(this.phaseBuffer % 4)) {
-            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 18), new Vector2(4 * (this.dir ? 1 : -1), 0), this));
+        if (!(this.phaseBuffer % 12)) {
+            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 18), new Vector2(3 * (this.dir ? 1 : -1), 0), this));
             game.playSound("pew");
         }
-        if (this.phaseBuffer === 31) this.phase = 'idle';
+        if (this.phaseBuffer === 47) this.phase = 'idle';
     }
 
     movePhase = game => {
@@ -204,6 +208,10 @@ class Robot extends Actor {
 
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
+        if (this.health < this.maxHealth / 2) {
+            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+        }
+
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;

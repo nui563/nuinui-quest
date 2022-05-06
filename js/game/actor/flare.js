@@ -222,7 +222,9 @@ class Flare extends Actor {
             this.vel.x += (this.dir ? -1 : 1) * 2;
         }
 
-        if (!this.health) game.scene.nextScene = new StageSelect(game, null, game.currentStage);
+        if (!this.health) {
+            game.scene.nextScene = new StageSelect(game, null, game.currentStage);
+        }
     }
 
     setAnimation = animation => {

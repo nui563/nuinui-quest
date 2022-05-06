@@ -18,8 +18,8 @@ class Actor {
 
     takeHit = game => {}
     
-    dropHeart = game => {
-        if (Math.random() > .6) {
+    dropHeart = (game, rate) => {
+        if (Math.random() > rate) {
             game.scene.actors.push(new Heart(CollisionBox.center(this).plus(new Vector2(-4, -4))));
         }
     }
@@ -211,7 +211,7 @@ class Bullet extends Projectile {
             collision = true;
             game.playSound('no_damage');
             for (let i = 0; i < 3; i++) game.scene.particles.smoke_white(this.pos, new Vector2(0, 0), 1);
-            game.scene.shakeBuffer = 4;
+            // game.scene.shakeBuffer = 4;
         }
         else if (!CollisionBox.intersects(this, game.scene.currentSection)) collision = true;
 
@@ -252,6 +252,7 @@ class Rocket extends Projectile {
         const p2 = CollisionBox.center(this);
         this.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
         const vel = new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(-1);
+        if (Math.random() > .5) vel.y -= .5;
 
         this.pos = this.pos.plus(vel);
         game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(this.vel.x > 0 ? -4 : 4, 0)), new Vector2(0, 0), 0);
@@ -275,6 +276,7 @@ class Rocket extends Projectile {
             game.scene.particles.explosion(CollisionBox.center(this));
             game.scene.shakeBuffer = 4;
             game.playSound("rumble");
+            this.dropHeart(game, .3);
         }
 
         this.frameCount++;

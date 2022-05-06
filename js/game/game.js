@@ -5,6 +5,8 @@ class Game {
     width = 16 * 20;
     height = 16 * 12;
 
+    bgm = null;
+
     lastKeys = null;
     cpuKeys = new Object;
 
@@ -19,7 +21,8 @@ class Game {
         this.data = data;
 
         // Controller
-        this.keys = new KeyboardListener().keys;
+        // this.keys = new KeyboardListener().keys;
+        this.inputManager = INPUTMANAGER;
 
         // Display layers
         const container = document.createElement("div");
@@ -41,6 +44,11 @@ class Game {
         this.resize();
         window.addEventListener('resize', this.resize);
 
+        if (!document.hasFocus()) {
+            document.getElementById('focus-warning').style.display = 'flex';
+            document.getElementById('game-container').style.boxShadow = '0 0 2px #08f';
+        }
+
         // Init animation
         this.skipTicks = 1000 / 60;
         this.maxFrameSkip = 10;
@@ -54,30 +62,38 @@ class Game {
 
     start = () => {
         // Manage pausing game when window out of focus
-        this.isPaused = !document.hasFocus();
-        window.onfocus = () => this.resume();
-        window.onblur = () => this.pause();
-        if (!this.isPaused) this.run();
+        document.onvisibilitychange = () => {
+            if (document.visibilityState === 'hidden') this.pause();
+            else if (this.isPaused) this.resume();
+        };
+        if (document.visibilityState !== 'hidden') this.run();
+        else this.isPaused = true;
     }
 
     pause = () => {
         console.log('game paused');
+        if (this.bgm) this.bgm.pause();
         this.isPaused = true;
-        cancelAnimationFrame(this.animation);
     }
 
     resume = () => {
         console.log('resumed');
+        if (this.bgm) this.bgm.play();
         this.isPaused = false;
-        this.nextGameTick = performance.now();
         this.run();
     }
 
     run = () => {
+        this.nextGameTick = performance.now();
         this.animation = requestAnimationFrame(this.loop);
     }
 
     update = () => {
+        if (this.bgm) {
+            if (BGMMUTED && this.bgm.volume !== 0) this.bgm.volume = 0;
+            else if (!BGMMUTED && this.bgm.volume !== BGMVOLUME) this.bgm.volume = BGMVOLUME;
+        }
+        this.keys = this.inputManager[KEYMODE === 'keyboard' ? 'getKeyboardKeys' : 'getGamepadKeys']();
         this.scene.update(this);
         this.frameCount++;
     }
@@ -95,11 +111,34 @@ class Game {
     }
 
     playSound = sound => {
-        if (MUTED) return;
-        const audio = this.assets.audios[sound];
-        audio.currentTime = 0;
-        audio.volume = VOLUME;
-        audio.play();
+        if (SEMUTED) return;
+        const audio = new Audio(`./sound/${sound}.wav`);
+        const onCanPlay = () => {
+            audio.currentTime = 0;
+            audio.oncanplay = null;
+            audio.play();
+        }
+        audio.oncanplay = onCanPlay;
+        audio.volume = SEVOLUME;
+    }
+
+    playBGM = bgm => {
+        if (this.bgm) this.stopBGM();
+        this.bgm = new Audio(`./music/${bgm}.flac`);
+        this.bgm.volume = BGMMUTED ? 0 : BGMVOLUME;
+        this.bgm.loop = true;
+        const onCanPlay = () => {
+            this.bgm.currentTime = 0;
+            this.bgm.oncanplay = null;
+            this.bgm.play();
+        }
+        this.bgm.oncanplay = onCanPlay;
+    }
+
+    stopBGM = () => {
+        if (!this.bgm) return;
+        this.bgm.pause();
+        this.bgm.currentTime = 0;
     }
 
     loop = timestamp => {
@@ -110,7 +149,7 @@ class Game {
             loops++;
         }
         if (loops) this.draw();
-        this.animation = requestAnimationFrame(this.loop);
+        if (!this.isPaused) this.animation = requestAnimationFrame(this.loop);
     }
 
     // Resize display canvas
@@ -118,6 +157,6 @@ class Game {
         const scaleX = window.innerWidth / this.width;
         const scaleY = window.innerHeight / this.height;
         const scaleToFit = Math.floor(Math.max(1, Math.min(scaleX, scaleY)));
-        document.getElementById('game-container').style.transform = 'scale(' + scaleToFit + ')';
+        document.getElementById('game-container').style.transform = 'scale(' + (SCREENDISPLAY ? SCREENDISPLAY : scaleToFit) + ')';
     }
 }

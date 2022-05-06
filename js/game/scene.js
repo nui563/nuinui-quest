@@ -121,7 +121,7 @@ class Scene {
 
         
         const flare = this.actors.find(actor => actor instanceof Flare);
-        if(flare && flare.hasKintsuba && game.keys.subattack && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect) {
+        if(flare && flare.hasKintsuba && game.keys.item && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect) {
             this.isFocus = flare.focusTime;
             flare.focusCooldown = flare.focusCooldownTime;
             game.playSound("focus");
@@ -246,9 +246,20 @@ class Scene {
         for (let i = 0; i < 4; i++) {
             const cx = game[`ctx${i}`];
             cx.save();
-            if (this.shakeBuffer) {
+            if (SCREENSHAKE && this.shakeBuffer) {
                 this.drawView = true;
                 cx.translate(Math.floor(Math.random() * 8) - 4, 0);
+                // if (KEYMODE === 'gamepad' && game.inputManager.gamepad !== null) {
+                //     const gamepad = navigator.getGamepads()[game.inputManager.gamepad];
+                //     if (this.shakeBuffer === 1 && gamepad.vibrationActuator && gamepad.vibrationActuator.type === "dual-rumble") {
+                //         gamepad.vibrationActuator.playEffect('dual-rumble', {
+                //             startDelay: 0,
+                //             duration: 100,
+                //             weakMagnitude: 1.0,
+                //             strongMagnitude: 1.0,
+                //         });
+                //     }
+                // }
             }
             switch (i) {
                 case 0:

@@ -46,17 +46,21 @@ const EVENTS = {
                     (game, event) => {
                         const scene = game.scene;
                         switch (event.timelineFrame) {
-                            case 0:
+                            case 30:
+                                scene.shakeBuffer = 30;
+                                game.playSound('rumble');
+                                break;
+                            case 90:
                                 event.flare.setAnimation('wakeup');
                                 game.playSound('wakeup');
                                 break;
-                            case 39:
+                            case 129:
                                 event.flare.setAnimation('idle');
                                 break;
-                            case 89:
+                            case 200:
                                 event.flare.dir = false;
                                 break;
-                            case 129:
+                            case 240:
                                 event.flare.dir = true;
                                 break;
                             case 394:
@@ -73,22 +77,20 @@ const EVENTS = {
                                 event.end = true;
                                 scene.enableHUD = true;
                 
-                                // const a = new Audio('./sound/terminal.mp3');
-                                // a.volume = .25;
-                                // a.play();
+                                // game.playBGM('stage1_tmp');
                                 break;
                                 
                             default:
                                 break;
                         }
                 
-                        if (event.timelineFrame > 159 && event.timelineFrame < 339) {
-                            if (event.timelineFrame === 160) game.playSound('question');
-                            scene.customDraw.push(game => {
-                                game.ctx3.drawImage(game.assets.images['sp_speech_bubble'], 32 * (Math.floor(event.frameCount / 16) % 2), 0, 32, 24, 164, 20, 32, 24);
-                                game.ctx3.drawImage(game.assets.images['sp_kintsuba'], 167, 23);
-                            });
-                        }
+                        // if (event.timelineFrame > 159 && event.timelineFrame < 339) {
+                        //     if (event.timelineFrame === 160) game.playSound('question');
+                        //     scene.customDraw.push(game => {
+                        //         game.ctx3.drawImage(game.assets.images['sp_speech_bubble'], 32 * (Math.floor(event.frameCount / 16) % 2), 0, 32, 24, 164, 20, 32, 24);
+                        //         game.ctx3.drawImage(game.assets.images['sp_kintsuba'], 167, 23);
+                        //     });
+                        // }
                 
                         if (event.timelineFrame > 339 && event.timelineFrame < 394) {
                             if (event.timelineFrame === 340) event.flare.animationLocked = false;
@@ -177,7 +179,7 @@ const EVENTS = {
 
                         if (event.boss.phase === 'intro') {
                             scene.shakeBuffer = 2;
-                            if (!(event.timelineFrame % 60)) game.playSound('warning');
+                            if (!(event.timelineFrame % 32)) game.playSound('rumble');
                         }
 
                         if (event.boss.phase === 'idle') {
@@ -205,7 +207,7 @@ const EVENTS = {
                             event.boss.phase = 'death';
                         }
                         
-                        if (!(event.timelineFrame % 32)) game.playSound('rumble');
+                        if (!(event.timelineFrame % 32) && event.timelineFrame <= 160) game.playSound('rumble');
                         
                         if (event.timelineFrame === 180) {
                             
@@ -272,6 +274,7 @@ const EVENTS = {
                         const flare = scene.actors.find(actor => actor instanceof Flare);
 
                         if (event.timelineFrame === 0) {
+                            game.stopBGM();
                             flare.playerControl = false;
                             event.pekora = new Pekora(new Vector2(123 * 16, 20 * 16), 32);
                             event.pekora.setAnimation('think');
@@ -328,6 +331,7 @@ const EVENTS = {
                             flare.playerControl = true;
                             event.pekora.setAnimation('idle');
                             event.pekora.phase = 'idle';
+                            // game.playBGM('boss1_tmp');
                         }
 
                         if (!event.pekora.health) {
@@ -337,6 +341,7 @@ const EVENTS = {
                             event.pekora.dir = false;
                             event.pekora.setAnimation('idle');
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
+                            game.stopBGM();
                         }
                     },
                     (game, event) => {
@@ -372,6 +377,7 @@ const EVENTS = {
                             scene.actors = scene.actors.filter(actor => actor !== event.pekora);
                             flare.playerControl = true;
                             event.end = true;
+                            // game.playBGM('stage1_tmp');
                         }
 
                         if (event.pekora.phase === 'flee') {
@@ -406,6 +412,7 @@ const EVENTS = {
                             event.end = true;
                             
                             scene.nextScene = new StageSelect(game, 0, 1);
+                            game.stopBGM();
                         }
                     }
                 ]
@@ -550,9 +557,8 @@ const EVENTS = {
                         if (event.timelineFrame === 0) {
                             flare.playerControl = false;
                         
-                            event.kintsuba = new Kintsuba(new Vector2(109.25 * 16, 29 * 16));
-                            event.kintsuba.dir = false;
-                            game.scene.actors.unshift(event.kintsuba);
+                            event.elfriend = new Elfriend(new Vector2(109.25 * 16, 29 * 16), false);
+                            game.scene.actors.unshift(event.elfriend);
 
                             game.cpuKeys.right = true;
                         }
@@ -567,24 +573,28 @@ const EVENTS = {
                         const flare = scene.actors.find(actor => actor instanceof Flare);
 
                         if (event.timelineFrame > 59 && event.timelineFrame < 240) {
-                            if (event.timelineFrame === 60) game.playSound('question');
-                            scene.customDraw.push(game => {
-                                game.ctx3.drawImage(game.assets.images['sp_speech_bubble'], 32 * (Math.floor(event.frameCount / 16) % 2), 0, 32, 24, 110, 100, 32, 24);
-                                game.ctx3.drawImage(game.assets.images['sp_kintsuba2'], 113, 103);
-                            });
+                            if (event.timelineFrame === 60) {
+                                flare.setAnimation('look');
+                                game.playSound('level_start');
+                                flare.animationLocked = true;
+                            }
+                        }
+
+                        if (event.timelineFrame === 180) {
+                            flare.animationLocked = false;
+                            flare.setAnimation('idle');
                         }
 
                         if (event.timelineFrame === 240) {
-                            game.scene.actors.push(new ClockPickup(event.kintsuba.pos.value(), new Vector2(20, 20)));
+                            game.scene.actors.push(new ClockPickup(event.elfriend.pos.value(), new Vector2(20, 20)));
                         }
 
                         if (event.timelineFrame > 240) {
-                            event.kintsuba.dir = true;
-                            event.kintsuba.pos.x += 2;
+                            event.elfriend.pos.y -= 2;
                         }
 
-                        if (!CollisionBox.includedIn(event.kintsuba, scene.view)) {
-                            scene.actors = scene.actors.filter(a => a !== event.kintsuba);
+                        if (!CollisionBox.intersects(event.elfriend, scene.view)) {
+                            scene.actors = scene.actors.filter(a => a !== event.elfriend);
                             flare.playerControl = true;
                             event.end = true;
                         }
@@ -694,8 +704,12 @@ const EVENTS = {
                         }
 
                         if (event.timelineFrame === 140) {
+                            event.pekora.lastPhase = 'rocket';
                             event.pekora.phase = 'rocket';
+                            event.miko.lastPhase = 'sniper';
                             event.miko.phase = 'sniper';
+                            event.pekora.phaseBuffer = 0;
+                            event.miko.phaseBuffer = 0;
                         }
 
                         if (!event.pekora.health && !event.pekoraDefeated) {

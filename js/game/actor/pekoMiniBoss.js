@@ -127,13 +127,14 @@ class PekoMiniBoss extends Actor {
     }
 
     releasePhase = game => {
-        if (this.phaseBuffer > 10 && !(this.phaseBuffer % 4) && this.laserTarget) {
+        if (this.phaseBuffer > 10 && !(this.phaseBuffer % 10) && this.laserTarget) {
             const core = this.middleParts[3];
             const p1 = this.laserTarget;
             const p2 = CollisionBox.center(core);
             const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
-            const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-10);
+            const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-8);
             game.scene.actors.push(new Bullet(core.pos.plus(new Vector2(8, 8)), vel, this));
+            game.playSound("pew");
         }
 
         if (this.phaseBuffer >= 60 * 3) {

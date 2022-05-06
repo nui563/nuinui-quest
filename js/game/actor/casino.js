@@ -1,81 +1,3 @@
-// class Nousabot extends Actor {
-//     size = new Vector2(24, 24);
-//     vel = new Vector2(0, 0);
-
-//     maxHealth = 3;
-
-//     constructor(pos) {
-//         super();
-//         this.pos = new Vector2(pos.x, pos.y).times(16);
-//         this.health = this.maxHealth;
-//     }
-    
-//     checkHit = (game, collisionBox) => {
-//         const collision = CollisionBox.intersects(this, collisionBox);
-//         return collision;
-//     }
-
-//     takeHit = (game, other) => {
-//         this.health--;
-//         game.scene.shakeBuffer = 15;
-//         game.scene.particles.ray(this.checkHit(game, other).pos);
-//         game.scene.particles.impact(this.checkHit(game, other).pos);
-        
-//         if (!this.health) {
-//             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-//             game.scene.particles.explosion(CollisionBox.center(this));
-//             game.playSound("rumble");
-//         } else {
-//             game.playSound('damage');
-//         }
-//     }
-
-//     update = game => {
-//         const flare = game.scene.actors.find(actor => actor instanceof Flare);
-//         // if (this.vel.y) this.vel.y += this.gravity;
-//         this.vel.x = Math.cos((this.frameCount / 2048) * (180 / Math.PI)) / 4;
-//         this.vel.y = Math.sin((this.frameCount / 2048) * (180 / Math.PI)) / 4;
-
-//         this.pos.x += this.vel.x;
-//         this.pos.y += this.vel.y;
-        
-//         for (let i = 0; i < 2; i++) {
-//             const dist = .5;
-//             const a = Math.cos(Math.random() * 2 * Math.PI);
-//             const b = Math.sin(Math.random() * 2 * Math.PI);
-//             game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
-//         }
-
-//         // Attack
-//         if ([87, 107, 127].includes(this.frameCount % 128)) {
-//             const p1 = CollisionBox.center(this);
-//             const p2 = CollisionBox.center(flare);
-//             if (p1.distance(p2) < 192 && p1.y - 32 < p2.y) {
-//                 const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
-//                 const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(2);
-//                 game.scene.actors.push(new Bullet(p1, new Vector2(8, 8), vel, this));
-//                 game.playSound("pew");
-//             }
-//         }
-
-//         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
-        
-//         this.frameCount++;
-//     }
-
-//     draw = (game, cx) => {
-//         cx.save();
-//         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
-//         if (!this.dir) {
-//             cx.translate(this.size.x / 2, 0);
-//             cx.scale(-1, 1);
-//             cx.translate(-this.size.x / 2, 0);
-//         }
-//         cx.drawImage(game.assets.images['sp_nousabot'], 0, 0, 24, 24, 0, 0, 24, 24);
-//         cx.restore();
-//     }
-// }
-
 class Mikobell extends Actor {
     size = new Vector2(20, 38);
     vel = new Vector2(0, 0);
@@ -111,7 +33,7 @@ class Mikobell extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.explosion(CollisionBox.center(this));
             game.playSound("rumble");
-            this.dropHeart(game);
+            this.dropHeart(game, .6);
         } else {
             game.playSound('damage');
         }
@@ -131,7 +53,7 @@ class Mikobell extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= 63) {
+        if (this.phaseBuffer >= 31 && Math.random() > .98) {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
@@ -201,6 +123,10 @@ class Mikobell extends Actor {
         
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
+        if (this.health < this.maxHealth / 2) {
+            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+        }
+
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
@@ -255,7 +181,7 @@ class Casinochip extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.explosion(CollisionBox.center(this));
             game.playSound("rumble");
-            this.dropHeart(game);
+            this.dropHeart(game, .7);
         } else {
             game.playSound('damage');
         }
