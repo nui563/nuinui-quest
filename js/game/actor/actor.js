@@ -67,7 +67,7 @@ class Elfriend extends Actor {
 
         // this.pos.x += Math.sin(this.frameCount * 2 / 180 * Math.PI) / 4;
         this.pos.y += Math.cos(((this.randomFlight + this.frameCount * 2) % 360) / 180 * Math.PI) / 4;
-
+        this.dir = game.scene.actors.find(a => a instanceof Flare).pos.x > this.pos.x;
         this.frameCount++;
     }
 
@@ -83,32 +83,6 @@ class Elfriend extends Actor {
         cx.restore();
     }
 }
-
-// class SavePoint extends Actor {
-//     size = new Vector2(32, 48);
-//     isSaving = false;
-//     constructor(pos) {
-//         super(pos);
-//     }
-
-//     update = game => {
-//         const flare = game.scene.actors.find(actor => actor instanceof Flare);
-//         const collision = flare && CollisionBox.intersects(this, flare);
-
-//         if (collision) {
-//             if (!this.isSaving) {
-//                 this.isSaving = true;
-//             }
-//         } else if (this.isSaving) this.isSaving = false;
-//     }
-
-//     draw = (game, cx) => {
-//         cx.save();
-//         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
-//         cx.drawImage(game.assets.images['sp_vending_machine'], 0, 0, 32, 48, 0, 0, 32, 48);
-//         cx.restore();
-//     }
-// }
 
 class Projectile extends Actor {
     constructor(pos, size, vel, originActor) {
@@ -131,7 +105,7 @@ class Projectile extends Actor {
         }
         else if (CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
             collision = true;
-            game.playSound('no_damage');
+            if (CollisionBox.intersects(this, game.scene.view)) game.playSound('no_damage');
             game.scene.particles.sparkle_white(CollisionBox.center(this));
         }
         else if (!CollisionBox.intersects(this, game.scene.currentSection)) collision = true;
@@ -166,11 +140,12 @@ class Arrow extends Projectile {
             game.playSound('no_damage');
             game.scene.particles.sparkle_white(CollisionBox.center(this));
         }
-        else if (!CollisionBox.intersects(this, game.scene.currentSection)) collision = true;
+        else if (!CollisionBox.intersects(this, game.scene.view)) collision = true;
 
         if (collision) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
         }
+        this.vel.y = 0;
 
         this.frameCount++;
     }
@@ -211,7 +186,6 @@ class Bullet extends Projectile {
             collision = true;
             game.playSound('no_damage');
             for (let i = 0; i < 3; i++) game.scene.particles.smoke_white(this.pos, new Vector2(0, 0), 1);
-            // game.scene.shakeBuffer = 4;
         }
         else if (!CollisionBox.intersects(this, game.scene.currentSection)) collision = true;
 
@@ -236,14 +210,23 @@ class Rocket extends Projectile {
         super(pos, new Vector2(8, 8), vel, originActor);
     }
 
+    health = 2;
+
     takeHit = (game, other) => {
+        this.health--;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
-        game.scene.actors = game.scene.actors.filter(a => a !== this);
-        
-        game.scene.particles.explosion(CollisionBox.center(this));
-        game.scene.shakeBuffer = 4;
-        game.playSound("rumble");
+
+        if (this.health) {
+            this.shakeBuffer = 15;
+            game.playSound('hit');
+        } else {
+            game.scene.actors = game.scene.actors.filter(a => a !== this);
+            game.scene.particles.explosion(CollisionBox.center(this));
+            game.scene.shakeBuffer = 4;
+            game.playSound("rumble");
+            this.dropHeart(game, .9);
+        }
     }
 
     update = game => {
@@ -276,7 +259,7 @@ class Rocket extends Projectile {
             game.scene.particles.explosion(CollisionBox.center(this));
             game.scene.shakeBuffer = 4;
             game.playSound("rumble");
-            this.dropHeart(game, .3);
+            this.dropHeart(game, .9);
         }
 
         this.frameCount++;
@@ -287,6 +270,31 @@ class Rocket extends Projectile {
         cx.translate(Math.round(this.pos.x + 4), Math.round(this.pos.y + 4));
         cx.rotate(this.angle - Math.PI)
         cx.drawImage(game.assets.images['sp_peko_rocket'], -8, -8);
+        cx.restore();
+    }
+}
+
+class Aircon extends Actor {
+
+    constructor(pos) {
+        super(new Vector2(pos.x * 16, pos.y * 16), new Vector2(32, 4 * 16));
+    }
+
+    checkHit = (game, collisionBox) => {
+        return false;
+    }
+
+    update = game => {
+        if (Math.random() > .75) game.scene.particles.shine_vel_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, 16)), new Vector2(0, -3), 1);
+        const actors = game.scene.actors.filter(actor => ![this].includes(actor) && actor.checkHit(game, this));
+        actors.forEach(actor => actor.vel.y = Math.max(-8, actor.vel.y - 1.5));
+        this.frameCount++;
+    }
+    
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        cx.drawImage(game.assets.images['sp_aircon'], 0, this.size.y - 16);
         cx.restore();
     }
 }

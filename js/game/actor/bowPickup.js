@@ -37,7 +37,7 @@ class ClockPickup extends Actor {
 
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (CollisionBox.intersects(this, flare)) {
-            flare.hasKintsuba = true;
+            flare.item = true;
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');

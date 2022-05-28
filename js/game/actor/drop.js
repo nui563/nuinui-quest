@@ -8,6 +8,10 @@ class Heart extends Actor {
         super(pos);
     }
     
+    checkHit = (game, collisionBox) => {
+        return CollisionBox.intersects(this, collisionBox);
+    }
+    
     update = game => {
         this.pos = this.pos.plus(this.vel);
         

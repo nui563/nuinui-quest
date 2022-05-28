@@ -5,7 +5,7 @@ class Pekora extends Actor {
 
     gravity = .15;
 
-    moveSpeed = 1.5;
+    moveSpeed = 2;
 
     phaseBuffer = 0;
 
@@ -23,7 +23,7 @@ class Pekora extends Actor {
     takeHit = (game, other) => {
         if (!this.invicibility) {
             this.health--;
-            game.scene.shakeBuffer = 15;
+            this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
             game.playSound('damage');
@@ -54,7 +54,7 @@ class Pekora extends Actor {
     idlePhase = game => {
         if (this.phaseBuffer >= 31) {
             if (Math.random() < (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .2)) {
-                if (game.scene.name === 'casino') {
+                if (game.scene.name === 'casino' || Math.random() > .75) {
                     this.phase = 'rocket';
                     this.setAnimation('rocket');
                     // game.playSound("charge");
@@ -66,12 +66,12 @@ class Pekora extends Actor {
                     if (Math.random() > .75) {
                         this.phase = 'attack2';
                         this.setAnimation('laugh');
-                        game.playSound('peko');
+                        // game.playSound('peko');
                     }
                     else {
                         this.phase = 'attack';
                         this.setAnimation('laugh');
-                        game.playSound('peko');
+                        // game.playSound('peko');
                     }
                 }
             } else {
@@ -115,13 +115,13 @@ class Pekora extends Actor {
     }
 
     attack2Phase = game => {
-        if (!(this.phaseBuffer % 12)) {
-            const angle = (this.phaseBuffer / 63) * Math.PI * (this.dir ? 1 : -1) + (!this.dir ? Math.PI : 0);
+        if (!(this.phaseBuffer % 9)) {
+            const angle = (this.phaseBuffer / 72) * Math.PI * (this.dir ? 1 : -1) + (!this.dir ? Math.PI : 0);
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-2);
             game.scene.actors.push(new Bullet(this.pos.plus(new Vector2(8, 8)), vel, this));
             game.playSound("pew");
         }
-        if (this.phaseBuffer === 64) {
+        if (this.phaseBuffer === 72) {
             this.lastMove = this.phase;
             this.phase = 'idle';
             this.setAnimation('idle');

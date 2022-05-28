@@ -48,6 +48,17 @@ class PekoMiniBoss extends Actor {
             });
         }
         this.leftVel = new Vector2(0, this.moveSpeed);
+
+        this.shields = [];
+        for (let i = 0; i < 8; i++) {
+            this.shields.push({
+                pos: CollisionBox.center(this.middleParts[3]),
+                size: new Vector2(8, 8),
+                lerpAmount: .01 + Math.random() * .05,
+                dist: 16 + Math.floor(Math.random() * 16),
+                health: 3
+            });
+        }
     }
 
     introPhase = game => {
@@ -144,22 +155,39 @@ class PekoMiniBoss extends Actor {
     }
 
     checkHit = (game, collisionBox) => {
+        const shields = CollisionBox.intersectingCollisionBoxes(collisionBox, this.shields);
+        if (shields.length) {
+            shields[0].other.hit = true;
+            return shields[0].collision;
+        }
         const collision = CollisionBox.intersects(this.middleParts[3], collisionBox);
         return collision;
     }
 
     takeHit = (game, other) => {
-        this.health--;
-        game.playSound('damage');
-        game.scene.shakeBuffer = 15;
-        this.hitBuffer = 20;
-        game.scene.particles.ray(this.checkHit(game, other).pos);
-        game.scene.particles.impact(this.checkHit(game, other).pos);
+        if (this.shields.some(shield => shield.hit)) {
+            this.shields.forEach(shield => {
+                if (shield.hit) {
+                    shield.health--;
+                    shield.hit = false;
+                    game.playSound('hit');
+                    if (!shield.health) game.scene.particles.mini_explosion(this.checkHit(game, other).pos);
+                    game.scene.particles.ray(this.checkHit(game, other).pos);
+                    game.scene.particles.impact(this.checkHit(game, other).pos);
+                }
+            });
+            this.shields = this.shields.filter(shield => shield.health);
+        } else {
+            this.health--;
+            game.playSound('damage');
+            this.hitBuffer = 20;
+            game.scene.particles.ray(this.checkHit(game, other).pos);
+            game.scene.particles.impact(this.checkHit(game, other).pos);
+        }
+        this.shakeBuffer = 15;
     }
 
     update = game => {
-        // console.log(this.waitBuffer)
-        
         this[`${this.phase}Phase`](game);
 
         ['left', 'right', 'middle'].forEach(side => {
@@ -175,6 +203,22 @@ class PekoMiniBoss extends Actor {
                 }
             });
         });
+
+        this.shields.forEach((shield, i) => {
+            shield.hit = false;
+            const angle = i * Math.PI / 4 + (this.frameCount / 2048) * (180 / Math.PI) * (i%2?1:-1);
+            shield.pos = shield.pos.lerp(CollisionBox.center(this.middleParts[3]).plus(new Vector2(-4 + Math.cos(angle) ** 3 * shield.dist, -4 + Math.sin(angle) ** 3 * shield.dist)), shield.lerpAmount);
+        })
+
+        if (this.health && this.shields.length < 8 && Math.random() > .995) {
+            this.shields.push({
+                pos: CollisionBox.center(this.middleParts[3]).plus(new Vector2(Math.random() * 64, 16 * 8)),
+                size: new Vector2(8, 8),
+                lerpAmount: .01 + Math.random() * .05,
+                dist: 16 + Math.floor(Math.random() * 16),
+                health: 3
+            });
+        }
 
         // Side parts animation
         // parts.forEach((part, i) => {
@@ -211,12 +255,16 @@ class PekoMiniBoss extends Actor {
                 24, 24);
         });
 
+        this.shields.filter(a => !a.hit).forEach((shield, i) => {
+            cx.save()
+            cx.translate(Math.round(CollisionBox.center(shield).x), Math.round(CollisionBox.center(shield).y));
+            cx.rotate((90*i + 90 * (Math.floor(this.frameCount / 4) % 4)) * Math.PI / 180 * (i%2?1:-1));
+            cx.drawImage(game.assets.images['sp_peko_mini_boss_shield'], 0, 0, 8, 8, -4, -4, 8, 8);
+            cx.restore();
+        });
+
         if (this.laserTarget) {
             cx.drawImage(game.assets.images['sp_laser_target'], this.phase === 'attack' ? 0 : (Math.floor(this.frameCount / 2) % 2) * 24, 0, 24, 24, this.laserTarget.x - 12, this.laserTarget.y - 12, 24, 24);
-        }
-
-        if (this.phase === 'attack') {
-
         }
 
         cx.restore();

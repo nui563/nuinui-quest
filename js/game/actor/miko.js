@@ -5,7 +5,7 @@ class Miko extends Actor {
 
     gravity = .15;
 
-    moveSpeed = 1.5;
+    moveSpeed = 2.5;
 
     phaseBuffer = 0;
 
@@ -25,7 +25,7 @@ class Miko extends Actor {
     takeHit = (game, other) => {
         if (!this.invicibility) {
             this.health--;
-            game.scene.shakeBuffer = 15;
+            this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
             game.playSound('damage');
@@ -47,8 +47,9 @@ class Miko extends Actor {
     }
 
     idlePhase = game => {
+        const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (this.phaseBuffer >= 31) {
-            if (Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
+            if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
                 if (!game.scene.miniBossCleared) {
                     this.phase = 'sniper';
                     this.setAnimation('sniper');
@@ -61,7 +62,7 @@ class Miko extends Actor {
                         game.canvas2.style.filter = 'brightness(0%)';
                         this.nightMode = true;
                     }
-                    if (Math.random() > .6) {
+                    if (Math.random() > (this.lastMove === 'chant' ? .8 : .6)) {
                         this.phase = 'chant';
                         this.setAnimation('chant');
                     } else {
@@ -69,12 +70,17 @@ class Miko extends Actor {
                     }
                 }
             } else {
-                this.phase = 'move';
-                game.playSound("jump");
-                const flare = game.scene.actors.find(actor => actor instanceof Flare);
-                if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
-                else this.moveDir = Math.random() > .5 ? 1 : -1;
-                this.vel.y = -4;
+                this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
+                if (Math.random() > .6 && this.lastMove !== 'sniper') {
+                    this.phase = 'sniper';
+                    this.setAnimation('sniper');
+                } else {
+                    this.phase = 'move';
+                    game.playSound("jump");
+                    if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
+                    else this.moveDir = Math.random() > .5 ? 1 : -1;
+                    this.vel.y = -4;
+                }
             }
         }
     }
@@ -114,11 +120,9 @@ class Miko extends Actor {
     
     chantPhase = game => {
         if (!(this.phaseBuffer % 8)) {
-            if (this.phaseBuffer > 16 && this.phaseBuffer < 56) {
-                for (let i = 40; i < 16 * 20; i+=36) {
-                    if (Math.random() > .75) game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x + i + Math.floor(Math.random() * 8 - 4), 24 * 16), new Vector2(0, 2 + Math.random()), this));
-                    if (Math.random() > .75) game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x - i + Math.floor(Math.random() * 8 - 4), 24 * 16), new Vector2(0, 2 + Math.random()), this));
-                }
+            if (this.phaseBuffer > 4) {
+                game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x + this.phaseBuffer * 4, 24 * 16), new Vector2(0, 3), this));
+                game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x - this.phaseBuffer * 4, 24 * 16), new Vector2(0, 3), this));
             }
             game.playSound("miko_chant");
         }
@@ -149,6 +153,7 @@ class Miko extends Actor {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         
         if (this.phase) this[`${this.phase}Phase`](game);
+        // if (this.phase !== 'chant' && this.health > this.maxHealth / 2) this.chantPhase(game);
 
         this.vel.y = Math.round((this.vel.y + this.gravity) * 100) / 100;
         this.vel = new Vector2(Math.max(-8, Math.min(8, this.vel.x)), Math.max(-8, Math.min(8, this.vel.y)));
@@ -186,6 +191,12 @@ class Miko extends Actor {
         if (this.invicibility) this.invicibility--;
         this.animationFrame++;
         this.frameCount++;
+
+        // if (!(this.frameCount % 8) && this.health && this.health < this.maxHealth / 2 && !this.mikofast) {
+        //     this.mikofast = true;
+        //     this.update(game);
+        //     this.mikofast = false;
+        // }
     }
 
     draw = (game, cx) => {

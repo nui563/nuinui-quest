@@ -6,6 +6,18 @@ class ParticleManager {
         this.pool.filter(particle => particle.zIndex === zIndex).forEach(particle => particle.update(cx, assets));
     }
 
+    mini_explosion = pos => {
+        this.pool.push(new Particle({
+            type: `explosion`,
+            pos: pos,
+            size: new Vector2(18, 18),
+            xOffset: p => p.size.x * Math.floor(p.life * 8 / p.lifespan),
+            vel: new Vector2(0, 0),
+            lifespan: 32,
+            zIndex: 1
+        }));
+    }
+
     explosion = pos => {
         for (let i = 0; i < 16; i++) {
             this.pool.push(new Particle({
@@ -24,7 +36,7 @@ class ParticleManager {
     jump = actor => {
         this.pool.push(new Particle({
             type: `jump`,
-            pos: actor.pos.plus(new Vector2(actor.size.x / 2, actor.size.y - 9)),
+            pos: actor.pos.plus(new Vector2(actor.size.x / 2, actor.size.y - 12)),
             size: new Vector2(16, 32),
             xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
             vel: new Vector2(0, 0),
@@ -119,6 +131,19 @@ class ParticleManager {
             vel: new Vector2(0, 0),
             lifespan: 24,
             zIndex: 1
+        }));
+    }
+    
+    shine_vel_white = (pos, vel, zIndex) => {
+        this.pool.push(new Particle({
+            type: `shine_${Math.random() > .5 ? '' : '2_'}white`,
+            pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 20 - 10), Math.round(pos.y) + Math.round(Math.random() * 20 - 10)),
+            size: new Vector2(10, 10),
+            xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
+            vel: vel,
+            lifespan: 16,
+            delay: Math.floor(Math.random() * 8),
+            zIndex: zIndex
         }));
     }
 

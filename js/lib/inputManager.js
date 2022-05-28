@@ -1,5 +1,5 @@
 class KeyboardListener {
-    keys = { left: false, right: false, jump: false, attack: false, item: false }
+    keys = { left: false, right: false, down: false, up: false, jump: false, attack: false, item: false }
 
     constructor() {
         this.enable();
@@ -47,12 +47,13 @@ class InputManager {
     getGamepadKeys = () => {
         if (this.gamepad === null) return {}
         const gamepad = navigator.getGamepads()[this.gamepad];
-        // console.log(gamepad.buttons.map(a=>a.value))
         switch (GAMEPADTYPE) {
             case 'a':
                 return {
                     left: gamepad.axes[0] < -0.5 || gamepad.buttons[14].value,
                     right: gamepad.axes[0] > 0.5 || gamepad.buttons[15].value,
+                    up: gamepad.axes[1] < -0.5 || gamepad.buttons[12].value,
+                    down: gamepad.axes[1] > 0.5 || gamepad.buttons[13].value,
                     jump: gamepad.buttons[1].value || gamepad.buttons[2].value,
                     attack: gamepad.buttons[3].value,
                     item: gamepad.buttons[0].value
@@ -61,18 +62,20 @@ class InputManager {
                 return {
                     left: gamepad.axes[0] < -0.5 || gamepad.buttons[14].value,
                     right: gamepad.axes[0] > 0.5 || gamepad.buttons[15].value,
+                    up: gamepad.axes[1] < -0.5 || gamepad.buttons[12].value,
+                    down: gamepad.axes[1] > 0.5 || gamepad.buttons[13].value,
                     jump: gamepad.buttons[0].value,
                     attack: gamepad.buttons[1].value || gamepad.buttons[2].value,
                     item: gamepad.buttons[3].value
                 }
-            case 'c':
-                return {
-                    left: gamepad.axes[0] < -0.5 || gamepad.buttons[14].value,
-                    right: gamepad.axes[0] > 0.5 || gamepad.buttons[15].value,
-                    jump: gamepad.axes[1] < -0.5 || gamepad.buttons[12].value,
-                    attack: gamepad.buttons[1].value || gamepad.buttons[3].value,
-                    item: gamepad.buttons[0].value || gamepad.buttons[2].value
-                }
+            // case 'c':
+            //     return {
+            //         left: gamepad.axes[0] < -0.5 || gamepad.buttons[14].value,
+            //         right: gamepad.axes[0] > 0.5 || gamepad.buttons[15].value,
+            //         jump: gamepad.axes[1] < -0.5 || gamepad.buttons[12].value,
+            //         attack: gamepad.buttons[1].value || gamepad.buttons[3].value,
+            //         item: gamepad.buttons[0].value || gamepad.buttons[2].value
+            //     }
             default:
                 return {}
         }
@@ -86,6 +89,8 @@ let KEYMODE = 'keyboard';
 const DEFAULTKEYCODES = {
     ArrowLeft: "left",
     ArrowRight: "right",
+    ArrowUp: "up",
+    ArrowDown: "down",
     KeyZ: "jump",
     KeyX: "attack",
     KeyC: "item"
@@ -98,6 +103,8 @@ let GAMEPADTYPE = GAMEPADDEFAULTTYPE;
 const KEYBOARDINPUT = {
     left: "ArrowLeft",
     right: "ArrowRight",
+    up: "ArrowUp",
+    down: "ArrowDown",
     jump: "KeyZ",
     attack: "KeyX",
     item: "KeyC"
@@ -141,6 +148,8 @@ const resetKeys = () => {
     document.getElementById('gamepad-type-A').click();
     document.getElementById('key-keyboard-left').innerHTML = 'ArrowLeft';
     document.getElementById('key-keyboard-right').innerHTML = 'ArrowRight';
+    document.getElementById('key-keyboard-up').innerHTML = 'ArrowUp';
+    document.getElementById('key-keyboard-down').innerHTML = 'ArrowDown';
     document.getElementById('key-keyboard-jump').innerHTML = 'KeyZ';
     document.getElementById('key-keyboard-attack').innerHTML = 'KeyX';
     document.getElementById('key-keyboard-item').innerHTML = 'KeyC';
@@ -166,6 +175,10 @@ const toggleKeyMode = (e, value) => {
     document.getElementById(`key-${KEYMODE}-container`).style.display = 'none';
     KEYMODE = value;
     document.getElementById(`key-${KEYMODE}-container`).style.display = 'flex';
+    if (KEYMODE === 'gamepad') {
+        document.getElementById('focus-warning').style.display = 'none';
+        document.getElementById('game-container').style.boxShadow = '0 0 2px #000';
+    }
 }
 
 const changeGamepadType = e => {

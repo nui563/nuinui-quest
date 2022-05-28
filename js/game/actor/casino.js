@@ -25,13 +25,14 @@ class Mikobell extends Actor {
 
     takeHit = (game, other) => {
         this.health--;
-        game.scene.shakeBuffer = 15;
+        this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.explosion(CollisionBox.center(this));
+            game.scene.shakeBuffer = 4;
             game.playSound("rumble");
             this.dropHeart(game, .6);
         } else {
@@ -173,13 +174,14 @@ class Casinochip extends Actor {
 
     takeHit = (game, other) => {
         this.health--;
-        game.scene.shakeBuffer = 15;
+        this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.explosion(CollisionBox.center(this));
+            game.scene.shakeBuffer = 4;
             game.playSound("rumble");
             this.dropHeart(game, .7);
         } else {
@@ -236,6 +238,58 @@ class Casinochip extends Actor {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         cx.drawImage(game.assets.images['sp_casino_chip'], Math.floor(this.frameCount / 6) % 2 ? 0 : 32, this.color ? 0 : 32, 32, 32, 0, 0, 32, 32);
+        cx.restore();
+    }
+}
+
+class Scythe extends Actor {
+    size = new Vector2(0, 0);
+
+    angle = 0;
+
+    constructor(pos, speed, offset) {
+        super();
+        this.pos = new Vector2(pos.x, pos.y).times(16);
+        this.speed = speed;
+        this.offset = offset * (Math.PI/180);
+
+        this.collisions = [];
+        for (let i = 0; i < 4; i++) {
+            this.collisions.push({
+                pos: new Vector2(this.pos.x + i * 16, this.pos.y),
+                size: new Vector2(12, 12)
+            })
+        }
+    }
+    
+    checkHit = (game, collisionBox) => {
+        const collisions = CollisionBox.intersectingCollisionBoxes(collisionBox, this.collisions);
+        return collisions.length ? CollisionBox.intersects(collisions[0].other, collisionBox) : false;
+    }
+
+    update = game => {
+        this.angle = this.offset + ((this.frameCount * this.speed) * (Math.PI/180)) % (2 * Math.PI);
+
+        this.collisions.forEach((collision, i) => {
+            const a = this.angle;
+            collision.pos = this.pos.plus(new Vector2(Math.cos(a), Math.sin(a)).times(16*(i+1))).plus(new Vector2(-6, -6));
+        });
+        
+        for (let i = 0; i < 2; i++) {
+            const dist = .5;
+            const a = Math.cos(Math.random() * 2 * Math.PI);
+            const b = Math.sin(Math.random() * 2 * Math.PI);
+            // game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
+        }
+        
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        cx.rotate(this.angle);
+        cx.drawImage(game.assets.images['sp_scythe'], 0, 0, 80, 32, 0, -8, 80, 32);
         cx.restore();
     }
 }

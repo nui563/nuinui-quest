@@ -1,9 +1,10 @@
 class Flare extends Actor {
     vel = new Vector2(0, 0);
     runSpeed = .35;
-    jumpSpeed = 1.9;
+    jumpSpeed = 2.4;
+    slidePower = 4;
     velLoss = new Vector2(0.8, 1);
-    gravity = .2;
+    gravity = .3;
     dir = true;
 
     focusCooldownTime = 6 * 60;
@@ -18,7 +19,7 @@ class Flare extends Actor {
     jumpPower = 0;
 
     hasBow = false;
-    hasKintsuba = false;
+    item = false;
 
     maxHealth = 16;
 
@@ -89,6 +90,12 @@ class Flare extends Actor {
             size: new Vector2(32, 40),
             speed: .25,
             frames: 3
+        },
+        slide: {
+            offset: new Vector2(0, -11),
+            size: new Vector2(32, 32),
+            speed: 1,
+            frames: 1
         }
     }
 
@@ -100,23 +107,67 @@ class Flare extends Actor {
 
     update = game => {
         const keys = this.playerControl ? game.keys : game.cpuKeys;
-        const movement = keys.left === keys.right ? 0 : this.runSpeed * (keys.right ? 1 : -1);
+        const movement = this.isSliding || keys.left === keys.right ? 0 : this.runSpeed * (keys.right ? 1 : -1);
 
         // if (this.isSleeping && Object.values(keys).some(key => key)) this.isSleeping = false;
-
         const wasGrounded = this.isGrounded;
         this.isGrounded = game.scene.currentSection.collisions.find(collision => 
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y+this.size.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(this, collision, 'x'));
+        
+        let ceilObstacle = game.scene.currentSection.collisions.find(collision => 
+            CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
+            CollisionBox.intersectsInAxis(this, collision, 'x'));
+        
+        if (!this.isSliding && !this.slideBuffer && this.isGrounded && keys.jump && keys.down) {
+            this.vel.x = this.slidePower * (this.dir ? 1 : -1);
+            this.isSliding = true;
+            this.slideBuffer = true;
+            this.pos.y += 16;
+            this.size.y = 16;
+            game.scene.particles.run(this);
+            game.playSound('dash');
+        } else {
+            if ((!this.isSliding && !keys.jump) || (this.isSliding && this.slideBuffer && !keys.jump)) {
+                this.slideBuffer = false;
+            }
+            if (this.isSliding && (!this.isGrounded || Math.abs(this.vel.x) < 1.73)) {
+                if (this.isGrounded && ceilObstacle) {
+                    this.vel.x += 1 * (this.dir ? 1 : -1);
+                } else {
+                    this.isSliding = false;
+                    this.size.y = 32;
+                    if (!this.isGrounded !== !ceilObstacle) this.pos.y -= 16;
+                    else {
+                        this.pos.y = this.pos.round(16).y;
+                        while (CollisionBox.intersectingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
+                            this.pos.y--;
+                        }
+                    }
+                }
+            }
+        }
+        
+        this.isGrounded = game.scene.currentSection.collisions.find(collision => 
+            CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y+this.size.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
+            CollisionBox.intersectsInAxis(this, collision, 'x'));
+        ceilObstacle = game.scene.currentSection.collisions.find(collision => 
+            CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
+            CollisionBox.intersectsInAxis(this, collision, 'x'));
 
         // Jump
         this.isJumping = false;
-        if (this.jumpBuffer && !keys.jump) this.jumpBuffer = false; 
-        if (this.isGrounded && keys.jump && !this.jumpBuffer && !this.vel.y) {
+        if (this.jumpBuffer && !keys.jump) this.jumpBuffer = false;
+        if (this.isGrounded && keys.jump && !this.jumpBuffer && !this.vel.y && !this.slideBuffer && !ceilObstacle && !(keys.down && this.slideBuffer)) {
             this.jumpPower = this.jumpSpeed;
             this.jumpBuffer = true;
             this.isJumping = true;
             this.jumpInput = true;
+            if (this.isSliding) {
+                this.isSliding = false;
+                this.pos.y -= 16;
+                this.size.y = 32;
+            }
         }
 
         if (this.jumpInput && keys.jump) {
@@ -138,10 +189,10 @@ class Flare extends Actor {
         }
 
         // Direction
-        this.dir = keys.left === keys.right ? this.dir : keys.right;
+        this.dir = this.isSliding || keys.left === keys.right ? this.dir : keys.right;
 
         // Velocity
-        this.vel = this.vel.mult(this.velLoss);
+        this.vel = this.vel.mult(this.isSliding ? new Vector2(0.96, 1) : this.velLoss);
         if (this.vel.x < .05 && this.vel.x > -0.05) this.vel.x = 0;
         this.vel.x = Math.round((this.vel.x + movement) * 100) / 100;
         this.vel.y = Math.round((this.vel.y + this.gravity) * 100) / 100;
@@ -152,6 +203,11 @@ class Flare extends Actor {
             this.pos.x = Math.round(this.pos.x);
             while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, game.scene.currentSection.collisions).length) {
                 this.pos.x = this.pos.x + Math.sign(this.vel.x);
+            }
+            if (this.isSliding) {
+                this.isSliding = false;
+                this.pos.y -= 16;
+                this.size.y = 32;
             }
             this.vel.x = 0;
         }
@@ -166,7 +222,7 @@ class Flare extends Actor {
         }
         this.pos.y = Math.round((this.pos.y + this.vel.y) * 100) / 100;
 
-        if (this.isGrounded && movement && this.vel.x && !this.vel.y) {
+        if (this.isGrounded && !this.isSliding && movement && this.vel.x && !this.vel.y) {
             if (movement !== this.lastMovement) game.scene.particles.run(this);
             else if (this.animationFrame % 16 === 15) {
                 game.playSound('step');
@@ -177,7 +233,7 @@ class Flare extends Actor {
 
         if (this.attackBuffer && !keys.attack) this.attackBuffer = false;
         if (this.attackCooldown) this.attackCooldown--;
-        const isAttacking = this.hasBow && keys.attack && !this.attackBuffer && !this.attackCooldown;
+        const isAttacking = this.hasBow && keys.attack && !this.attackBuffer && !this.attackCooldown && !this.invicibility && !this.isSliding;
         if (isAttacking) {
             game.scene.actors.push(new Arrow(this.pos.plus(new Vector2(0, 8)), new Vector2(20, 7), new Vector2(5 * (this.dir ? 1 : -1), 0), this));
             game.playSound("bow_shoot");
@@ -186,13 +242,16 @@ class Flare extends Actor {
         }
 
         //hit
-        const actorCollisions = game.scene.actors.filter(actor => [Robot, Nousabot, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko].some(e => actor instanceof e) && actor.checkHit(game, this));
+        const actorCollisions = game.scene.actors.filter(actor => [Robot, Nousabot, Nousakumo, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko, Scythe].some(e => actor instanceof e) && actor.checkHit(game, this));
         if (actorCollisions.length) actorCollisions.forEach(collision => this.takeHit(game, collision));
 
         let newAnimation;
         if (!this.attackCooldown) {
-            if (this.isGrounded) newAnimation = Math.abs(this.vel.x) < this.runSpeed ? 'idle' : 'run';
-            else newAnimation = this.vel.y < 0 ? 'jump' : 'fall';
+            if (this.isGrounded) {
+                if (this.isSliding) newAnimation = 'slide';
+                else newAnimation = Math.abs(this.vel.x) < this.runSpeed ? 'idle' : 'run';
+            }
+            else newAnimation = this.vel.y <= .6 ? 'jump' : 'fall';
         } else if (isAttacking) {
             if (!this.isGrounded) newAnimation = this.vel.y > 0 ? 'bow_fall' : 'bow_jump';
             else newAnimation = 'bow';
@@ -217,12 +276,19 @@ class Flare extends Actor {
             this.health = Math.max(0, this.health - damage);
             this.invicibility = 30;
             game.scene.shakeBuffer = 8;
-            game.scene.particles.ray(this.checkHit(game, other).pos);
-            game.scene.particles.impact(this.checkHit(game, other).pos);
-            this.vel.x += (this.dir ? -1 : 1) * 2;
+            if (other instanceof Scythe) {
+                game.scene.particles.ray(other.checkHit(game, this).pos);
+                game.scene.particles.impact(other.checkHit(game, this).pos);
+            } else {
+                game.scene.particles.ray(this.checkHit(game, other).pos);
+                game.scene.particles.impact(this.checkHit(game, other).pos);
+            }
+            this.vel.x += (this.dir ? -1 : 1) * 4;
+            if (this.vel.y > -2) this.vel.y -= 2;
         }
 
         if (!this.health) {
+            game.stopBGM();
             game.scene.nextScene = new StageSelect(game, null, game.currentStage);
         }
     }
@@ -239,10 +305,10 @@ class Flare extends Actor {
             const velX = this.vel.x;
             const side = Math.round(velX) || ['bow', 'bow_fall', 'bow_jump'].includes(this.animation);
             const spd = Math.round(16 / (1 + Math.abs(velX)));
-            const fallOffset = (this.vel.y > 0 ? -2 : 0);
+            const fallOffset = (this.vel.y > this.gravity ? -2 : 0);
             cx.drawImage(game.assets.images['sp_ponytail'],
-                (Math.floor(this.animationFrame / spd) % 3) * 24, (side ? 24 : 0), 24, 24,
-                side ? -18 : -14, 2 + fallOffset, 24, 24);
+                (Math.floor(this.animationFrame / spd) % 3) * 24, side ? 24 : 0, 24, 24,
+                side ? -18 + (this.isSliding ? 4 : 0) : -14, 2 + fallOffset, 24, 24);
             
             cx.drawImage(game.assets.images['sp_ribbon'],
                 (Math.floor(this.animationFrame / spd * 1.5) % 3) * 16, side ? 16 : 0, 16, 16,

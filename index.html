@@ -18,12 +18,12 @@
     <!-- Game -->
     <script src="js/game/event/gameEvent.js"></script>
     <script src="js/game/event/sectionEvents.js"></script>
+    <script src="js/game/event/checkpoints.js"></script>
     <script src="js/game/actor/actor.js"></script>
     <script src="js/game/actor/drop.js"></script>
     <script src="js/game/actor/flare.js"></script>
     <script src="js/game/actor/pekora.js"></script>
     <script src="js/game/actor/miko.js"></script>
-    <script src="js/game/actor/kintsuba.js"></script>
     <script src="js/game/actor/falls.js"></script>
     <script src="js/game/actor/casino.js"></script>
     <script src="js/game/actor/bowPickup.js"></script>
@@ -43,14 +43,14 @@
             <legend>Sound Effects Volume - SE音量</legend>
             <div id="se-volume-container">
                 <span id="se-volume-icon" class="material-icons">volume_up</span>
-                <input id="se-volume" type="range" min="0" max="1" step="0.05" value="0.25">
+                <input id="se-volume" type="range" min="0" max="1" step="0.05" value="0.5">
             </div>
         </fieldset>
-        <fieldset style="opacity:.5" disabled>
+        <fieldset>
             <legend>BGM Volume - BGM音量</legend>
             <div id="bgm-volume-container">
                 <span id="bgm-volume-icon" class="material-icons">volume_up</span>
-                <input id="bgm-volume" type="range" min="0" max="1" step="0.05" value="0.125">
+                <input id="bgm-volume" type="range" min="0" max="1" step="0.05" value="0.75">
             </div>
         </fieldset>
         <fieldset>
@@ -73,23 +73,38 @@
             
                 <div id="key-keyboard-container">
                     <div id="key-config-left">
-                        <label for="key-keyboard-left">Left - 左←</label>
+                        <label for="key-keyboard-left">Left</label>
+                        <label for="key-keyboard-left">左←</label>
                         <button class="key-config" id="key-keyboard-left" onclick="changeKeyKeyboard('left')">ArrowLeft</button>
                     </div>
                     <div id="key-config-right">
-                        <label for="key-keyboard-right">Right - 右→</label>
+                        <label for="key-keyboard-right">Right</label>
+                        <label for="key-keyboard-right">右→</label>
                         <button class="key-config" id="key-keyboard-right" onclick="changeKeyKeyboard('right')">ArrowRight</button>
                     </div>
+                    <div id="key-config-up">
+                        <label for="key-keyboard-up">Up</label>
+                        <label for="key-keyboard-up">上↑</label>
+                        <button class="key-config" id="key-keyboard-up" onclick="changeKeyKeyboard('up')">ArrowUp</button>
+                    </div>
+                    <div id="key-config-down">
+                        <label for="key-keyboard-down">Down</label>
+                        <label for="key-keyboard-down">下↓</label>
+                        <button class="key-config" id="key-keyboard-down" onclick="changeKeyKeyboard('down')">ArrowDown</button>
+                    </div>
                     <div id="key-config-jump">
-                        <label for="key-keyboard-jump">Jump - ジャンプ</label>
+                        <label for="key-keyboard-jump">Jump</label>
+                        <label for="key-keyboard-jump">ジャンプ</label>
                         <button class="key-config" id="key-keyboard-jump" onclick="changeKeyKeyboard('jump')">KeyZ</button>
                     </div>
                     <div id="key-config-attack">
-                        <label for="key-keyboard-attack">Shoot - 射撃</label>
+                        <label for="key-keyboard-attack">Shoot</label>
+                        <label for="key-keyboard-attack">射撃</label>
                         <button class="key-config" id="key-keyboard-attack" onclick="changeKeyKeyboard('attack')">KeyX</button>
                     </div>
                     <div id="key-config-item">
-                        <label for="key-keyboard-item">Item - アイテム</label>
+                        <label for="key-keyboard-item">Item</label>
+                        <label for="key-keyboard-item">アイテム</label>
                         <button class="key-config" id="key-keyboard-item" onclick="changeKeyKeyboard('item')">KeyC</button>
                     </div>
                 </div>
@@ -104,10 +119,10 @@
                             <input type="radio" id="gamepad-type-B" name="gamepad-type" value="b" onclick="changeGamepadType(this)">
                             <label for="gamepad-type-B">Type B</label>
                         </div>
-                        <div>
+                        <!-- <div>
                             <input type="radio" id="gamepad-type-C" name="gamepad-type" value="c" onclick="changeGamepadType(this)">
                             <label for="gamepad-type-C">Type C</label>
-                        </div>
+                        </div> -->
                     </div>
                     <img id="gamepad-type-img" width="220" height="64" alt="gamepad-type" src="./img/opt_type_a.png">
                 </div>
@@ -118,8 +133,9 @@
     </div>
     <span id="info-icon" class="material-icons" onclick="toggleInfo()">information</span>
     <div id="info-container" style="display: none;">
-        <div style="width:300px;font-size:32px;border-bottom: 2px solid #fff;margin-bottom: 4px;">credits</div>
+        <div style="width:300px;font-size:32px;border-bottom: 2px solid #fff;margin-bottom: 4px;justify-content: start;">credits</div>
         <div style="color: #99c;margin:8px 0">Created by <a href="https://twitter.com/sulpx" target="_blank">Sulpx</a></div>
+        <div style="color: #99c;margin:8px 0">Music <a href="https://twitter.com/FBLSReindeer" target="_blank">FabulousReindeer</a></div>
     </div>
 </body>
 

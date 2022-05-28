@@ -5,13 +5,15 @@ class Game {
     width = 16 * 20;
     height = 16 * 12;
 
-    bgm = null;
+    audioCtx = null;
+    bufferLoader = null;
+
+    bgmId = null;
 
     lastKeys = null;
     cpuKeys = new Object;
 
     currentStage = 0;
-    stage2cleared = false;
 
     constructor(assets, data) {
         // Assets
@@ -49,6 +51,9 @@ class Game {
             document.getElementById('game-container').style.boxShadow = '0 0 2px #08f';
         }
 
+        // Audio
+        this.audioCtx = assets.audioCtx;
+
         // Init animation
         this.skipTicks = 1000 / 60;
         this.maxFrameSkip = 10;
@@ -72,13 +77,13 @@ class Game {
 
     pause = () => {
         console.log('game paused');
-        if (this.bgm) this.bgm.pause();
+        if (this.audioCtx.state === 'running') this.audioCtx.suspend();
         this.isPaused = true;
     }
 
     resume = () => {
         console.log('resumed');
-        if (this.bgm) this.bgm.play();
+        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
         this.isPaused = false;
         this.run();
     }
@@ -89,9 +94,13 @@ class Game {
     }
 
     update = () => {
-        if (this.bgm) {
-            if (BGMMUTED && this.bgm.volume !== 0) this.bgm.volume = 0;
-            else if (!BGMMUTED && this.bgm.volume !== BGMVOLUME) this.bgm.volume = BGMVOLUME;
+        if (this.introBGM) {
+            if (BGMMUTED && this.introBGM.volume !== 0) this.introBGM.volume = 0;
+            else if (!BGMMUTED && this.introBGM.volume !== BGMVOLUME) this.introBGM.volume = BGMVOLUME;
+        }
+        if (this.loopBGM) {
+            if (BGMMUTED && this.loopBGM.volume !== 0) this.loopBGM.volume = 0;
+            else if (!BGMMUTED && this.loopBGM.volume !== BGMVOLUME) this.loopBGM.volume = BGMVOLUME;
         }
         this.keys = this.inputManager[KEYMODE === 'keyboard' ? 'getKeyboardKeys' : 'getGamepadKeys']();
         this.scene.update(this);
@@ -122,23 +131,50 @@ class Game {
         audio.volume = SEVOLUME;
     }
 
-    playBGM = bgm => {
-        if (this.bgm) this.stopBGM();
-        this.bgm = new Audio(`./music/${bgm}.flac`);
-        this.bgm.volume = BGMMUTED ? 0 : BGMVOLUME;
-        this.bgm.loop = true;
-        const onCanPlay = () => {
-            this.bgm.currentTime = 0;
-            this.bgm.oncanplay = null;
-            this.bgm.play();
+    playBGM = id => {
+        const bgm = this.assets.bgmData.find(bgm => bgm.id === id);
+        if (!bgm.buffer) return;
+        this.bgm = bgm;
+        const source = this.audioCtx.createBufferSource();
+        source.buffer = this.bgm.buffer;
+        source.loop = true;
+        source.loopStart = this.bgm.loopStart;
+        source.loopEnd = source.buffer.duration;
+        this.bgm.source = source;
+        this.bgm.gainNode = this.audioCtx.createGain();
+        // this.bgm.gainNode.gain.value = .5;
+        source.connect(this.bgm.gainNode);
+        this.bgm.gainNode.connect(this.audioCtx.destination);
+
+        this.bgm.updateVolume = () => this.bgm.gainNode.gain.value = BGMMUTED ? 0 : BGMVOLUME;
+        this.bgm.updateVolume();
+
+        document.getElementById("bgm-volume").onchange = e => {
+            BGMVOLUME = e.target.value;
+            this.bgm.updateVolume();
         }
-        this.bgm.oncanplay = onCanPlay;
+        document.getElementById("bgm-volume-icon").onclick = e => {
+            BGMMUTED = !BGMMUTED;
+            document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? "volume_off" : "volume_up";
+            this.bgm.updateVolume();
+        }
+
+        if (this.audioCtx.state === "suspended") this.audioCtx.resume().then(() => this.bgm.source.start());
+        else this.bgm.source.start();
     }
 
     stopBGM = () => {
         if (!this.bgm) return;
-        this.bgm.pause();
-        this.bgm.currentTime = 0;
+        this.bgm.source.stop();
+        this.bgm = null;
+        
+        document.getElementById("bgm-volume").onchange = e => {
+            BGMVOLUME = e.target.value;
+        }
+        document.getElementById("bgm-volume-icon").onclick = e => {
+            BGMMUTED = !BGMMUTED;
+            document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? "volume_off" : "volume_up";
+        }
     }
 
     loop = timestamp => {

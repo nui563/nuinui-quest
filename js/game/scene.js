@@ -47,24 +47,16 @@ class Scene {
             if (section) section.collisions.push(collision);
         });
 
-        this.currentSection = this.sections[0];
-        // this.currentSection = this.sections[9];
-        this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
-
-        // DEBUG
-        // if (game.currentStage === 1) {
-        //     const flare = new Flare(new Vector2(275 * 16, 31 * 16), new Vector2(16, 32)); // start
-        //     // const flare = new Flare(new Vector2(146 * 16, 4 * 16), new Vector2(16, 32)); // miniboss
-        //     flare.setAnimation('idle');
-        //     flare.playerControl = true;
-        //     this.view.target = flare;
-        //     flare.hasBow = true;
-        //     flare.hasKintsuba = true;
-        //     flare.dir = true;
-        //     this.enableHUD = true;
-        //     this.actors.push(flare);
-        // }
-        // -----
+        // game.checkpoint = game.currentStage === 0 ? CHECKPOINT_STAGE_1_2
+        //     : game.currentStage === 1 ? CHECKPOINT_STAGE_2_1
+        //     : game.currentStage === 2 ? CHECKPOINT_STAGE_3_0 : null;
+        
+        
+        if (game.checkpoint) game.checkpoint(game, this);
+        else {
+            this.currentSection = this.sections[0];
+            this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
+        }
 
         this.view.size = new Vector2(game.width, game.height);
         this.setViewPos();
@@ -77,7 +69,7 @@ class Scene {
         if (!this.view.target) {
             pos = this.currentSection.pos;
         } else {
-            const center = CollisionBox.center(this.view.target);
+            const center = new Vector2(this.view.target.pos.x + this.view.target.size.x / 2, this.view.target.pos.y + (this.view.target.size.y === 32 ? 16 : 0));
             pos = new Vector2(
                 Math.max(this.currentSection.pos.x, Math.min(this.currentSection.pos.x + this.currentSection.size.x - this.view.size.x, center.x - this.view.size.x / 2)),
                 Math.max(this.currentSection.pos.y, Math.min(this.currentSection.pos.y + this.currentSection.size.y - this.view.size.y, center.y - this.view.size.y / 2))
@@ -121,10 +113,13 @@ class Scene {
 
         
         const flare = this.actors.find(actor => actor instanceof Flare);
-        if(flare && flare.hasKintsuba && game.keys.item && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect) {
+        if(flare && flare.item && game.keys.item && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect) {
             this.isFocus = flare.focusTime;
             flare.focusCooldown = flare.focusCooldownTime;
             game.playSound("focus");
+            // if (game.bgm) {
+            //     game.bgm.source.playbackRate = .5;
+            // }
         }
 
         // Update actors
@@ -138,8 +133,7 @@ class Scene {
         this.setViewPos();
         if (!this.lastViewPos || !this.view.pos.equals(this.lastViewPos)) {
             this.lastViewPos = this.view.pos;
-            this.drawView = true;
-        } else this.drawView = this.drawView;
+        }
 
         this.drawHUD = true;
 
@@ -182,7 +176,7 @@ class Scene {
         if (flare) {
             const maxHealthWidth = 64;
             flare.healthBar = flare.healthBar ? (1 - .1) * flare.healthBar + .1 * flare.health : flare.health;
-            const healthWidth = flare.healthBar * maxHealthWidth / flare.maxHealth;
+            const healthWidth = Math.ceil(flare.healthBar * maxHealthWidth / flare.maxHealth);
             cx.fillStyle = '#000';
             cx.fillRect(9, 16, 6, maxHealthWidth);
             cx.fillStyle = '#f06';
@@ -195,7 +189,7 @@ class Scene {
                 cx.drawImage(game.assets.images['sp_bow_pickup'], 2, game.height - 22);
             }
 
-            if (flare.hasKintsuba) {
+            if (flare.item) {
                 cx.drawImage(game.assets.images['ui_slot2'], 24, game.height - 32);
                 if (flare.focusCooldown && !this.isFocus) {
                     cx.globalAlpha = .5;
@@ -247,7 +241,6 @@ class Scene {
             const cx = game[`ctx${i}`];
             cx.save();
             if (SCREENSHAKE && this.shakeBuffer) {
-                this.drawView = true;
                 cx.translate(Math.floor(Math.random() * 8) - 4, 0);
                 // if (KEYMODE === 'gamepad' && game.inputManager.gamepad !== null) {
                 //     const gamepad = navigator.getGamepads()[game.inputManager.gamepad];
@@ -297,7 +290,15 @@ class Scene {
 
                     this.particles.update(cx, game.assets, 0);
 
-                    this.actors.forEach(actor => actor.draw(game, cx));
+                    this.actors.forEach(actor => {
+                        cx.save();
+                        if (actor.shakeBuffer) {
+                            actor.shakeBuffer--;
+                            cx.translate(Math.floor(Math.random() * 8) - 4, 0);
+                        }
+                        actor.draw(game, cx);
+                        cx.restore();
+                    });
                     if (DEBUGMODE) this.actors.forEach(a => a.displayCollisionBox(game, cx));
                     
                     this.particles.update(cx, game.assets, 1);
@@ -328,6 +329,9 @@ class Scene {
                         cx.fillRect(focusPos.x, focusPos.y, Math.ceil(this.isFocus * focusWidth / flare.focusTime), 4);
                         cx.restore();
                     }
+                    // if (game.currentStage === 2) {
+                    //     cx.drawImage(game.assets.images['ui_level_thanks'], game.width - 128, 0);
+                    // }
                     if (this.frameCount < 30) {
                         cx.fillStyle = '#000';
                         cx.globalAlpha = 1 - this.frameCount / 30;
@@ -340,8 +344,5 @@ class Scene {
 
         this.customDraw.forEach(custom => custom(game));
         this.customDraw = [];
-
-        if (this.drawView) this.drawView = false;
-        // if (DEBUGMODE) this.drawCollisions(game, game.ctx3);
     }
 }

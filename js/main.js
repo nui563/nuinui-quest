@@ -1,9 +1,9 @@
 let DEBUGMODE = false;
 
 let SEMUTED = false;
-let SEVOLUME = 0.25;
+let SEVOLUME = 0.5;
 let BGMMUTED = false;
-let BGMVOLUME = 0.125;
+let BGMVOLUME = 0.75;
 
 let SCREENDISPLAY = null;
 let SCREENSHAKE = true;
@@ -18,18 +18,11 @@ const toggleInfo = () => {
 window.onload = () => {
     INPUTMANAGER = new InputManager();
     // Game
-    const rawFile = new XMLHttpRequest();
-    rawFile.overrideMimeType("application/json");
-    rawFile.open("GET", "save.json", true);
-    rawFile.onreadystatechange = () => {
-        if (rawFile.readyState === 4 && rawFile.status == "200") {
-            const data = rawFile.responseText;
-            console.log("save file loaded", JSON.parse(data));
-            const game = new Game(new Assets(), data);
-            game.assets.load().then(game.start());
-        }
-    }
-    rawFile.send(null);
+    fetch("save.json").then(res => res.json()).then(res => {
+        console.log("save file loaded", res);
+        const game = new Game(new Assets(), JSON.stringify(res));
+        game.assets.load().then(game.start());
+    });
     
     // Sound options
     document.getElementById("se-volume").onchange = e => SEVOLUME = e.target.value;
@@ -37,18 +30,23 @@ window.onload = () => {
         SEMUTED = !SEMUTED;
         document.getElementById("se-volume-icon").innerHTML = SEMUTED ? "volume_off" : "volume_up";
     }
-    document.getElementById("bgm-volume").onchange = e => BGMVOLUME = e.target.value;
-    document.getElementById("bgm-volume-icon").onclick = e => {
-        BGMMUTED = !BGMMUTED;
-        document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? "volume_off" : "volume_up";
-    }
 
     window.onblur = () => {
-        document.getElementById('focus-warning').style.display = 'flex';
-        document.getElementById('game-container').style.boxShadow = '0 0 2px #08f';
+        if (KEYMODE === 'keyboard') {
+            document.getElementById('focus-warning').style.display = 'flex';
+            document.getElementById('game-container').style.boxShadow = '0 0 2px #08f';
+        }
     }
     window.onfocus = () => {
         document.getElementById('focus-warning').style.display = 'none';
         document.getElementById('game-container').style.boxShadow = '0 0 2px #000';
+    }
+    
+    document.getElementById("bgm-volume").onchange = e => {
+        BGMVOLUME = e.target.value;
+    }
+    document.getElementById("bgm-volume-icon").onclick = e => {
+        BGMMUTED = !BGMMUTED;
+        document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? "volume_off" : "volume_up";
     }
 }
