@@ -16,7 +16,10 @@ class KeyboardListener {
     }
 
     handler = e => {
-        if (e.code in KEYCODES) this.keys[KEYCODES[e.code]] = e.type === "keydown";
+        if (e.code in KEYCODES) {
+            this.keys[KEYCODES[e.code]] = e.type === "keydown";
+            e.preventDefault();
+        }
     }
 }
 
@@ -159,7 +162,7 @@ const toggleOptions = () => {
     const container = document.getElementById("options-container");
     const toggle = container.style.display === 'none';
     container.style.display = toggle ? 'flex' : 'none';
-    document.getElementById('options-icon').innerHTML = toggle ? 'close' : 'settings';
+    document.getElementById('options-icon').innerHTML = toggle ? '<img src="./img/icon_close.png">' : '<img src="./img/icon_settings.png">';
 }
 
 const setScreenDisplay = (e, value) => {

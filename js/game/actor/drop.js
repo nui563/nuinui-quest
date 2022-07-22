@@ -2,10 +2,12 @@ class Heart extends Actor {
     size = new Vector2(8, 8);
     vel = new Vector2(0, 0);
     gravity = .2;
-    heal = 4;
+    heal = 2;
     
-    constructor(pos) {
-        super(pos);
+    constructor(pos, fromMap) {
+        if (fromMap) {
+            super(new Vector2(pos.x * 16, pos.y * 16), new Vector2(32, 4 * 16));
+        } else super(pos);
     }
     
     checkHit = (game, collisionBox) => {
@@ -48,6 +50,7 @@ class Heart extends Actor {
     draw = (game, cx) => {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        if (game.currentStage === 2 && game.scene.bossStarted) cx.translate(0, Math.round(Math.cos(Math.floor(this.frameCount / 4) * (180 / Math.PI))));
         cx.drawImage(game.assets.images['sp_heart'], 0, 0);
         cx.restore();
     }

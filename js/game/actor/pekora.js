@@ -22,7 +22,7 @@ class Pekora extends Actor {
 
     takeHit = (game, other) => {
         if (!this.invicibility) {
-            this.health--;
+            this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
@@ -30,7 +30,9 @@ class Pekora extends Actor {
             
             if (!this.health) {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
+                game.score += 5000;
             } else {
+                game.score += 100;
                 this.invicibility = 30;
             }
         }

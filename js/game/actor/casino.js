@@ -24,18 +24,22 @@ class Mikobell extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health--;
+        this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.scene.particles.explosion(CollisionBox.center(this));
-            game.scene.shakeBuffer = 4;
-            game.playSound("rumble");
+            if (other.type !== 'rocket') {
+                game.scene.particles.explosion(CollisionBox.center(this));
+                game.scene.shakeBuffer = 4;
+                game.playSound("rumble");
+            }
             this.dropHeart(game, .6);
+            game.score += 200;
         } else {
+            game.score += 50;
             game.playSound('damage');
         }
     }
@@ -173,18 +177,22 @@ class Casinochip extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health--;
+        this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.scene.particles.explosion(CollisionBox.center(this));
-            game.scene.shakeBuffer = 4;
-            game.playSound("rumble");
+            if (other.type !== 'rocket') {
+                game.scene.particles.explosion(CollisionBox.center(this));
+                game.scene.shakeBuffer = 4;
+                game.playSound("rumble");
+            }
             this.dropHeart(game, .7);
+            game.score += 100;
         } else {
+            game.score += 20;
             game.playSound('damage');
         }
     }
@@ -237,7 +245,7 @@ class Casinochip extends Actor {
     draw = (game, cx) => {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
-        cx.drawImage(game.assets.images['sp_casino_chip'], Math.floor(this.frameCount / 6) % 2 ? 0 : 32, this.color ? 0 : 32, 32, 32, 0, 0, 32, 32);
+        cx.drawImage(game.assets.images['sp_casino_chip'], Math.floor(this.frameCount / 6) % 2 ? 0 : 32, game.currentStage === 2 ? 64 : this.color ? 0 : 32, 32, 32, 0, 0, 32, 32);
         cx.restore();
     }
 }

@@ -16,18 +16,23 @@ class Nousabot extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health--;
+        this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.scene.particles.explosion(CollisionBox.center(this));
-            game.scene.shakeBuffer = 4;
-            game.playSound("rumble");
+            
+            if (other.type !== 'rocket') {
+                game.scene.particles.explosion(CollisionBox.center(this));
+                game.scene.shakeBuffer = 4;
+                game.playSound("rumble");
+            }
+            game.score += 100;
             this.dropHeart(game, .7);
         } else {
+            game.score += 20;
             game.playSound('damage');
         }
     }
@@ -67,6 +72,7 @@ class Nousabot extends Actor {
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
         this.frameCount++;
+        if (this.scrollFilter && this.pos.x >= 41 * 16) this.toFilter = true;
     }
 
     draw = (game, cx) => {
@@ -77,7 +83,7 @@ class Nousabot extends Actor {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
-        cx.drawImage(game.assets.images['sp_nousabot'], 0, 0, 24, 24, 0, 0, 24, 24);
+        cx.drawImage(game.assets.images['sp_nousabot'], 0, game.currentStage === 2 ? 24 : 0, 24, 24, 0, 0, 24, 24);
         cx.restore();
     }
 }
@@ -107,18 +113,23 @@ class Robot extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health--;
+        this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.scene.particles.explosion(CollisionBox.center(this));
-            game.scene.shakeBuffer = 4;
-            game.playSound("rumble");
+            
+            if (other.type !== 'rocket') {
+                game.scene.particles.explosion(CollisionBox.center(this));
+                game.scene.shakeBuffer = 4;
+                game.playSound("rumble");
+            }
             this.dropHeart(game, .3);
+            game.score += 200;
         } else {
+            game.score += 50;
             game.playSound('damage');
         }
     }
@@ -163,12 +174,12 @@ class Robot extends Actor {
 
     update = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
-        
+
         this[`${this.phase}Phase`](game);
 
         const newCollisionBox = { pos:new Vector2(this.pos.x + this.vel.x, this.pos.y), size:this.size }
 
-        if (CollisionBox.intersectingCollisionBoxes(newCollisionBox, game.scene.currentSection.collisions).length) {
+        if (!this.scrollSpeed && CollisionBox.intersectingCollisionBoxes(newCollisionBox, game.scene.currentSection.collisions).length) {
             this.pos.x = Math.round(this.pos.x);
             while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, game.scene.currentSection.collisions).length) {
                 this.pos.x = this.pos.x + Math.sign(this.vel.x);
@@ -188,25 +199,6 @@ class Robot extends Actor {
         this.pos.x = Math.round((this.pos.x + this.vel.x) * 100) / 100;
 
         this.pos.y += this.vel.y;
-        
-        // for (let i = 0; i < 2; i++) {
-        //     const dist = .5;
-        //     const a = Math.cos(Math.random() * 2 * Math.PI);
-        //     const b = Math.sin(Math.random() * 2 * Math.PI);
-        //     game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
-        // }
-
-        // Attack
-        // if ([87, 107, 127].includes(this.frameCount % 128)) {
-        //     const p1 = CollisionBox.center(this);
-        //     const p2 = CollisionBox.center(flare);
-        //     if (p1.distance(p2) < 192 && p1.y - 32 < p2.y) {
-        //         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
-        //         const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(2);
-        //         game.scene.actors.push(new Bullet(p1, new Vector2(8, 8), vel, this));
-        //         game.playSound("pew");
-        //     }
-        // }
 
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
@@ -224,13 +216,15 @@ class Robot extends Actor {
     draw = (game, cx) => {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        if (this.waterOffset) cx.translate(0, Math.round(Math.cos(Math.floor(this.frameCount / 4) * (180 / Math.PI))));
         if (!this.dir) {
             cx.translate(this.size.x / 2, 0);
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
         const offset = new Vector2(12, 12);
-        cx.drawImage(game.assets.images['sp_robot'], this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, 0, 48, 48, -offset.x, -offset.y, 48, 48);
+        if (this.waterOffset)cx.drawImage(game.assets.images['sp_pirate_jetski'], -10, -8);
+        else cx.drawImage(game.assets.images['sp_robot'], this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, game.currentStage === 2 ? 48 : 0, 48, 48, -offset.x, -offset.y, 48, 48);
         cx.restore();
     }
 }
@@ -261,18 +255,23 @@ class Nousakumo extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health--;
+        this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.scene.particles.explosion(CollisionBox.center(this));
-            game.scene.shakeBuffer = 4;
-            game.playSound("rumble");
+            
+            if (other.type !== 'rocket') {
+                game.scene.particles.explosion(CollisionBox.center(this));
+                game.scene.shakeBuffer = 4;
+                game.playSound("rumble");
+            }
             this.dropHeart(game, .9);
+            game.score += 50;
         } else {
+            game.score += 10;
             game.playSound('damage');
         }
     }
@@ -382,7 +381,9 @@ class Nousakumo extends Actor {
             cx.translate(-this.size.x / 2, 0);
         }
         const offset = new Vector2(6, 10);
-        cx.drawImage(game.assets.images['sp_nousakumo'], this.isGrounded ? 0 : 32, 0, 32, 48, -offset.x, -offset.y, 32, 48);
+        cx.drawImage(game.assets.images['sp_nousakumo'],
+            this.isGrounded ? 0 : 32, game.currentStage === 2 ? 32 : 0, 32, 32,
+            -offset.x, -offset.y, 32, 32);
         cx.restore();
     }
 }
@@ -396,8 +397,8 @@ class VaporBlock extends Actor {
         this.pos = new Vector2(pos.x, pos.y).times(16);
         this.vapor = vapor;
         this.cycle = cycle;
-        this.vaporBuffer = 0;
-        this.cycleBuffer = cycle;
+        this.vaporBuffer = !vapor ? cycle : 0;
+        this.cycleBuffer = vapor ? cycle : 0;
         this.vaporCollisionBox = {pos:new Vector2(this.pos.x, this.pos.y - 4 * 16), size: new Vector2(16, 4 * 16)}
     }
     
@@ -413,6 +414,7 @@ class VaporBlock extends Actor {
         game.playSound('hit');
         this.vapor = false;
         this.vaporBuffer = 180;
+        game.score += 10;
     }
 
     update = game => {
@@ -421,31 +423,6 @@ class VaporBlock extends Actor {
             flare.takeHit(game, this.vaporCollisionBox);
             flare.vel.x = 8 * Math.sign(flare.vel.x);
         }
-        // if (this.vel.y) this.vel.y += this.gravity;
-        // this.vel.x = Math.cos((this.frameCount / 2048) * (180 / Math.PI)) / 2;
-        // this.vel.y = Math.sin((this.frameCount / 2048) * (180 / Math.PI)) / 2;
-
-        // this.pos.x += this.vel.x;
-        // this.pos.y += this.vel.y;
-        
-        // for (let i = 0; i < 2; i++) {
-        //     const dist = .5;
-        //     const a = Math.cos(Math.random() * 2 * Math.PI);
-        //     const b = Math.sin(Math.random() * 2 * Math.PI);
-        //     game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
-        // }
-
-        // Attack
-        // if ([63, 95, 127].includes(this.frameCount % 128) && CollisionBox.intersects(this, game.scene.view)) {
-        //     const p1 = CollisionBox.center(this);
-        //     const p2 = CollisionBox.center(flare);
-        //     if (p1.distance(p2) < 192 && p1.y - 32 < p2.y) {
-        //         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
-        //         const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(2);
-        //         game.scene.actors.push(new Bullet(p1, vel, this));
-        //         if (CollisionBox.intersects(this, game.scene.view)) game.playSound("pew");
-        //     }
-        // }
 
         if (this.vapor) {
             game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(0, -12)), new Vector2(0, -4), 1);

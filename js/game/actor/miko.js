@@ -24,7 +24,7 @@ class Miko extends Actor {
 
     takeHit = (game, other) => {
         if (!this.invicibility) {
-            this.health--;
+            this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
@@ -34,7 +34,9 @@ class Miko extends Actor {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
                 game.canvas1.style.filter = 'none';
                 game.canvas2.style.filter = 'none';
+                game.score += 5000;
             } else {
+                game.score += 100;
                 this.invicibility = 30;
             }
         }
@@ -104,15 +106,17 @@ class Miko extends Actor {
             this.setAnimation('idle');
             this.phase = 'idle';
             this.vel.x = 0;
+            game.playSound('land');
+            game.scene.particles.land(this);
         }
     }
 
     sniperPhase = game => {
-        if (this.phaseBuffer > 19 && !(this.phaseBuffer % 10)) {
-            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 14), new Vector2(3 * (this.dir ? 1 : -1), 0), this));
+        if (this.phaseBuffer > 15 && !(this.phaseBuffer % 20)) {
+            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 14), new Vector2(2 * (this.dir ? 1 : -1), 0), this));
             game.playSound("pew");
         }
-        if (this.phaseBuffer === 59) {
+        if (this.phaseBuffer === 60) {
             this.lastMove = this.phase;
             this.phase = 'idle';
         }

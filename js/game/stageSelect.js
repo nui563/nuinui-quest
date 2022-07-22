@@ -10,6 +10,7 @@ class StageSelect {
     }
 
     update = game => {
+        if (!this.frameCount) game.stopBGM();
 
         if (this.frameCount < 30) this.transitionAlpha = 1 - this.frameCount / 30;
         else if (this.frameCount < 150) this.transitionAlpha = 0;

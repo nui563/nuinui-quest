@@ -13,6 +13,7 @@ const EVENTS = {
                             event.flare = new Flare(new Vector2(160, 48), new Vector2(16, 32));
                             event.flare.setAnimation('sleep');
                             event.flare.animationLocked = true;
+                            if (game.demoCleared) event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
                 
                             scene.view.target = event.flare;
                 
@@ -59,6 +60,7 @@ const EVENTS = {
                                 event.end = true;
                                 scene.enableHUD = true;
                                 game.playBGM('smile_&_go_slow');
+                                game.timer = new Date();
                                 break;
                             default:
                                 break;
@@ -161,17 +163,38 @@ const EVENTS = {
 
         "4_0": [
             {
+                condition: game => game.scene.actors.find(actor => actor instanceof Flare).hasBow,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.drawImage(game.assets.images['sp_nousagi'], Math.floor(event.timelineFrame / 16) % 2 ? 0 : 24, 24, 24, 24, 80.5 * 16, 5 * 16 - 8, 24, 24);
+                            game.ctx0.restore();
+                        });
+                    }
+                ]
+            },
+            {
                 condition: game => game.scene.actors.find(actor => actor instanceof Flare).hasBow && !game.scene.miniBossStarted && !game.scene.miniBossCleared,
                 isPersistent: true,
                 timeline: [
                     (game, event) => {
-                        if (event.timelineFrame === 0) {
-                            game.stopBGM();
-                        }
-                        game.scene.miniBossStarted = true;
-                        const scene = game.scene;    
+                        const scene = game.scene;
                         const flare = scene.actors.find(actor => actor instanceof Flare);
-                        if (flare && flare.pos.x < 16 * 90) event.next = true;
+                        if (event.timelineFrame === 0) {
+                            flare.playerControl = false;
+                            game.cpuKeys.left = true;
+                        }
+                        scene.miniBossStarted = true;
+
+                        if (event.timelineFrame % 2 && Math.random() > .75) game.scene.shakeBuffer = 2;
+
+                        if (flare && flare.pos.x < 16 * 90) {
+                            game.cpuKeys = new Object;
+                            if (event.timelineFrame > 120) event.next = true;
+                        }
                     },
                     (game, event) => {
                         const scene = game.scene;
@@ -184,14 +207,14 @@ const EVENTS = {
                             scene.actors.push(event.boss);
 
                             event.collisions = [
-                                { pos: { x: 81.25 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }},
-                                { pos: { x: 97.75 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }}
+                                { pos: { x: 82 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }},
+                                { pos: { x: 97 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }}
                             ];
 
+                            game.stopBGM();
                             scene.warning = true;
                             scene.currentSection.collisions.push(...event.collisions);
 
-                            flare.playerControl = false;
                         }
 
                         if (event.boss.phase === 'intro') {
@@ -435,7 +458,9 @@ const EVENTS = {
                             event.pekora.phase = 'defeated';
                             event.pekora.dir = false;
                             event.pekora.setAnimation('idle');
+                            if (!flare.chargeTypeList.includes('rocket')) game.scene.actors.push(new RocketPickup(event.pekora.pos.value(), new Vector2(20, 20)));
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
+                            scene.actors = scene.actors.filter(a => !(a instanceof Rocket));
                             game.stopBGM();
                         }
                     },
@@ -509,6 +534,9 @@ const EVENTS = {
                             scene.nextScene = new StageSelect(game, 0, 1);
                             game.checkpoint = null;
                             game.stopBGM();
+                            game.score += 10000;
+                            const timerScore = Math.max(0, 500000 - (new Date().getTime() - game.timer.getTime()));
+                            game.score += timerScore;
                         }
                     }
                 ]
@@ -533,6 +561,8 @@ const EVENTS = {
                             event.flare = new Flare(new Vector2(16 * 9.5, 16 * 7), new Vector2(16, 32));
                             event.flare.setAnimation('idle');
                             event.flare.hasBow = true;
+                            event.flare.chargeTypeList = ['fire', 'rocket'];
+                            if (game.demoCleared) event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
                             
                             scene.view.target = event.flare;
                             scene.actors.push(event.flare);
@@ -607,6 +637,7 @@ const EVENTS = {
                             event.end = true;
                             scene.enableHUD = true;
                             game.playBGM('red_sus');
+                            game.timer = new Date();
                         }
                     }
                 ]
@@ -736,8 +767,13 @@ const EVENTS = {
                         game.scene.customDraw.push(game => {
                             game.ctx0.save();
                             game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
-                            game.ctx0.globalAlpha = alpha;
-                            game.ctx0.drawImage(game.assets.images['sp_skulls'], 20 * 8.5 * 16, Math.cos((game.scene.frameCount / game.height / 4) * (180 / Math.PI)) * 2 - 2);
+                            game.ctx0.globalAlpha = alpha * .75;
+                            for (let i = 0; i < 128; i++) {
+                                game.ctx0.drawImage(game.assets.images['sp_skulls'], 0, i, 320, 1,
+                                    20 * 8.5 * 16 + Math.cos(((game.scene.frameCount + i) / game.height / 4) * (180 / Math.PI)) * 4 - 8,
+                                    i + Math.cos((game.scene.frameCount / game.height / 4) * (180 / Math.PI)) * 2 - 2,
+                                    320, 1);
+                            }
                             game.ctx0.restore();
                         });
                     }
@@ -781,11 +817,11 @@ const EVENTS = {
                         const flare = scene.actors.find(actor => actor instanceof Flare);
 
                         if (event.timelineFrame === 0) {
-                            event.pekora = new Pekora(new Vector2(193 * 16, 8 * 16), 16);
+                            event.pekora = new Pekora(new Vector2(193 * 16, 8 * 16), 12);
                             event.pekora.vel = new Vector2(-2, -4);
                             event.pekora.setAnimation('jump');
 
-                            event.miko = new Miko(new Vector2(166 * 16, 8 * 16), 16);
+                            event.miko = new Miko(new Vector2(166 * 16, 8 * 16), 12);
                             event.miko.vel = new Vector2(2, -4);
                             event.miko.setAnimation('jump');
 
@@ -945,7 +981,7 @@ const EVENTS = {
                             flare.playerControl = false;
                             if (scene.isFocus) scene.isFocus = 0;
                             
-                            event.miko = new Miko(new Vector2((14 * 20 + 13) * 16, 32 * 16), 32);
+                            event.miko = new Miko(new Vector2((14 * 20 + 13) * 16, 32 * 16), 48);
                             event.miko.setAnimation('chant');
                             event.miko.dir = false;
                             scene.actors.push(event.miko);
@@ -983,13 +1019,10 @@ const EVENTS = {
                             game.playBGM('elite_moonlight_scuffle');
                         }
 
-                        // if (scene.warning && !(event.timelineFrame % 60)) game.playSound('warning');
-
                         if (event.timelineFrame === 240) {
                             event.miko.phase = 'idle';
                             flare.playerControl = true;
                             scene.warning = false;
-                            // game.playBGM('elite_moonlight_scuffle');
                         }
                         
                         if (!event.miko.health) {
@@ -997,6 +1030,7 @@ const EVENTS = {
                             flare.playerControl = false;
                             event.miko.phase = 'defeated';
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
+                            if (!flare.chargeTypeList.includes('petal')) scene.actors.push(new PetalPickup(event.miko.pos.value(), new Vector2(20, 20)));
                             game.stopBGM();
                         }
                     },
@@ -1045,12 +1079,20 @@ const EVENTS = {
                             scene.nextScene = new StageSelect(game, 1, 2);
                             game.checkpoint = null;
                             game.stopBGM();
+                            game.score += 20000;
+                            const timerScore = Math.max(0, 500000 - (new Date().getTime() - game.timer.getTime()));
+                            game.score += timerScore;
                         }
                     }
                 ]
             }
         ]
     },
+
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
     "port": {
         "0_0": [
             {
@@ -1069,6 +1111,8 @@ const EVENTS = {
                             event.flare = new Flare(new Vector2(16 * 9.5, 16 * 7), new Vector2(16, 32));
                             event.flare.setAnimation('idle');
                             event.flare.hasBow = true;
+                            event.flare.chargeTypeList = ['fire', 'rocket', 'petal'];
+                            if (game.demoCleared) event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
                             event.flare.item = true;
                             
                             scene.view.target = event.flare;
@@ -1143,10 +1187,827 @@ const EVENTS = {
                             event.flare.playerControl = true;
                             event.end = true;
                             scene.enableHUD = true;
+
+                            game.playBGM('aquamarine_bay');
+                            game.timer = new Date();
                         }
                     }
                 ]
             }
         ],
+
+
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "3_3": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.drawImage(game.assets.images['sp_port_clock'], 61.5 * 16, 52 * 16);
+                            game.ctx0.restore();
+                        });
+                    }
+                ]
+            },
+        ],
+
+
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "6_5": [
+            {
+                condition: game => !game.checkpoint,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x + (20 * 6 + 17.5) * 16, -game.scene.view.pos.y + (5 * 12 + 7) * 16 + 5);
+                            game.ctx0.scale(-1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_aqua_sleep'],
+                                (Math.floor(event.timelineFrame / 24) % 4) * 64, 0, 64, 48,
+                                0, 0, 64, 48);
+                            game.ctx0.restore();
+                        });
+                    }
+                ]
+            },
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.checkpoint = CHECKPOINT_STAGE_3_0;
+                        console.log('checkpoint')
+                        event.end = true;
+                    }
+                ]
+            }
+        ],
+
+
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "7_5": [
+            {
+                condition: game => !game.scene.currentSection.collisions.find(a => a.pos.x === 154 * 16 && a.pos.y === 62 * 16),
+                isPersistent: true,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 0) {
+                            event.actors = [new Torche({ "x": 150, "y": 63.5 })];
+                            scene.actors.push(...event.actors);
+                            
+                            scene.foreground[`154_62`] = "7";
+                            scene.foreground[`155_62`] = "7";
+
+                            event.collision = { pos: { x: 154 * 16, y: 62 * 16 }, size: { x: 32, y: 16 }};
+                            scene.currentSection.collisions.push(event.collision);
+                        }
+
+                        if (event.actors[0].active) {
+                            game.playSound('rumble');
+                            scene.shakeBuffer = 4;
+                            
+                            scene.background[`150_65`] = "19";
+                            delete scene.foreground[`154_62`];
+                            delete scene.foreground[`155_62`];
+                            scene.currentSection.collisions = scene.currentSection.collisions.filter(e => e !== event.collision);
+
+                            event.end = true;
+                        }
+                    }
+                ]
+            }
+        ],
+
+
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "8_3": [
+            {
+                condition: game => !game.scene.miniBossStarted && !game.scene.miniBossCleared,
+                isPersistent: true,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+
+                        if (event.timelineFrame === 0 && !scene.miniBossStarted) {
+                            scene.miniBossStarted = true;
+                            game.stopBGM(true);
+
+                            event.aqua = new Aqua(new Vector2(163.5 * 16, 39 * 16), 1);
+                            // event.aqua.currentSection = scene.currentSection;
+                            event.aqua.setAnimation('sleep');
+
+                            event.actors = [
+                                new Torche({ "x": 135, "y": 38.5 }),
+                                new Torche({ "x": 164, "y": 43.5 }),
+                                new Torche({ "x": 144, "y": 38.5 }),
+                                new Torche({ "x": 155, "y": 38.5 }),
+                                new Torche({ "x": 144, "y": 31.5 }),
+                                new Torche({ "x": 155, "y": 31.5 }),
+                                new Torche({ "x": 135, "y": 26.5 }),
+                                new Torche({ "x": 164, "y": 26.5 }),
+                                event.aqua
+                            ];
+                            scene.actors.push(...event.actors);
+
+                            scene.sections[13].collisions.push({ pos: { x: 167 * 16, y: 37 * 16 }, size: { x: 16, y: 4 * 16 }});
+                        }
+
+                        if (event.timelineFrame === 120) game.playBGM('sneak');
+
+                        if (!scene.blackout) {
+                            scene.blackout = true;
+
+                            for (let y = 0; y < 9; y++) {
+                                scene.foreground[`120_${37 + y}`] = "7";
+                            }
+                            event.collisions = [
+                                { pos: { x: 120 * 16, y: 37 * 16 }, size: { x: 16, y: 9 * 16 }}
+                            ];
+                            scene.sections[11].collisions.push(event.collisions[0]);
+                        }
+
+                        if (event.actors.filter(a => a instanceof Torche).every(a => a.active)) {
+                            scene.miniBossCleared = true;
+                            scene.blackout = false;
+                            
+                            game.stopBGM();
+                            game.playBGM('aquamarine_bay');
+                            
+                            game.playSound('rumble');
+                            scene.shakeBuffer = 4;
+                            for (let y = 0; y < 9; y++) {
+                                delete scene.foreground[`120_${37 + y}`];
+                            }
+                            scene.sections[11].collisions = scene.sections[11].collisions.filter(e => e !== event.collisions[0]);
+
+                            scene.actors = scene.actors.filter(a => !(a instanceof Aqua));
+                            event.next = true;
+                        }
+                    },
+                    (game, event) => {}
+                ]
+            }
+        ],
+        "7_3": [
+            {
+                condition: game => game.scene.actors.find(actor => actor instanceof Flare).dir && game.scene.sections[13].collisions.find(c => c.pos.x === 167 * 16 && c.pos.y === 37 * 16),
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 0) {
+                            event.aqua = scene.actors.find(a => a instanceof Aqua);
+
+                            scene.sections[13].collisions.push({ pos: { x: 167 * 16, y: 37 * 16 }, size: { x: 16, y: 4 * 16 }});
+                        }
+
+                        if (flare.pos.x > 150 * 16) {
+                            event.aqua.pos = new Vector2(135 * 16, 27 * 16);
+                            // event.aqua.currentSection = scene.sections[8];
+                            event.aqua.dir = true;
+                            event.aqua.moveDir = 1;
+                            event.aqua.phase = 'move';
+                            event.aqua.phaseBuffer = 0;
+                            event.aqua.isWaiting = true;
+
+                            game.scene.particles.explosion(new Vector2(159 * 16, 39 * 16));
+                            game.scene.particles.explosion(new Vector2(160 * 16, 37 * 16));
+                            game.scene.particles.explosion(new Vector2(160 * 16, 41 * 16));
+                            game.playSound('rumble');
+                            scene.shakeBuffer = 12;
+                            scene.foreground[`166_41`] = "22";
+                            scene.foreground[`167_41`] = "23";
+                            for (let y = 0; y < 4; y++) {
+                                delete scene.foreground[`167_${37 + y}`];
+                            }
+                            scene.sections[13].collisions = scene.sections[13].collisions.filter(c => !(c.pos.x === 167 * 16 && c.pos.y === 37 * 16));
+
+                            event.end = true;
+                        }
+                    },
+                    (game, event) => {}
+                ]
+            }
+        ],
+
+        
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "4_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.checkpoint = CHECKPOINT_STAGE_3_1;
+                        console.log('checkpoint')
+                        event.end = true;
+                    }
+                ]
+            }
+        ],
+
+
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "3_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            // game.ctx0.globalAlpha = .5;
+                            game.ctx0.drawImage(game.assets.images['sp_anchor'], 59 * 16, -12);
+                            game.ctx0.restore();
+
+                            game.ctx2.save();
+                            game.ctx2.translate(-game.scene.view.pos.x + 70 * 16, -game.scene.view.pos.y + 3.5 * 16);
+                            game.ctx2.rotate(-Math.PI * .125)
+                            game.ctx2.drawImage(game.assets.images['sp_flag'], 0, (Math.floor((game.scene.frameCount / 8) + 4) % 6) * 234, 128, 234, 16, 0, 24, 128);
+                            game.ctx2.rotate(-Math.PI * .125)
+                            game.ctx2.drawImage(game.assets.images['sp_flag'], 0, (Math.floor(game.scene.frameCount / 8) % 6) * 234, 128, 234, -8, 8, 48, 128);
+                            game.ctx2.restore();
+                        });
+                    }
+                ]
+            },
+        ],
+
+
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "2_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (flare.playerControl) {
+                            flare.playerControl = false;
+                            game.cpuKeys.left = true;
+                            // game.stopBGM();
+                        }
+
+                        if (flare.pos.x < 45 * 16) {
+                            flare.jetski = true;
+                        }
+
+                        if (!flare.jetski) {
+                            game.scene.customDraw.push(game => {
+                                game.ctx1.save();
+                                game.ctx1.translate(-game.scene.view.pos.x + 46.5 * 16, -game.scene.view.pos.y + 8.5 * 16);
+                                game.ctx1.translate(0, Math.round(Math.cos(Math.floor(event.timelineFrame / 4) * (180 / Math.PI))));
+                                game.ctx1.scale(-1, 1);
+                                game.ctx1.drawImage(game.assets.images['sp_jetski'], 0, 0);
+                                game.ctx1.restore();
+                            });
+                        }
+
+                        if (event.timelineFrame > 150) {
+                            game.scene.customDraw.push(game => {
+                                game.ctx2.save();
+                                game.ctx2.fillStyle = '#000';
+                                game.ctx2.globalAlpha = Math.min(1, (event.timelineFrame - 150) / 30);
+                                game.ctx2.fillRect(0, 0, game.width, game.height);
+                                game.ctx2.restore();
+                            });
+                        }
+                    }
+                ]
+            }
+        ],
+
+
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "1_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            if (game.scene.bossKillEffect) return;
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            const scrollVal = Math.floor(event.timelineFrame * .5) % 320;
+                            const scrollVal2 = Math.floor(-event.timelineFrame * .0625) % 320;
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll2'], 0, 0, 320, 160, 20 * 16 + scrollVal2, 0, 320, 160);
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll2'], 0, 0, 320, 160, 20 * 16 + scrollVal2 + 320, 0, 320, 160);
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll'], 0, 0, 320, 160, 20 * 16 + scrollVal, 0, 320, 160);
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll'], 0, 0, 320, 160, 20 * 16 + scrollVal - 320, 0, 320, 160);
+                            if (Math.floor(event.timelineFrame * .5) < 320) game.ctx0.drawImage(game.assets.images['bg_port_scroll'], 320, 0, 320, 160, 20 * 16 + scrollVal, 0, 320, 160);
+                            game.ctx0.restore();
+                            
+                            game.ctx2.save();
+                            game.ctx2.fillStyle = '#fff';
+                            for (let i = 0; i < game.height; i++) {
+                                if (Math.random() > .99) {
+                                    game.ctx2.fillRect(Math.round(game.width * (0.75 + Math.random() / 4)), i, game.width / 4, 1);
+                                }
+                            }
+                            game.ctx2.restore();
+                        });
+                    }
+                ]
+            },
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 0) {
+                            event.enemies = [];
+                            event.addEnemy = (enemyClass, pos, scrollSpeed, waterEffect, waterOffset, dir) => {
+                                let enemy;
+                                if ([Cannon, Rock].includes(enemyClass)) {
+                                    enemy = new enemyClass(pos, dir);
+                                } else enemy = new enemyClass(pos);
+                                enemy.scrollSpeed = scrollSpeed;
+                                enemy.scrollFilter = true;
+                                enemy.waterOffset = waterOffset;
+                                enemy.waterEffect = waterEffect;
+                                event.enemies.push(enemy);
+                                scene.actors.push(enemy);
+                            };
+
+                            scene.bossStarted = true;
+                        }
+
+                        if (event.timelineFrame < 60) {
+                            game.scene.customDraw.push(game => {
+                                game.ctx2.save();
+                                for (let x = 0; x < 20; x++) {
+                                    const sequence = Math.max(0, (event.timelineFrame - 30) / 30 + (20 - x) / 20);
+                                    for (let y = 0; y < 12; y++) {
+                                        game.ctx2.drawImage(game.assets.images['vfx_transition'], 16 * Math.floor((1 - sequence) * 7), 0, 16, 16, x * 16, y * 16, 16, 16);
+                                    }
+                                }
+                                game.ctx2.restore();
+                            });
+                        }
+
+                        if (flare.pos.x < 30 * 16) {
+                            flare.playerControl = true;
+                            game.cpuKeys = new Object;
+                            if (!event.collisions) {
+                                event.collisions = [
+                                    { pos: { x: 19 * 16, y: 0 }, size: { x: 16, y: 12 * 16 }},
+                                    { pos: { x: 40 * 16, y: 0 }, size: { x: 16, y: 12 * 16 }}
+                                ];
+    
+                                scene.currentSection.collisions.push(...event.collisions);
+                            }
+                        }
+
+                        switch (event.timelineFrame) {
+                            case 3 * 60:
+                            case 4 * 60:
+                            case 8 * 60:
+                            case 9 * 60:
+                            case 10 * 60:
+                            case 11 * 60:
+                            case 12 * 60:
+                            case 54 * 60:
+                            case 55 * 60:
+                            case 56 * 60:
+                            case 57 * 60:
+                            case 58 * 60:
+                            case 59 * 60:
+                            case 60 * 60:
+                                event.addEnemy(Nousabot, new Vector2(18, 4), 1.5, false, false);
+                                break;
+                            case 16 * 60:
+                            case 22 * 60:
+                            case 32 * 60:
+                            case 40 * 60:
+                            case 44 * 60:
+                            case 48 * 60:
+                            case 52 * 60:
+                            case 64 * 60:
+                                event.addEnemy(Robot, new Vector2(18, 11), .5, true, true);
+                                break;
+                            case 18 * 60:
+                            case 24 * 60:
+                            case 26 * 60:
+                            case 27 * 60:
+                            case 29 * 60:
+                            case 30 * 60:
+                            case 38 * 60:
+                            case 42 * 60:
+                            case 46 * 60:
+                            case 50 * 60:
+                                event.addEnemy(Nousabot, new Vector2(18, 5), 1, false, false);
+                                event.addEnemy(Nousabot, new Vector2(18, 7), 1, false, false);
+                                break;
+                            case 20 * 60:
+                                event.boat = {
+                                    pos: new Vector2(320 - 560, 0),
+                                    scrollSpeed: .125
+                                }
+                                event.addEnemy(Cannon, new Vector2(10, 6), .125, false, true, true);
+                                event.addEnemy(Cannon, new Vector2(-1, 6), .125, false, true, true);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        // switch (event.timelineFrame) {
+                        //     case 3 * 60:
+                        //         event.boat = {
+                        //             pos: new Vector2(192, 0),
+                        //             scrollSpeed: .125
+                        //         }
+                        //         break;
+                        //     default:
+                        //         break;
+                        // }
+
+                        if (event.timelineFrame > 480 && !(event.timelineFrame % 240) && Math.random() > .75) {
+                            const yPos = [9, 9.5, 10];
+                            event.addEnemy(Rock, new Vector2(10, yPos[Math.floor(Math.random() * yPos.length)]), 2, false, false, Math.random() > .5);
+                        }
+
+                        event.enemies.forEach(a => {
+                            if (a instanceof Cannon) a.scrollSpeed = event.boat.scrollSpeed;
+                            a.pos.x += a.scrollSpeed;
+                            if (!a.shakeBuffer && a.waterEffect && !(a.frameCount % 6)) game.scene.particles.water_trail(a);
+                            if (a.scrollFilter && a.pos.x >= 41 * 16) {
+                                event.enemies = event.enemies.filter(e => e !== a);
+                                a.toFilter = true;
+                            }
+                        });
+                        scene.actors.filter(a => a instanceof Heart).forEach(a => a.pos.x++);
+
+                        //boat
+                        if (event.boat) {
+                            if (event.boat.pos.x === 192) {
+                                event.boat.scrollSpeed = 0;
+                                event.next = true;
+                            }
+                            event.boat.pos.x += event.boat.scrollSpeed;
+                            game.scene.customDraw.push(game => {
+                                if (game.scene.bossKillEffect) return;
+                                game.ctx0.save();
+                                game.ctx0.translate(
+                                    -game.scene.view.pos.x + Math.round(event.boat.pos.x),
+                                    -game.scene.view.pos.y + Math.round(event.boat.pos.y) + Math.round(Math.cos(Math.floor(event.timelineFrame / 16) * (180 / Math.PI))));
+                                game.ctx0.drawImage(game.assets.images['sp_boat'], 0, 0);
+                                game.ctx0.restore();
+                            });
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 0) {
+                            event.marine = new Marine(new Vector2(24 * 16, -32), 48);
+                            event.marine.phase = 'intro';
+
+                            event.aircons = [
+                                new Aircon(new Vector2(20, 7.5), 1),
+                                new Aircon(new Vector2(38, 7.5), -1),
+                            ];
+                            scene.actors.push(event.marine, ...event.aircons);
+
+                            scene.warning = true;
+                            game.stopBGM();
+                        }
+
+                        if (event.timelineFrame === 180) {
+                            event.marine.setAnimation('idle');
+                            event.marine.phase = 'idle';
+                            
+                            scene.warning = false;
+                            game.playBGM("cosplay_pirate_idol_frenzy");
+                        }
+
+                        if (event.timelineFrame > 480 && !(event.timelineFrame % 240) && Math.random() > .75) {
+                            const yPos = [9, 9.5, 10];
+                            event.addEnemy(Rock, new Vector2(10, yPos[Math.floor(Math.random() * yPos.length)]), 2, false, false, Math.random() > .5);
+                        }
+                        
+                        event.enemies.forEach(a => {
+                            if (a instanceof Cannon) a.scrollSpeed = event.boat.scrollSpeed;
+                            a.pos.x += a.scrollSpeed;
+                            if (!a.shakeBuffer && a.waterEffect && !(a.frameCount % 6)) game.scene.particles.water_trail(a);
+                            if (a.scrollFilter && a.pos.x >= 41 * 16) {
+                                event.enemies = event.enemies.filter(e => e !== a);
+                                a.toFilter = true;
+                            }
+                        });
+                        scene.actors.filter(a => a instanceof Heart).forEach(a => a.pos.x++);
+                        
+                        //boat
+                        if (event.boat) {
+                            game.scene.customDraw.push(game => {
+                                if (game.scene.bossKillEffect) return;
+                                game.ctx0.save();
+                                game.ctx0.translate(
+                                    -game.scene.view.pos.x + Math.round(event.boat.pos.x),
+                                    -game.scene.view.pos.y + Math.round(event.boat.pos.y) + Math.round(Math.cos(Math.floor(event.timelineFrame / 16) * (180 / Math.PI))));
+                                game.ctx0.drawImage(game.assets.images['sp_boat'], 0, 0);
+                                game.ctx0.restore();
+                            });
+                        }
+                        
+                        if (!event.marine.health) {
+                            event.next = true;
+                            flare.playerControl = false;
+                            event.marine.phase = 'defeated';
+                            scene.actors = scene.actors.filter(a => !(a instanceof Bullet) && !(a instanceof Rock) && !(a instanceof Aircon) && !(a instanceof Dokuro));
+                            if (!flare.chargeTypeList.includes('sword')) scene.actors.push(new SwordPickup(event.marine.pos.value(), new Vector2(20, 20)));
+                            game.stopBGM();
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 120) scene.bossCleared = true;
+
+                        if (event.timelineFrame === 180) {
+                            scene.actors = scene.actors.filter(a => !(a instanceof Marine));
+
+                            const flare = scene.actors.find(actor => actor instanceof Flare);
+                            flare.playerControl = true;
+
+                            game.playBGM('aquamarine_bay');
+                        }
+                        if (flare.chargeTypeList.includes('sword')) {
+                            event.next = true;
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        if (event.timelineFrame === 0) {
+                            flare.playerControl = false;
+                        }
+
+                        if (flare.isGrounded && event.timelineFrame > 120) {
+                            game.cpuKeys.left = true;
+                        }
+
+                        if (flare.pos.x < 26 * 16 && game.cpuKeys.left && !event.transitionFrame) event.transitionFrame = event.timelineFrame;
+
+                        if (flare.pos.x < 21 * 16) {
+                            event.end = true;
+                            game.scene.nextScene = new StageSelect(game, 2, 0);
+                            game.demoCleared = true;
+                            game.checkpoint = null;
+                            game.cpuKeys = new Object;
+                            game.stopBGM();
+                            game.score += 30000;
+                            const timerScore = Math.max(0, 500000 - (new Date().getTime() - game.timer.getTime()));
+                            game.score += timerScore;
+                        }
+                        
+                        if (event.transitionFrame > 120) {
+                            game.scene.customDraw.push(game => {
+                                game.ctx2.save();
+                                game.ctx2.fillStyle = '#000';
+                                game.ctx2.globalAlpha = Math.min(1, (event.timelineFrame - event.transitionFrame) / 30);
+                                game.ctx2.fillRect(0, 0, game.width, game.height);
+                                game.ctx2.restore();
+                            });
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "yamato": {
+        "0_10": [
+            {
+                condition: game => game.scene.frameCount === 0,
+                isPersistent: true,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        if (event.frameCount === 0) {
+                            event.flare = new Flare(new Vector2(0, 16 * 12 * 10), new Vector2(16, 32));
+                            event.flare.setAnimation('idle');
+                            event.flare.hasBow = true;
+                            event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
+                            event.flare.item = true;
+                            event.flare.jetski = true;
+                            event.flare.isGrounded = false;
+                            event.flare.vel.x = 8;
+                            
+                            event.flare.playerControl = false;
+
+                            scene.view.target = event.flare;
+                            scene.actors.push(event.flare);
+                        }
+                        if (!event.flare.vel.x) {
+                            event.flare.jetski = false;
+                            event.flare.playerControl = true;
+                            
+                            scene.particles.explosion(CollisionBox.center(event.flare));
+                            game.playSound('rumble');
+                            
+                            event.next = true;
+                        } else {
+                            event.flare.vel.x = 4;
+                            if(!(event.frameCount % 10)) scene.particles.explosion(CollisionBox.center(event.flare));
+                            if(!(event.frameCount % 40)) game.playSound('rumble');
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        event.end = true;
+                        scene.enableHUD = true;
+                        game.timer = new Date();
+
+                        event.flare.pos = new Vector2(3.75 * 20 * 16, 12 * 16);
+                        // event.flare.pos = new Vector2(13.75 * 20 * 16, 0);
+                    }
+                ]
+            }
+        ],
+        "4_1": [
+            {
+                condition: game => !game.scene.miniBossCleared,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        
+                        if (flare.pos.y <= 18 * 16) {
+                            if (scene.isFocus) scene.isFocus = 0;
+                            
+                            event.ayame = new Ayame(new Vector2(104.5 * 16, 18 * 16), 48);
+                            event.ayame.setAnimation('idle');
+                            event.ayame.dir = false;
+                            scene.actors.push(event.ayame);
+
+                            let atfield = new ATField(new Vector2(102 * 16, 17 * 16), false);
+                            scene.actors.push(atfield);
+                            
+                            for (let x = 0; x < 3; x++) {
+                                scene.foreground[`${88 + x}_19`] = "f";
+                                scene.foreground[`${88 + x}_20`] = "e";
+                                scene.foreground[`${109 + x}_19`] = "f";
+                                scene.foreground[`${109 + x}_20`] = "e";
+                            }
+                            event.collisions = [
+                                { pos: { x: 88 * 16, y: 20 * 16 }, size: { x: 16 * 3, y: 16 }},
+                                { pos: { x: 109 * 16, y: 20 * 16 }, size: { x: 16 * 3, y: 16 }}
+                            ];
+                            scene.sections[7].collisions.push(...event.collisions);
+
+                            game.playSound('rumble');
+                            scene.shakeBuffer = 4;
+
+                            scene.lockedViewPos = new Vector2(0, 12 * 16);
+
+                            game.stopBGM();
+                            event.next = true;
+                        }
+                        
+                        // game.cpuKeys.right = true;
+
+                        // if (event.fubuki.isGrounded) event.fubuki.setAnimation('idle');
+
+                        // if (flare.pos.x > 14.25 * 20 * 16) {
+                        //     game.cpuKeys = new Object;
+
+                        //     event.collisions = [
+                        //         { pos: { x: (14 * 20 - 1) * 16, y: 0 }, size: { x: 16, y: 12 * 16 }},
+                        //         { pos: { x: 15 * 20 * 16, y: 0 }, size: { x: 16, y: 12 * 16 }}
+                        //     ];
+
+                        //     scene.currentSection.collisions.push(...event.collisions);
+
+                            
+
+                        //     event.next = true;
+                        // }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        scene.lockedViewPos.x = Math.round((flare.pos.x + event.ayame.pos.x) / 2) - game.width / 2;
+                    }
+                ]
+            }
+        ],
+        "14_0": [
+            {
+                condition:game => !game.scene.bossCleared,
+                isPersistent: true,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        
+                        if (event.timelineFrame === 0) {
+                            flare.playerControl = false;
+                            if (scene.isFocus) scene.isFocus = 0;
+                            
+                            event.fubuki = new Fubuki(new Vector2((14 * 20 + 13) * 16, -64), 48);
+                            event.fubuki.setAnimation('jump');
+                            event.fubuki.dir = false;
+                            scene.actors.push(event.fubuki);
+
+                            game.stopBGM();
+                        }
+                        
+                        game.cpuKeys.right = true;
+
+                        if (event.fubuki.isGrounded) event.fubuki.setAnimation('idle');
+
+                        if (flare.pos.x > 14.25 * 20 * 16) {
+                            game.cpuKeys = new Object;
+
+                            event.collisions = [
+                                { pos: { x: (14 * 20 - 1) * 16, y: 0 }, size: { x: 16, y: 12 * 16 }},
+                                { pos: { x: 15 * 20 * 16, y: 0 }, size: { x: 16, y: 12 * 16 }}
+                            ];
+
+                            scene.currentSection.collisions.push(...event.collisions);
+
+                            
+
+                            event.next = true;
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (!flare.playerControl && event.fubuki.isGrounded) event.fubuki.setAnimation('idle');
+
+                        if (event.timelineFrame === 60) {
+                            scene.warning = true;
+                        }
+
+                        if (event.timelineFrame === 240) {
+                            event.fubuki.phase = 'idle';
+                            flare.playerControl = true;
+                            scene.warning = false;
+                        }
+                        
+                        if (!event.fubuki.health) {
+                            event.next = true;
+                            flare.playerControl = false;
+                            event.fubuki.phase = 'defeated';
+                            scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
+                            // scene.actors.push(new PetalPickup(event.fubuki.pos.value(), new Vector2(20, 20)));
+                            game.stopBGM();
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+
+                        if (event.timelineFrame === 120) scene.bossCleared = true;
+
+                        if (event.timelineFrame === 180) {
+                            scene.currentSection.collisions = scene.currentSection.collisions.filter(collision => !event.collisions.includes(collision));
+                            scene.actors = scene.actors.filter(a => !(a instanceof Fubuki));
+
+                            const flare = scene.actors.find(actor => actor instanceof Flare);
+                            flare.playerControl = true;
+                            event.end = true;
+                        }
+                    }
+                ]
+            }
+        ]
     }
 }

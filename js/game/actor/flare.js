@@ -21,6 +21,31 @@ class Flare extends Actor {
     hasBow = false;
     item = false;
 
+    chargeShot = true;
+    chargeShotBuffer = 0;
+    chargeTypeBuffer = false;
+    chargeTypeBufferAnim = 0;
+    chargeTypeList = ['fire'];
+    // chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
+    chargeTypeData = {
+        fire: {
+            xVel: 5,
+            particle: 'charge_fire'
+        },
+        rocket: {
+            xVel: 2,
+            particle: 'charge_fire_2'
+        },
+        petal: {
+            xVel: 3,
+            particle: 'charge_fire_3'
+        },
+        sword: {
+            xVel: 2.5,
+            particle: 'charge_fire_4'
+        }
+    }
+
     maxHealth = 16;
 
     // Flare animations
@@ -96,6 +121,12 @@ class Flare extends Actor {
             size: new Vector2(32, 32),
             speed: 1,
             frames: 1
+        },
+        jetski: {
+            offset: new Vector2(-8, -8),
+            size: new Vector2(32, 40),
+            speed: 1,
+            frames: 1
         }
     }
 
@@ -103,6 +134,7 @@ class Flare extends Actor {
         super(pos, size);
 
         this.health = this.maxHealth;
+        this.chargeType = 0;
     }
 
     update = game => {
@@ -119,7 +151,7 @@ class Flare extends Actor {
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(this, collision, 'x'));
         
-        if (!this.isSliding && !this.slideBuffer && this.isGrounded && keys.jump && keys.down) {
+        if (!this.jetski && !this.isSliding && !this.slideBuffer && this.isGrounded && keys.jump && keys.down) {
             this.vel.x = this.slidePower * (this.dir ? 1 : -1);
             this.isSliding = true;
             this.slideBuffer = true;
@@ -182,19 +214,20 @@ class Flare extends Actor {
         if (!wasGrounded && this.isGrounded) {
             if (this.landBuffer) {
                 this.landBuffer = false;
-            } else {
+            } else if (!this.jetski) {
                 game.playSound('land');
                 game.scene.particles.land(this);
             }
         }
 
         // Direction
-        this.dir = this.isSliding || keys.left === keys.right ? this.dir : keys.right;
+        this.dir = this.jetski || this.isSliding || keys.left === keys.right ? this.dir : keys.right;
 
         // Velocity
+        let iceVel = game.scene.iceWind ? .25 * (game.scene.iceWindDir ? 1 : -1) : 0;
         this.vel = this.vel.mult(this.isSliding ? new Vector2(0.96, 1) : this.velLoss);
         if (this.vel.x < .05 && this.vel.x > -0.05) this.vel.x = 0;
-        this.vel.x = Math.round((this.vel.x + movement) * 100) / 100;
+        this.vel.x = Math.round((this.vel.x + movement + iceVel) * 100) / 100;
         this.vel.y = Math.round((this.vel.y + this.gravity) * 100) / 100;
         this.vel = new Vector2(Math.max(-8, Math.min(8, this.vel.x)), Math.max(-8, Math.min(8, this.vel.y)));
 
@@ -222,40 +255,113 @@ class Flare extends Actor {
         }
         this.pos.y = Math.round((this.pos.y + this.vel.y) * 100) / 100;
 
-        if (this.isGrounded && !this.isSliding && movement && this.vel.x && !this.vel.y) {
+        if (this.isGrounded && !this.isSliding && !this.jetski && movement && this.vel.x && !this.vel.y) {
             if (movement !== this.lastMovement) game.scene.particles.run(this);
             else if (this.animationFrame % 16 === 15) {
                 game.playSound('step');
                 game.scene.particles.step(this);
             }
         }
-        if (this.isJumping && this.vel.y) game.scene.particles.jump(this);
+        if (this.isJumping && this.vel.y && !this.jetski) game.scene.particles.jump(this);
 
-        if (this.attackBuffer && !keys.attack) this.attackBuffer = false;
-        if (this.attackCooldown) this.attackCooldown--;
-        const isAttacking = this.hasBow && keys.attack && !this.attackBuffer && !this.attackCooldown && !this.invicibility && !this.isSliding;
-        if (isAttacking) {
-            game.scene.actors.push(new Arrow(this.pos.plus(new Vector2(0, 8)), new Vector2(20, 7), new Vector2(5 * (this.dir ? 1 : -1), 0), this));
-            game.playSound("bow_shoot");
-            this.attackBuffer = true;
-            this.attackCooldown = 12;
+        // Charge type
+        if (!this.jetski && keys.up && !this.chargeTypeBuffer) {
+            this.chargeType = (this.chargeType + 1) % this.chargeTypeList.length;
+            this.chargeTypeBuffer = true;
+            this.chargeTypeBufferAnim = 60;
+        }
+        if (!keys.up && this.chargeTypeBuffer) this.chargeTypeBuffer = false;
+        if (this.chargeTypeBufferAnim) this.chargeTypeBufferAnim--;
+
+        // Charge shot
+        let keyChargeAttack = false;
+        if (this.chargeShot && !this.jetski) {
+            if (keys.attack) this.chargeShotBuffer++;
+
+            if (this.chargeShotBuffer > 30) {
+                if (!(this.frameCount % 4)) game.scene.particles[this.chargeTypeData[this.chargeTypeList[this.chargeType]].particle](CollisionBox.center(this));
+            }
+            if (this.chargeShotBuffer > 60) {
+                if (!keys.attack) {
+                    keyChargeAttack = true;
+                }
+            }
+
+            if (!keys.attack && this.chargeShotBuffer) this.chargeShotBuffer = 0;
         }
 
+        // Shot
+        const keyAttack = keys.attack || keyChargeAttack;
+        if (this.attackBuffer && !keys.attack) this.attackBuffer = false;
+        if (this.attackCooldown) this.attackCooldown--;
+        if (this.attackCooldownAnim) this.attackCooldownAnim--;
+        const isAttacking = this.hasBow && keyAttack && (this.jetski || !this.attackBuffer) && !this.attackCooldown && !this.invicibility && !this.isSliding;
+        if (isAttacking) {
+            if (keyChargeAttack && this.chargeTypeList[this.chargeType] === 'petal') {
+                for (let i = 0; i < 4; i++) {
+                    const angle = (Math.PI / 8) * i - (1.5 * Math.PI / 8);
+                    const vel = new Vector2(Math.cos(angle) * (this.dir ? 1 : -1), Math.sin(angle)).times(this.chargeTypeData[this.chargeTypeList[this.chargeType]].xVel)
+                    game.scene.actors.push(new Arrow(
+                        this.pos.plus(new Vector2(0, 8)),
+                        new Vector2(8, 8),
+                        vel,
+                        'petal',
+                        this
+                    ));
+                }
+            } else {
+                const xVel = !keyChargeAttack ? 5 : this.chargeTypeData[this.chargeTypeList[this.chargeType]].xVel;
+                if (this.jetski) {
+                    game.scene.actors.push(new Arrow(
+                        this.pos.plus(new Vector2(-16, 22)),
+                        new Vector2(20, 7),
+                        new Vector2(xVel * (this.dir ? 1 : -1), Math.cos(this.frameCount * 2) * .5),
+                        'bullet',
+                        this
+                    ));
+                    game.scene.actors.push(new Arrow(
+                        this.pos.plus(new Vector2(-16, 22)),
+                        new Vector2(20, 7),
+                        new Vector2(xVel * (this.dir ? 1 : -1), -Math.cos(this.frameCount * 2) * .5),
+                        'bullet',
+                        this
+                    ));
+                } else {
+                    game.scene.actors.push(new Arrow(
+                        this.pos.plus(new Vector2(0, 8)),
+                        new Vector2(20, 7),
+                        new Vector2(xVel * (this.dir ? 1 : -1), 0),
+                        keyChargeAttack ? this.chargeTypeList[this.chargeType] : null,
+                        this
+                    ));
+                }
+            }
+            game.playSound(this.jetski ? "pew" : "bow_shoot");
+            this.attackBuffer = true;
+            this.attackCooldown = keyChargeAttack ? 36 : this.jetski ? 9 : 12;
+            this.attackCooldownAnim = 12;
+        }
+
+        if (this.jetski && this.isGrounded && !(this.frameCount % 6) && game.currentStage === 2) game.scene.particles.water_trail(this);
+        if (this.jetski && game.currentStage === 2) game.scene.particles.smoke_white(this.pos.plus(new Vector2(this.size.x, this.size.y - 8)), new Vector2(4, 0), 0);
+
         //hit
-        const actorCollisions = game.scene.actors.filter(actor => [Robot, Nousabot, Nousakumo, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko, Scythe].some(e => actor instanceof e) && actor.checkHit(game, this));
+        const actorCollisions = game.scene.actors.filter(actor => [Robot, Nousabot, Nousakumo, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko, Scythe, Dokuro, Cannon, Pirate, Neko, Rock, Marine, Aqua, Fubuki]
+            .some(e => actor instanceof e) && actor.checkHit(game, this));
         if (actorCollisions.length) actorCollisions.forEach(collision => this.takeHit(game, collision));
 
         let newAnimation;
-        if (!this.attackCooldown) {
+        if (!this.attackCooldownAnim || this.isSliding) {
             if (this.isGrounded) {
                 if (this.isSliding) newAnimation = 'slide';
-                else newAnimation = Math.abs(this.vel.x) < this.runSpeed ? 'idle' : 'run';
+                else newAnimation = keys.left !== keys.right ? 'run' : 'idle';
             }
             else newAnimation = this.vel.y <= .6 ? 'jump' : 'fall';
         } else if (isAttacking) {
             if (!this.isGrounded) newAnimation = this.vel.y > 0 ? 'bow_fall' : 'bow_jump';
             else newAnimation = 'bow';
         }
+        if (this.jetski) newAnimation = 'jetski';
 
         if (newAnimation && !this.animationLocked && newAnimation !== this.animation) this.setAnimation(newAnimation);
         else this.animationFrame++;
@@ -272,11 +378,12 @@ class Flare extends Actor {
     takeHit = (game, other) => {
         if (!this.invicibility) {
             game.playSound('damage');
-            const damage = 1;
+            const damage = other.damage ? other.damage : 1;
             this.health = Math.max(0, this.health - damage);
             this.invicibility = 30;
+            this.chargeShotBuffer = 0;
             game.scene.shakeBuffer = 8;
-            if (other instanceof Scythe) {
+            if (other instanceof Scythe || other instanceof Pirate || (other instanceof Aqua && other.playerAggro && !other.vel.x)) {
                 game.scene.particles.ray(other.checkHit(game, this).pos);
                 game.scene.particles.impact(other.checkHit(game, this).pos);
             } else {
@@ -290,6 +397,8 @@ class Flare extends Actor {
         if (!this.health) {
             game.stopBGM();
             game.scene.nextScene = new StageSelect(game, null, game.currentStage);
+            game.score = 0;
+            game.scoreDisplay = 0;
         }
     }
 
@@ -308,7 +417,7 @@ class Flare extends Actor {
             const fallOffset = (this.vel.y > this.gravity ? -2 : 0);
             cx.drawImage(game.assets.images['sp_ponytail'],
                 (Math.floor(this.animationFrame / spd) % 3) * 24, side ? 24 : 0, 24, 24,
-                side ? -18 + (this.isSliding ? 4 : 0) : -14, 2 + fallOffset, 24, 24);
+                this.jetski ? -14 : side ? -18 + (this.isSliding ? 4 : 0) : -14, 2 + fallOffset, 24, 24);
             
             cx.drawImage(game.assets.images['sp_ribbon'],
                 (Math.floor(this.animationFrame / spd * 1.5) % 3) * 16, side ? 16 : 0, 16, 16,
@@ -332,24 +441,20 @@ class Flare extends Actor {
     draw = (game, cx) => {
         if (this.invicibility % 2) return;
         cx.save();
+        if (this.chargeShotBuffer > 60 && Math.floor(this.frameCount / 4) % 2) cx.filter = 'brightness(2)';
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (!this.dir) {
             cx.translate(this.size.x / 2, 0);
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
+        if (this.isGrounded && this.jetski) {
+            cx.translate(0, Math.round(Math.cos(Math.floor(this.frameCount / 4) * (180 / Math.PI))));
+        }
         this.playAnimation(game, cx);
-        // else if (this.isGrounded) {
-        //     if (Math.abs(this.vel.x) < this.runSpeed) {
-        //         cx.drawImage(game.assets.images['player_idle'], 0, 0, 32, 40, -8, -6, 32, 40);
-        //     } else {
-        //         if (!(this.frameCount % 16)) game.playSound('step');
-        //         cx.drawImage(game.assets.images['player_run'], Math.floor(this.frameCount * .3) % 10 * 64, 0, 64, 64, -30, -18, 64, 64);
-        //     }
-        // } else {
-        //     cx.drawImage(game.assets.images['player_jump'], this.vel.y < 0 ? 0 : 32, 0, 32, 40, -10, -6, 32, 40);
-        // }
-
+        if (this.jetski && this.attackBuffer) {
+            cx.drawImage(game.assets.images['vfx_rapid_fire'], 24 * (Math.floor(this.frameCount / 2) % 2), 0, 24, 24, 24, 12, 24, 24);
+        }
         cx.restore();
     }
 }

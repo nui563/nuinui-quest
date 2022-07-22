@@ -9,11 +9,17 @@ class Game {
     bufferLoader = null;
 
     bgmId = null;
+    soundFrame = {};
 
     lastKeys = null;
     cpuKeys = new Object;
 
     currentStage = 0;
+
+    score = 0;
+    scoreDisplay = 0;
+
+    timer = 0;
 
     constructor(assets, data) {
         // Assets
@@ -60,8 +66,11 @@ class Game {
         this.startTime = performance.now();
         this.nextGameTick = this.startTime;
 
+        // DEBUG
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('stage')) this.currentStage = parseInt(urlParams.get('stage')) - 1;
+
         // Init stage selection
-        // this.scene = new StageSelect(null, 0);
         this.scene = new Scene(this, JSON.parse(this.data).game.stages[this.currentStage]);
     }
 
@@ -94,16 +103,16 @@ class Game {
     }
 
     update = () => {
-        if (this.introBGM) {
-            if (BGMMUTED && this.introBGM.volume !== 0) this.introBGM.volume = 0;
-            else if (!BGMMUTED && this.introBGM.volume !== BGMVOLUME) this.introBGM.volume = BGMVOLUME;
-        }
-        if (this.loopBGM) {
-            if (BGMMUTED && this.loopBGM.volume !== 0) this.loopBGM.volume = 0;
-            else if (!BGMMUTED && this.loopBGM.volume !== BGMVOLUME) this.loopBGM.volume = BGMVOLUME;
-        }
+        this.soundFrame = {};
         this.keys = this.inputManager[KEYMODE === 'keyboard' ? 'getKeyboardKeys' : 'getGamepadKeys']();
         this.scene.update(this);
+        if (this.bgmFadeOut) {
+            this.bgm.gainNode.gain.value -= BGMVOLUME / 32;
+            if (this.bgm.gainNode.gain.value <= 0.003) {
+                this.bgmFadeOut = false;
+                this.stopBGM();
+            }
+        }
         this.frameCount++;
     }
 
@@ -119,16 +128,24 @@ class Game {
         this.drawFrameCount++;
     }
 
-    playSound = sound => {
-        if (SEMUTED) return;
-        const audio = new Audio(`./sound/${sound}.wav`);
-        const onCanPlay = () => {
-            audio.currentTime = 0;
-            audio.oncanplay = null;
-            audio.play();
-        }
-        audio.oncanplay = onCanPlay;
-        audio.volume = SEVOLUME;
+    playSound = id => {
+        const sound = this.assets.audioList.find(sound => sound.id === id);
+        if (SEMUTED || !sound.buffer || this.soundFrame[id]) return;
+        this.soundFrame[id] = true;
+        const source = this.audioCtx.createBufferSource();
+        source.buffer = sound.buffer;
+        source.loop = false;
+        source.loopStart = 0;
+        source.loopEnd = source.buffer.duration;
+        if (['step', 'pew', 'bow_shoot', 'miko_chant', 'dash', 'slash'].includes(id)) source.playbackRate.value = 1 + Math.random() * .2 - .1;
+        sound.source = source;
+        sound.gainNode = this.audioCtx.createGain();
+        source.connect(sound.gainNode);
+        sound.gainNode.connect(this.audioCtx.destination);
+        sound.gainNode.gain.value = SEMUTED ? 0 : SEVOLUME;
+        
+        if (this.audioCtx.state === "suspended") this.audioCtx.resume().then(() => sound.source.start());
+        else sound.source.start();
     }
 
     playBGM = id => {
@@ -142,7 +159,6 @@ class Game {
         source.loopEnd = source.buffer.duration;
         this.bgm.source = source;
         this.bgm.gainNode = this.audioCtx.createGain();
-        // this.bgm.gainNode.gain.value = .5;
         source.connect(this.bgm.gainNode);
         this.bgm.gainNode.connect(this.audioCtx.destination);
 
@@ -155,7 +171,7 @@ class Game {
         }
         document.getElementById("bgm-volume-icon").onclick = e => {
             BGMMUTED = !BGMMUTED;
-            document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? "volume_off" : "volume_up";
+            document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? '<img src="./img/icon_volume_off.png">' : '<img src="./img/icon_volume_on.png">';
             this.bgm.updateVolume();
         }
 
@@ -163,17 +179,21 @@ class Game {
         else this.bgm.source.start();
     }
 
-    stopBGM = () => {
+    stopBGM = fadeout => {
         if (!this.bgm) return;
-        this.bgm.source.stop();
-        this.bgm = null;
-        
-        document.getElementById("bgm-volume").onchange = e => {
-            BGMVOLUME = e.target.value;
-        }
-        document.getElementById("bgm-volume-icon").onclick = e => {
-            BGMMUTED = !BGMMUTED;
-            document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? "volume_off" : "volume_up";
+        if (fadeout) {
+            this.bgmFadeOut = true;
+        } else {
+            this.bgm.source.stop();
+            this.bgm = null;
+            
+            document.getElementById("bgm-volume").onchange = e => {
+                BGMVOLUME = e.target.value;
+            }
+            document.getElementById("bgm-volume-icon").onclick = e => {
+                BGMMUTED = !BGMMUTED;
+                document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? '<img src="./img/icon_volume_off.png">' : '<img src="./img/icon_volume_on.png">';
+            }
         }
     }
 

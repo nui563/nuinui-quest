@@ -4,13 +4,12 @@ const CHECKPOINT_STAGE_1_0 = (game, scene) => {
     flare.setAnimation('idle');
     flare.playerControl = true;
     flare.hasBow = true;
+    if (game.demoCleared) flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
     flare.dir = false;
     scene.enableHUD = true;
     scene.actors.push(flare);
     
     scene.view.target = flare;
-
-    // game.playBGM('serious_&_go');
 }
 
 const CHECKPOINT_STAGE_1_1 = (game, scene) => {
@@ -19,6 +18,7 @@ const CHECKPOINT_STAGE_1_1 = (game, scene) => {
     flare.setAnimation('idle');
     flare.playerControl = true;
     flare.hasBow = true;
+    if (game.demoCleared) flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
     flare.dir = true;
     scene.enableHUD = true;
     scene.actors.push(flare);
@@ -36,6 +36,7 @@ const CHECKPOINT_STAGE_1_2 = (game, scene) => {
     flare.setAnimation('idle');
     flare.playerControl = true;
     flare.hasBow = true;
+    if (game.demoCleared) flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
     flare.dir = false;
     scene.enableHUD = true;
     scene.actors.push(flare);
@@ -53,6 +54,8 @@ const CHECKPOINT_STAGE_2_0 = (game, scene) => {
     flare.setAnimation('idle');
     flare.playerControl = true;
     flare.hasBow = true;
+    flare.chargeTypeList = ['fire', 'rocket'];
+    if (game.demoCleared) flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
     flare.item = true;
     flare.dir = true;
     scene.enableHUD = true;
@@ -69,6 +72,8 @@ const CHECKPOINT_STAGE_2_1 = (game, scene) => {
     flare.setAnimation('idle');
     flare.playerControl = true;
     flare.hasBow = true;
+    flare.chargeTypeList = ['fire', 'rocket'];
+    if (game.demoCleared) flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
     flare.item = true;
     flare.dir = true;
     scene.enableHUD = true;
@@ -82,18 +87,37 @@ const CHECKPOINT_STAGE_2_1 = (game, scene) => {
 
 const CHECKPOINT_STAGE_3_0 = (game, scene) => {
     scene.currentSection = scene.sections[3];
-    // const flare = new Flare(new Vector2(129.5 * 16, 68 * 16), new Vector2(16, 32));
-    const flare = new Flare(new Vector2(107 * 16, 45 * 16), new Vector2(16, 32));
+    const flare = new Flare(new Vector2(129.5 * 16, 68 * 16), new Vector2(16, 32));
     flare.setAnimation('idle');
     flare.playerControl = true;
     flare.hasBow = true;
+    flare.chargeTypeList = ['fire', 'rocket', 'petal'];
+    if (game.demoCleared) flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
     flare.item = true;
     flare.dir = true;
     scene.enableHUD = true;
     scene.actors.push(flare);
     
     scene.view.target = flare;
-    // scene.miniBossCleared = true;
 
-    game.playBGM('red_sus');
+    game.playBGM('aquamarine_bay');
+}
+
+const CHECKPOINT_STAGE_3_1 = (game, scene) => {
+    scene.currentSection = scene.sections[3];
+    const flare = new Flare(new Vector2(89.5 * 16, 8 * 16), new Vector2(16, 32));
+    flare.setAnimation('idle');
+    flare.playerControl = true;
+    flare.hasBow = true;
+    flare.chargeTypeList = ['fire', 'rocket', 'petal'];
+    if (game.demoCleared) flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
+    flare.item = true;
+    flare.dir = false;
+    scene.enableHUD = true;
+    scene.actors.push(flare);
+    
+    scene.view.target = flare;
+    scene.miniBossCleared = true;
+
+    game.playBGM('aquamarine_bay');
 }

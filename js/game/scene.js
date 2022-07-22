@@ -47,10 +47,10 @@ class Scene {
             if (section) section.collisions.push(collision);
         });
 
-        // game.checkpoint = game.currentStage === 0 ? CHECKPOINT_STAGE_1_2
-        //     : game.currentStage === 1 ? CHECKPOINT_STAGE_2_1
-        //     : game.currentStage === 2 ? CHECKPOINT_STAGE_3_0 : null;
-        
+        // DEBUG
+        const urlParams = new URLSearchParams(window.location.search);
+        const checkpoints = [[CHECKPOINT_STAGE_1_0, CHECKPOINT_STAGE_1_1, CHECKPOINT_STAGE_1_2], [CHECKPOINT_STAGE_2_0, CHECKPOINT_STAGE_2_1], [CHECKPOINT_STAGE_3_0, CHECKPOINT_STAGE_3_1]];
+        if (urlParams.has('checkpoint')) game.checkpoint = checkpoints[game.currentStage][parseInt(urlParams.get('checkpoint')) - 1];
         
         if (game.checkpoint) game.checkpoint(game, this);
         else {
@@ -75,6 +75,11 @@ class Scene {
                 Math.max(this.currentSection.pos.y, Math.min(this.currentSection.pos.y + this.currentSection.size.y - this.view.size.y, center.y - this.view.size.y / 2))
             ).round();
         }
+        
+        if (this.lockedViewPos) {
+            if (this.lockedViewPos.x) pos.x = this.lockedViewPos.x;
+            if (this.lockedViewPos.y) pos.y = this.lockedViewPos.y;
+        }
         // this.view.pos = this.view.pos ? this.view.pos.lerp(pos, .1) : pos;
         this.view.pos = pos;
     }
@@ -90,7 +95,11 @@ class Scene {
                 if (this.currentSection.events) {
                     this.currentSection.events.filter(event => event.condition(game)).forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
                 }
-                this.actors = this.actors.filter(actor => actor instanceof Flare);
+                const persistentActors = [];
+                this.events.forEach(e => {
+                    if (e.actors) persistentActors.push(...e.actors);
+                });
+                this.actors = this.actors.filter(actor => actor instanceof Flare || persistentActors.includes(actor));
                 this.currentSection.actors.forEach(event => {
                     this.actors.push(eval("new " + event.className + "(...event.data)"));
                 });
@@ -107,13 +116,13 @@ class Scene {
             })
         }
 
-        const bossClass = (this.name === 'forest' ? Pekora : Miko);
+        const bossClass = (this.name === 'forest' ? Pekora : game.currentStage === 2 ? Marine : Miko);
         const boss = this.actors.find(actor => actor instanceof bossClass);
         this.bossKillEffect = boss && !boss.health && !this.bossCleared;
 
         
         const flare = this.actors.find(actor => actor instanceof Flare);
-        if(flare && flare.item && game.keys.item && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect) {
+        if(flare && flare.item && game.keys.item && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect && !flare.jetski) {
             this.isFocus = flare.focusTime;
             flare.focusCooldown = flare.focusCooldownTime;
             game.playSound("focus");
@@ -123,6 +132,7 @@ class Scene {
         }
 
         // Update actors
+        this.actors = this.actors.filter(a => !a.toFilter);
         if (this.isFocus && this.frameCount % 4) this.actors.filter(actor => actor instanceof Flare || actor instanceof Arrow).forEach(actor => actor.update(game));
         else if (!this.bossKillEffect || this.frameCount % 2) this.actors.forEach(actor => actor.update(game));
 
@@ -139,6 +149,7 @@ class Scene {
 
         if (this.shakeBuffer) this.shakeBuffer--;
 
+        if (this.iceWind) this.iceWind--;
         if (this.isFocus) this.isFocus--;
         this.sectionFrame++;
         this.frameCount++;
@@ -172,6 +183,32 @@ class Scene {
     }
 
     displayHUD = (game, cx) => {
+
+        cx.drawImage(game.assets.images['ui_score'], game.width - 57, 2);
+        game.scoreDisplay = game.scoreDisplay ? (1 - .1) * game.scoreDisplay + .1 * game.score : game.score;
+        const digits = Array.from(String(Math.ceil(game.scoreDisplay)), num => Number(num));
+        while (digits.length < 8) digits.unshift(0);
+        digits.forEach((digit, i) => {
+            cx.drawImage(game.assets.images['ui_digit'], 5 * digit, 0, 5, 5, game.width - 53 + 6 * i, 5, 5, 5);
+        });
+
+        if (game.timer) {
+            cx.drawImage(game.assets.images['ui_timer'], game.width - 39, 15);
+
+            const time = (new Date().getTime() - game.timer.getTime()) / 1000;
+            let minutes = parseInt(time / 60, 10);
+            let seconds = parseInt(time % 60, 10);
+            minutes = (minutes < 10 ? "0" + minutes : minutes).toString();
+            seconds = (seconds < 10 ? "0" + seconds : seconds).toString();
+
+            minutes.split('').forEach((digit, i) => {
+                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 35 + 6 * i, 18, 5, 5);
+            });
+            seconds.split('').forEach((digit, i) => {
+                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 17 + 6 * i, 18, 5, 5);
+            });
+        }
+
         const flare = this.actors.find(actor => actor instanceof Flare);
         if (flare) {
             const maxHealthWidth = 64;
@@ -185,11 +222,14 @@ class Scene {
 
             cx.drawImage(game.assets.images['ui_slot'], 0, game.height - 32);
 
-            if (flare.hasBow) {
+            if (flare.hasBow && !flare.jetski) {
                 cx.drawImage(game.assets.images['sp_bow_pickup'], 2, game.height - 22);
+                if (flare.chargeShot) {
+                    cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, 12, game.height - 12, 12, 12);
+                }
             }
 
-            if (flare.item) {
+            if (flare.item && !flare.jetski) {
                 cx.drawImage(game.assets.images['ui_slot2'], 24, game.height - 32);
                 if (flare.focusCooldown && !this.isFocus) {
                     cx.globalAlpha = .5;
@@ -199,13 +239,22 @@ class Scene {
                     cx.fillRect(28, game.height - 13, Math.ceil(flare.focusCooldown * 16 / flare.focusCooldownTime), 2);
                 } else cx.drawImage(game.assets.images['sp_clock'], 26, game.height - 22);
             }
+
+            if (flare.chargeTypeBufferAnim && !flare.jetski) {
+                cx.translate(-this.view.pos.x, -this.view.pos.y);
+                cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, Math.round(flare.pos.x + flare.size.x / 2) - 6, Math.round(flare.pos.y) - 20, 12, 12);
+            }
+
+            if (flare.jetski) {
+                cx.drawImage(game.assets.images['sp_jetski_item'], 2, game.height - 22);
+            }
         }
 
         const pekora = this.actors.find(a => a instanceof Pekora);
         if (pekora) {
             const maxHealthWidth = 64;
             pekora.healthBar = pekora.healthBar ? (1 - .1) * pekora.healthBar + .1 * pekora.health : pekora.health;
-            const healthWidth = pekora.healthBar * maxHealthWidth / pekora.maxHealth;
+            const healthWidth = Math.ceil(pekora.healthBar * maxHealthWidth / pekora.maxHealth);
             cx.fillStyle = '#000';
             cx.fillRect(29, 16, 6, maxHealthWidth);
             cx.fillStyle = '#8FAFFF';
@@ -217,12 +266,36 @@ class Scene {
         if (miko) {
             const maxHealthWidth = 64;
             miko.healthBar = miko.healthBar ? (1 - .1) * miko.healthBar + .1 * miko.health : miko.health;
-            const healthWidth = miko.healthBar * maxHealthWidth / miko.maxHealth;
+            const healthWidth = Math.ceil(miko.healthBar * maxHealthWidth / miko.maxHealth);
             cx.fillStyle = '#000';
             cx.fillRect((pekora ? 44 : 24) + 5, 16, 6, maxHealthWidth);
             cx.fillStyle = '#FC78FC';
             cx.fillRect((pekora ? 44 : 24) + 5, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
             cx.drawImage(game.assets.images['ui_healthbar_miko'], pekora ? 44 : 24, 0);
+        }
+        
+        const marine = this.actors.find(a => a instanceof Marine);
+        if (marine) {
+            const maxHealthWidth = 64;
+            marine.healthBar = marine.healthBar ? (1 - .1) * marine.healthBar + .1 * marine.health : marine.health;
+            const healthWidth = Math.ceil(marine.healthBar * maxHealthWidth / marine.maxHealth);
+            cx.fillStyle = '#000';
+            cx.fillRect(29, 16, 6, maxHealthWidth);
+            cx.fillStyle = '#FCB800';
+            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
+            cx.drawImage(game.assets.images['ui_healthbar_marine'], 24, 0);
+        }
+
+        const fubuki = this.actors.find(a => a instanceof Fubuki);
+        if (fubuki) {
+            const maxHealthWidth = 64;
+            fubuki.healthBar = fubuki.healthBar ? (1 - .1) * fubuki.healthBar + .1 * fubuki.health : fubuki.health;
+            const healthWidth = Math.ceil(fubuki.healthBar * maxHealthWidth / fubuki.maxHealth);
+            cx.fillStyle = '#000';
+            cx.fillRect(29, 16, 6, maxHealthWidth);
+            cx.fillStyle = '#8FAFFF';
+            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
+            cx.drawImage(game.assets.images['ui_healthbar_fubuki'], 24, 0);
         }
     }
 
@@ -307,13 +380,70 @@ class Scene {
                     // if (this.drawView) {
                     cx.clearRect(0, 0, game.width, game.height);
                     if (this.bossKillEffect) break;
+                    if (this.iceWind) {
+                        cx.save();
+                        if (!this.iceWindDir) {
+                            cx.translate(game.width, 0);
+                            cx.scale(-1, 1);
+                        }
+                        cx.drawImage(game.assets.images['sp_ice_wind'], 16 - this.frameCount % 16, 16 - this.frameCount % 16, 320, 192, 0, 0, 320, 192);
+                        cx.restore();
+                    }
                     cx.translate(-this.view.pos.x, -this.view.pos.y);
                     this.drawTiles(game, cx, this.foreground);
+                    if (DEBUGMODE) this.currentSection.collisions.forEach(a => {
+                        cx.save();
+                        cx.translate(Math.round(a.pos.x), Math.round(a.pos.y));
+                        cx.fillStyle = "#00f8";
+                        cx.fillRect(0, 0, a.size.x, 1);
+                        cx.fillRect(0, 0, 1, a.size.y);
+                        cx.fillRect(a.size.x - 1, 0, 1, a.size.y);
+                        cx.fillRect(0, a.size.y - 1, a.size.x, 1);
+                        cx.fillStyle = "#00f4";
+                        cx.fillRect(0, 0, a.size.x, a.size.y);
+                        cx.restore();
+                    });
                     // }
                     break;
                 case 3:
                     cx.clearRect(0, 0, game.width, game.height);
                     if (this.bossKillEffect) break;
+
+                    if (game.currentStage === 2 && this.blackout && !this.miniBossCleared) {
+                        cx.save();
+                        cx.fillStyle = '#000c';
+                        cx.fillRect(0, 0, game.width, game.height);
+                        cx.globalCompositeOperation = "destination-out";
+
+                        const largeLight = this.actors.filter(a => a instanceof Flare || a instanceof Aqua || (a instanceof Torche && a.active));
+                        largeLight.forEach(a => {
+                            cx.save();
+                            const pos = CollisionBox.center(a).round();
+                            cx.translate(pos.x - this.view.pos.x, pos.y - this.view.pos.y);
+                            if (Math.floor(this.frameCount / 16) % 2) {
+                                cx.scale(-1, 1);
+                            }
+                            cx.drawImage(game.assets.images['ui_shadow_mask'], -64, -64);
+                            cx.restore();
+                        })
+
+                        const smallLight = this.actors.filter(a => a instanceof Arrow && a.type === 'fire');
+                        smallLight.forEach(a => {
+                            cx.save();
+                            const pos = CollisionBox.center(a).round();
+                            cx.translate(pos.x - this.view.pos.x, pos.y - this.view.pos.y);
+                            if (Math.floor(this.frameCount / 16) % 2) {
+                                cx.scale(-1, 1);
+                            }
+                            cx.drawImage(game.assets.images['ui_shadow_mask_small'], -32, -32);
+                            cx.restore();
+                        })
+                        cx.restore();
+                    }
+
+                    if (game.demoCleared) {
+                        cx.drawImage(game.assets.images['ui_level_thanks'], game.width / 2 - 64, 0);
+                    }
                     if (this.enableHUD) this.displayHUD(game, cx);
                     if (this.warning) this.displayWarning(game, cx);
                     if (this.isFocus) {
@@ -329,9 +459,14 @@ class Scene {
                         cx.fillRect(focusPos.x, focusPos.y, Math.ceil(this.isFocus * focusWidth / flare.focusTime), 4);
                         cx.restore();
                     }
-                    // if (game.currentStage === 2) {
-                    //     cx.drawImage(game.assets.images['ui_level_thanks'], game.width - 128, 0);
-                    // }
+                    if (game.currentStage === 2 && this.blackout && !this.miniBossCleared) {
+                        const count = this.actors.filter(a => a instanceof Torche && a.active).length;
+                        for (let y = 0; y < 8; y++) {
+                            cx.drawImage(game.assets.images['vfx_smoke_white'], 0, 0, 8, 8, 22, 4 + y * 10, 8, 8);
+                            cx.drawImage(game.assets.images['vfx_smoke_black'], 8, 0, 8, 8, 22, 4 + y * 10, 8, 8);
+                            if (y < count) cx.drawImage(game.assets.images['vfx_smoke_white'], 16, 0, 8, 8, 22, 4 + y * 10, 8, 8);
+                        }
+                    }
                     if (this.frameCount < 30) {
                         cx.fillStyle = '#000';
                         cx.globalAlpha = 1 - this.frameCount / 30;

@@ -34,7 +34,7 @@ canvas {
   position: absolute;
 }
 
-#options-icon, #info-icon, #focus-icon {
+#options-icon, #info-icon, #focus-icon, #fullscreen-icon {
   position: absolute;
   left: 0;
   top: 0;
@@ -50,13 +50,19 @@ canvas {
   right: 0;
 }
 
+#fullscreen-icon {
+  left: auto;
+  top: auto;
+  right: 0;
+  bottom: 0;
+}
+
 #focus-warning {
   position: absolute;
   left: 46px;
   top: 0;
   display: flex;
   align-items: center;
-  color: #f80;
   z-index: 5;
 }
 

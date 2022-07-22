@@ -29,13 +29,13 @@ class PekoMiniBoss extends Actor {
 
         for (let i = 0; i < 7; i++) {
             this.leftParts.push({
-                pos: new Vector2(pos.x - 10, -2 - 18 * (i+1)),
+                pos: new Vector2(pos.x - 2, -2 - 18 * (i+1)),
                 size: new Vector2(20, 20)
             });
         }
         for (let i = 0; i < 7; i++) {
             this.rightParts.push({
-                pos: new Vector2(pos.x + this.size.x - 10, this.size.y + 2 + 18 * i),
+                pos: new Vector2(pos.x + this.size.x - 18, this.size.y + 2 + 18 * i),
                 size: new Vector2(20, 20)
             });
         }
@@ -56,7 +56,7 @@ class PekoMiniBoss extends Actor {
                 size: new Vector2(8, 8),
                 lerpAmount: .01 + Math.random() * .05,
                 dist: 16 + Math.floor(Math.random() * 16),
-                health: 3
+                health: 1
             });
         }
     }
@@ -169,6 +169,7 @@ class PekoMiniBoss extends Actor {
             this.shields.forEach(shield => {
                 if (shield.hit) {
                     shield.health--;
+                    game.score += 10;
                     shield.hit = false;
                     game.playSound('hit');
                     if (!shield.health) game.scene.particles.mini_explosion(this.checkHit(game, other).pos);
@@ -178,11 +179,15 @@ class PekoMiniBoss extends Actor {
             });
             this.shields = this.shields.filter(shield => shield.health);
         } else {
-            this.health--;
+            game.score += 50;
+            this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             game.playSound('damage');
             this.hitBuffer = 20;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            if (!this.health) {
+                game.score += 1000;
+            }
         }
         this.shakeBuffer = 15;
     }

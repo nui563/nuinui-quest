@@ -5,7 +5,11 @@
 <head>
     <title>FLARE NUINUI QUEST</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <meta name="keywords" content="Hololive, Flare, nuinui, megaman, game, fangame, platformer">
+    <meta name="description" content="Mega Man style platformer about Shiranui Flare and her journey through a series of encounters with Hololive characters">
+    <meta name="author" content="sulpx">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
@@ -24,8 +28,14 @@
     <script src="js/game/actor/flare.js"></script>
     <script src="js/game/actor/pekora.js"></script>
     <script src="js/game/actor/miko.js"></script>
+    <script src="js/game/actor/marine.js"></script>
+    <script src="js/game/actor/aqua.js"></script>
+    <script src="js/game/actor/ayame.js"></script>
+    <script src="js/game/actor/fubuki.js"></script>
     <script src="js/game/actor/falls.js"></script>
     <script src="js/game/actor/casino.js"></script>
+    <script src="js/game/actor/portcity.js"></script>
+    <script src="js/game/actor/yamato.js"></script>
     <script src="js/game/actor/bowPickup.js"></script>
     <script src="js/game/actor/pekoMiniBoss.js"></script>
     <script src="js/game/scene.js"></script>
@@ -36,20 +46,20 @@
 </head>
 
 <body>
-    <span id="options-icon" class="material-icons" onclick="toggleOptions()">settings</span>
-    <span id="focus-warning" style="display: none;"><span id="focus-icon" class="material-icons">warning</span>Click to play</span>
+    <span id="options-icon" class="material-icons" onclick="toggleOptions()"><img src="./img/icon_settings.png"></span>
+    <span id="focus-warning" style="display: none;"><span id="focus-icon" class="material-icons"><img src="./img/icon_warning.png"></span>Click to play</span>
     <div id="options-container" style="display: none;">
         <fieldset>
             <legend>Sound Effects Volume - SE音量</legend>
             <div id="se-volume-container">
-                <span id="se-volume-icon" class="material-icons">volume_up</span>
+                <span id="se-volume-icon" class="material-icons"><img src="./img/icon_volume_on.png"></span>
                 <input id="se-volume" type="range" min="0" max="1" step="0.05" value="0.5">
             </div>
         </fieldset>
         <fieldset>
             <legend>BGM Volume - BGM音量</legend>
             <div id="bgm-volume-container">
-                <span id="bgm-volume-icon" class="material-icons">volume_up</span>
+                <span id="bgm-volume-icon" class="material-icons"><img src="./img/icon_volume_on.png"></span>
                 <input id="bgm-volume" type="range" min="0" max="1" step="0.05" value="0.75">
             </div>
         </fieldset>
@@ -67,8 +77,8 @@
             <legend>Control Settings - キーコンフィグ</legend>
             <div id="key-config-container">
                 <div id="key-mode-container">
-                    <button class="key-mode-opt active" id="key-mode-opt-keyboard" onclick="toggleKeyMode(this, 'keyboard')"><span class="material-icons">keyboard</span></button>
-                    <button disabled class="key-mode-opt" id="key-mode-opt-gamepad" onclick="toggleKeyMode(this, 'gamepad')"><span class="material-icons">sports_esports</span></button>
+                    <button class="key-mode-opt active" id="key-mode-opt-keyboard" onclick="toggleKeyMode(this, 'keyboard')"><span class="material-icons"><img src="./img/icon_keyboard.png"></span></button>
+                    <button disabled class="key-mode-opt" id="key-mode-opt-gamepad" onclick="toggleKeyMode(this, 'gamepad')"><span class="material-icons"><img src="./img/icon_gamepad.png"></span></button>
                 </div>
             
                 <div id="key-keyboard-container">
@@ -131,12 +141,14 @@
             </div>
         </fieldset>
     </div>
-    <span id="info-icon" class="material-icons" onclick="toggleInfo()">information</span>
+    <span id="info-icon" class="material-icons" onclick="toggleInfo()"><img src="./img/icon_info.png"></span>
     <div id="info-container" style="display: none;">
         <div style="width:300px;font-size:32px;border-bottom: 2px solid #fff;margin-bottom: 4px;justify-content: start;">credits</div>
         <div style="color: #99c;margin:8px 0">Created by <a href="https://twitter.com/sulpx" target="_blank">Sulpx</a></div>
         <div style="color: #99c;margin:8px 0">Music <a href="https://twitter.com/FBLSReindeer" target="_blank">FabulousReindeer</a></div>
+        <div style="color: #99c;margin:8px 0">Musical Inspiration <a href="https://soundcloud.com/commandycan/spanishpiraterobotfrenzy" target="_blank">commandycan</a></div>
     </div>
+    <span id="fullscreen-icon" class="material-icons" onclick="toggleFullscreen()"><img src="./img/icon_fullscreen.png"></span>
 </body>
 
 </html>
