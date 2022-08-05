@@ -76,6 +76,7 @@ class Scene {
             if (localStorage.getItem(`nuinui-save-stage-${i+1}`)) {
                 elem.onclick = e => {
                     this.nextScene = new StageSelect(game, game.currentStage, i);
+                    game.checkpoint = null;
                     game.playSound('wakeup');
                 }
                 elem.classList = 'save-stage unlocked';
