@@ -121,6 +121,18 @@ class ParticleManager {
         }));
     }
 
+    smoke_spirit = (pos, vel, zIndex) => {
+        this.pool.push(new Particle({
+            type: `smoke_spirit`,
+            pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 10 - 5), Math.round(pos.y) + Math.round(Math.random() * 10 - 5)),
+            size: new Vector2(8, 8),
+            xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
+            vel: vel,
+            lifespan: 12 + Math.floor(Math.random() * 8),
+            zIndex: zIndex
+        }));
+    }
+
     shine_white = (pos, zIndex) => {
         this.pool.push(new Particle({
             type: `shine_${Math.random() > .5 ? '' : '2_'}white`,

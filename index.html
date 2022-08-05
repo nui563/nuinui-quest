@@ -45,9 +45,15 @@
     <script src="js/main.js"></script>
 </head>
 
-<body>
-    <span id="options-icon" class="material-icons" onclick="toggleOptions()"><img src="./img/icon_settings.png"></span>
+<body oncontextmenu="return false;">
+<!-- <body> -->
     <span id="focus-warning" style="display: none;"><span id="focus-icon" class="material-icons"><img src="./img/icon_warning.png"></span>Click to play</span>
+    <div id="navbar-container">
+        <span id="options-icon" class="material-icons" onclick="toggleOptions()"><img src="./img/icon_settings.png"></span>
+        <span id="save-icon" class="material-icons" onclick="toggleSave()"><img src="./img/icon_save.png"></span>
+        <span id="fullscreen-icon" class="material-icons" onclick="toggleFullscreen()"><img src="./img/icon_fullscreen.png"></span>
+        <span id="info-icon" class="material-icons" onclick="toggleInfo()"><img src="./img/icon_info.png"></span>
+    </div>
     <div id="options-container" style="display: none;">
         <fieldset>
             <legend>Sound Effects Volume - SE音量</legend>
@@ -64,9 +70,9 @@
             </div>
         </fieldset>
         <fieldset>
-            <legend>Screen Display - 画面表示</legend>
+            <legend>Zoom - ズーム</legend>
             <div id="screen-display-container">
-                <button class="screen-opt active" onclick="setScreenDisplay(this, null)">Default - デフォルト</button>
+                <button class="screen-opt active" onclick="setScreenDisplay(this, null)">Auto - 自動</button>
                 <button class="screen-opt" onclick="setScreenDisplay(this, 1)">x1</button>
                 <button class="screen-opt" onclick="setScreenDisplay(this, 2)">x2</button>
                 <button class="screen-opt" onclick="setScreenDisplay(this, 3)">x3</button>
@@ -141,14 +147,70 @@
             </div>
         </fieldset>
     </div>
-    <span id="info-icon" class="material-icons" onclick="toggleInfo()"><img src="./img/icon_info.png"></span>
+    <div id="save-container" style="display: none;">
+        <fieldset id="stage-container">
+            <legend>Stages - ステージ</legend>
+            <div class="save-stage" id="save-stage-1"></div>
+            <div class="save-stage" id="save-stage-2"></div>
+            <div class="save-stage" id="save-stage-3"></div>
+            <div class="save-stage" id="save-stage-4"></div>
+            <div class="save-stage" id="save-stage-5"></div>
+        </fieldset>
+        <fieldset id="item-container">
+            <legend>Items - アイテム</legend>
+            <div class="save-item selectable-item" id="save-item-1"></div>
+            <div class="save-item selectable-item" id="save-item-2"></div>
+            <div class="save-item selectable-item" id="save-item-3"></div>
+            <div id="skill-container">
+                <div class="save-item" id="save-item-4"></div>
+                <div class="save-item" id="save-item-5"></div>
+                <div class="save-item" id="save-item-6"></div>
+                <div class="save-item" id="save-item-7"></div>
+                <div class="save-item" id="save-item-8"></div>
+                <div class="save-item" id="save-item-9"></div>
+            </div>
+        </fieldset>
+        <fieldset id="stage-container">
+            <legend>Achievements - 実績</legend>
+            <span>
+                <div class="save-achievement" id="save-achievement-1" title="Find the not-so-secret weapon"></div>
+                <div class="save-achievement" id="save-achievement-2" title="Defeat the first boss (no hit)"></div>
+                <div class="save-achievement" id="save-achievement-3" title="Defeat Pekora (no jump)"></div>
+                <div class="save-achievement" id="save-achievement-4" title="Clear stage (in under 5 minutes)"></div>
+            </span>
+            <span>
+                <div class="save-achievement" id="save-achievement-5" title="Clear the scythe room (no hit)"></div>
+                <div class="save-achievement" id="save-achievement-6" title="Daisensou!!"></div>
+                <div class="save-achievement" id="save-achievement-7" title="Defeat Miko (no charge shot)"></div>
+                <div class="save-achievement" id="save-achievement-8" title="Clear stage (in under 5 minutes)"></div>
+            </span>
+            <span>
+                <div class="save-achievement" id="save-achievement-9" title="Find the secret room"></div>
+                <div class="save-achievement" id="save-achievement-10" title="Defeat Aqua (currently not possible)"></div>
+                <div class="save-achievement" id="save-achievement-11" title="Clear the jetski phase (no hit from rocks)"></div>
+                <div class="save-achievement" id="save-achievement-12" title="Clear stage (in under 5 minutes)"></div>
+            </span>
+            <span>
+                <div class="save-achievement" id="save-achievement-13" title="Find Poyoyo"></div>
+                <div class="save-achievement" id="save-achievement-14" title="Defeat Ayame (scimitar only)"></div>
+                <div class="save-achievement" id="save-achievement-15" title="Survive 2 minutes in the last room"></div>
+                <div class="save-achievement" id="save-achievement-16" title="Clear stage (in under 5 minutes)"></div>
+            </span>
+            <span>
+                <div class="save-achievement" id="save-achievement-17" title="???"></div>
+                <div class="save-achievement" id="save-achievement-18" title="???"></div>
+                <div class="save-achievement" id="save-achievement-19" title="???"></div>
+                <div class="save-achievement" id="save-achievement-20" title="Clear stage (in under 5 minutes)"></div>
+            </span>
+        </fieldset>
+        <button id="save-delete" onclick="deleteSaveData()">Delete Save Data - セーブデータの消去</button>
+    </div>
     <div id="info-container" style="display: none;">
         <div style="width:300px;font-size:32px;border-bottom: 2px solid #fff;margin-bottom: 4px;justify-content: start;">credits</div>
         <div style="color: #99c;margin:8px 0">Created by <a href="https://twitter.com/sulpx" target="_blank">Sulpx</a></div>
         <div style="color: #99c;margin:8px 0">Music <a href="https://twitter.com/FBLSReindeer" target="_blank">FabulousReindeer</a></div>
         <div style="color: #99c;margin:8px 0">Musical Inspiration <a href="https://soundcloud.com/commandycan/spanishpiraterobotfrenzy" target="_blank">commandycan</a></div>
     </div>
-    <span id="fullscreen-icon" class="material-icons" onclick="toggleFullscreen()"><img src="./img/icon_fullscreen.png"></span>
 </body>
 
 </html>

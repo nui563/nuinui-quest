@@ -183,6 +183,7 @@ class Pirate extends Actor {
     phase = 'idle';
     phaseBuffer = 0;
 
+    moveDir = 1;
     aggro = false;
 
     constructor(pos) {
@@ -423,6 +424,7 @@ class Rock extends Actor {
     
     checkHit = (game, collisionBox) => {
         const collision = CollisionBox.intersects(this, collisionBox);
+        if (game.scene.achievement11 && collisionBox instanceof Flare && collision) game.scene.achievement11 = false;
         return collision;
     }
 

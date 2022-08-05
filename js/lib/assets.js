@@ -6,13 +6,19 @@ class Assets {
         'sp_flare_jump',
         'sp_flare_fall',
         'sp_flare_run',
+        'sp_flare_run_attack',
         'sp_flare_sleep',
         'sp_flare_wakeup',
         'sp_flare_wink',
         'sp_flare_look',
         'sp_flare_bow',
+        'sp_flare_gun',
+        'sp_flare_gun_arms',
+        'sp_flare_gun_arms_back',
         'sp_flare_bow_jump',
+        'sp_flare_gun_jump',
         'sp_flare_bow_fall',
+        'sp_flare_gun_fall',
         'sp_flare_slide',
         "sp_flare_jetski",
 
@@ -20,6 +26,10 @@ class Assets {
         'sp_ribbon',
 
         'sp_elfriend_idle',
+
+        'sp_sukonbu',
+        'sp_poyoyo',
+        'sp_spirit',
 
         'sp_pekora_idle',
         'sp_pekora_think',
@@ -146,6 +156,7 @@ class Assets {
         'vfx_explosion',
         'vfx_smoke_white',
         'vfx_smoke_black',
+        'vfx_smoke_spirit',
         'vfx_jump',
         'vfx_run',
         'vfx_step',
@@ -194,7 +205,8 @@ class Assets {
         { id: 'miko_kick' },
         { id: 'warning' },
         { id: 'dash' },
-        { id: 'slash' }
+        { id: 'slash' },
+        { id: 'gun' }
     ]
     
     bgmData = [

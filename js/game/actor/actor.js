@@ -155,7 +155,7 @@ class Arrow extends Projectile {
                 game.playSound("rumble");
             }
         }
-        else if (this.type !== 'bullet' && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
+        else if (!['bullet', 'sword'].includes(this.type) && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
             collision = true;
             if (this.type === 'rocket') {
                 game.scene.particles.explosion(CollisionBox.center(this));
@@ -210,7 +210,7 @@ class Arrow extends Projectile {
         else if (this.type === 'rocket') {
             cx.drawImage(game.assets.images['sp_peko_rocket'], 4, -4);
         } else {
-            cx.drawImage(game.assets.images['sp_arrow'], this.type === 'fire' ? 20 : 0, 0, 20, 10, 0, 0, 20, 10);
+            cx.drawImage(game.assets.images['sp_arrow'], this.type === 'fire' ? 20 : 0, this.originActor.weapon === 'bow' ? 0 : 10, 20, 10, 0, 0, 20, 10);
         }
         cx.restore();
     }
@@ -245,7 +245,6 @@ class Bullet extends Projectile {
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.scene.shakeBuffer = 4;
             this.dropHeart(game, .7);
             game.playSound('damage');
             game.score += 50;
@@ -480,7 +479,7 @@ class Torche extends Actor {
     update = game => {
         const actorCollisions = game.scene.actors.filter(actor => actor instanceof Arrow && actor.type === 'fire' && actor.checkHit(game, this));
         if (!this.active && actorCollisions.length) {
-            game.scene.shakeBuffer = 4;
+            game.scene.shakeBuffer = 2;
             game.playSound("noise");
             this.active = true;
             game.score += 10;

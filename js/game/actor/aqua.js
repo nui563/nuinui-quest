@@ -158,6 +158,10 @@ class Aqua extends Actor {
         if (this.phase && !this.isWaiting) this[`${this.phase}Phase`](game);
 
         this.vel.y = Math.round((this.vel.y + this.gravity) * 100) / 100;
+        if (this.vel.y < -4) {
+            this.vel.y = -4;
+            this.vel.x /= 2;
+        }
         this.vel = new Vector2(Math.max(-8, Math.min(8, this.vel.x)), Math.max(-8, Math.min(8, this.vel.y)));
 
         const newCollisionBox = { pos:new Vector2(this.pos.x + this.vel.x, this.pos.y), size:this.size }

@@ -7,6 +7,7 @@ body {
   margin: 0;
   background-color: #0f0f17;
   display: flex;
+  flex-direction: column;
   color: #fff;
   overflow: hidden;
   user-select: none;
@@ -23,21 +24,240 @@ body {
   opacity: 1;
 }
 
+#navbar-container {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  background-color: #224;
+  height: 46px;
+  display: flex;
+  border-radius: 0 0 8px 8px;
+  transition: .3s;
+  z-index: 4;
+}
+
+#save-container {
+  position: absolute;
+  left: 46px;
+  top: 0;
+  padding: 46px 16px 8px;
+  background-color: #224;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 0 2px #000;
+  z-index: 1;
+  display: flex; 
+  flex-direction: column;
+  align-items: center;
+}
+
+#stage-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.save-item {
+  width: 24px;
+  height: 24px;
+  margin: 4px;
+  background-image: url('../img/ui_items.png');
+  image-rendering: pixelated;
+  background-size: 256px 48px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.save-item.unlocked {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.selectable-item {
+  width: 48px;
+  height: 48px;
+  border: #448 4px solid;
+  border-radius: 4px;
+}
+.item-selected, .selectable-item:hover {
+  border: #fff 4px solid;
+  cursor: pointer;
+}
+
+#skill-container {
+  display: flex;
+  flex-direction: row;
+  margin: auto;
+  background-color: #000;
+  border-radius: 4px;
+}
+
+#save-item-1 {
+  background-position: 0 0;
+}
+#save-item-2 {
+  background-position: -48px 0;
+}
+#save-item-3 {
+  background-position: -96px 0;
+}
+#save-item-4 {
+  background-position: -144px 0;
+}
+#save-item-5 {
+  background-position: -168px 0;
+}
+#save-item-6 {
+  background-position: -192px 0;
+}
+#save-item-7 {
+  background-position: -144px 24px;
+}
+#save-item-8 {
+  background-position: -168px 24px;
+}
+#save-item-9 {
+  background-position: -192px 24px;
+}
+
+.save-achievement {
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  background-image: url('../img/ui_achievements.png');
+  image-rendering: pixelated;
+  background-size: 256px 320px;
+  border: #448 4px solid;
+  border-radius: 4px;
+  filter: grayscale();
+  cursor: help;
+}
+
+#save-achievement-1 {
+  background-position: 0 0;
+}
+#save-achievement-2 {
+  background-position: -64px 0;
+}
+#save-achievement-3 {
+  background-position: -128px 0;
+}
+#save-achievement-4 {
+  background-position: 64px 0;
+}
+#save-achievement-5 {
+  background-position: 0 -64px;
+}
+#save-achievement-6 {
+  background-position: -64px -64px;
+}
+#save-achievement-7 {
+  background-position: -128px -64px;
+}
+#save-achievement-8 {
+  background-position: 64px -64px;
+}
+#save-achievement-9 {
+  background-position: 0 -128px;
+}
+#save-achievement-10 {
+  background-position: -64px -128px;
+}
+#save-achievement-11 {
+  background-position: -128px -128px;
+}
+#save-achievement-12 {
+  background-position: 64px -128px;
+}
+#save-achievement-13 {
+  background-position: 0 128px;
+}
+#save-achievement-14 {
+  background-position: -64px 128px;
+}
+#save-achievement-15 {
+  background-position: -128px 128px;
+}
+#save-achievement-16 {
+  background-position: 64px 128px;
+}
+#save-achievement-17 {
+  background-position: 0 64px;
+}
+#save-achievement-18 {
+  background-position: -64px 64px;
+}
+#save-achievement-19 {
+  background-position: -128px 64px;
+}
+#save-achievement-20 {
+  background-position: 64px 64px;
+}
+
+.save-stage {
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  background-image: url('../img/ui_level_icon.png');
+  image-rendering: pixelated;
+  background-size: 320px;
+  border: #448 4px solid;
+  border-radius: 4px;
+  filter: grayscale();
+}
+
+.save-stage.unlocked, .save-achievement.unlocked {
+  filter: none;
+}
+
+.save-stage.unlocked:hover {
+  border: #fff 4px solid;
+  cursor: pointer;
+}
+
+#save-stage-1 {
+  background-position: 0;
+}
+#save-stage-2 {
+  background-position: -64px;
+}
+#save-stage-3 {
+  background-position: -128px;
+}
+#save-stage-4 {
+  background-position: 128px;
+}
+#save-stage-5 {
+  background-position: 64px;
+}
+
+#save-delete {
+  margin: 2px 2px 2px auto;
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: x-small;
+}
+
+#save-delete:hover {
+  background-color: #f00;
+  color: #fff;
+}
+
 #game-container {
   margin: auto;
   image-rendering: pixelated;
   background: #000;
   box-shadow: 0 0 2px #000;
+  z-index: 0;
 }
 
 canvas {
   position: absolute;
 }
 
-#options-icon, #info-icon, #focus-icon, #fullscreen-icon {
-  position: absolute;
-  left: 0;
-  top: 0;
+#options-icon, #save-icon, #info-icon, #focus-icon, #fullscreen-icon {
   width: 32px;
   height: 32px;
   margin: 7px;
@@ -46,23 +266,16 @@ canvas {
 }
 
 #info-icon {
-  left: auto;
-  right: 0;
-}
-
-#fullscreen-icon {
-  left: auto;
-  top: auto;
-  right: 0;
-  bottom: 0;
+  margin-left: auto;
 }
 
 #focus-warning {
   position: absolute;
-  left: 46px;
-  top: 0;
+  width: 100%;
+  bottom: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   z-index: 5;
 }
 
@@ -75,11 +288,11 @@ canvas {
   position: absolute;
   right: 0;
   top: 0;
-  padding: 32px 16px 8px;
+  padding: 46px 16px 8px;
   background-color: #224;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 0 2px #000;
-  z-index: 4;
+  z-index: 1;
   display: flex; 
   flex-direction: column;
   align-items: center;
@@ -98,18 +311,18 @@ canvas {
 }
 
 #info-container a:hover {
-  text-decoration:none
+  text-decoration:none;
 }
 
 #options-container {
   position: absolute;
   left: 0;
   top: 0;
-  padding: 32px 0 8px;
+  padding: 46px 0 8px;
   background-color: #224;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 0 2px #000;
-  z-index: 4;
+  z-index: 1;
   display: flex; 
   flex-direction: column;
   align-items: center;
@@ -188,14 +401,14 @@ fieldset {
 .key-mode-opt {
   width: 50%;
   padding: 2px;
-  background-color: #fff;
+  background-color: #224;
   color: #224;
   border: 2px solid #fff;
   cursor: pointer;
 }
 
 .key-mode-opt:hover {
-  background-color: #224;
+  background-color: #448;
   color: #fff;
 }
 

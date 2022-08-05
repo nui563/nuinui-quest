@@ -13,7 +13,6 @@ const EVENTS = {
                             event.flare = new Flare(new Vector2(160, 48), new Vector2(16, 32));
                             event.flare.setAnimation('sleep');
                             event.flare.animationLocked = true;
-                            if (game.demoCleared) event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
                 
                             scene.view.target = event.flare;
                 
@@ -185,15 +184,29 @@ const EVENTS = {
                         const flare = scene.actors.find(actor => actor instanceof Flare);
                         if (event.timelineFrame === 0) {
                             flare.playerControl = false;
-                            game.cpuKeys.left = true;
+                            if (scene.isFocus) scene.isFocus = 0;
+                            event.side = flare.pos.x > 16 * 94;
+
+                            game.cpuKeys.left = event.side;
+                            game.cpuKeys.right = !event.side;
+
+                            game.stopBGM(true);
+
+                            event.pekora = new Pekora(new Vector2((event.side ? 85 : 94) * 16, 4 * 16), 32);
+                            event.pekora.setAnimation('idle');
+                            event.pekora.dir = event.side;
+                            scene.actors.push(event.pekora);
                         }
                         scene.miniBossStarted = true;
 
-                        if (event.timelineFrame % 2 && Math.random() > .75) game.scene.shakeBuffer = 2;
-
-                        if (flare && flare.pos.x < 16 * 90) {
-                            game.cpuKeys = new Object;
-                            if (event.timelineFrame > 120) event.next = true;
+                        if (flare && ((event.side && flare.pos.x < 16 * 94) || (!event.side && flare.pos.x > 16 * 85))) {
+                            if (game.cpuKeys.left || game.cpuKeys.right) {
+                                game.cpuKeys = new Object;
+                                event.pekora.setAnimation('laugh');
+                                game.playSound('peko');
+                            }
+                            if (event.timelineFrame > 140) event.pekora.setAnimation('idle');
+                            if (event.timelineFrame > 200) event.next = true;
                         }
                     },
                     (game, event) => {
@@ -202,36 +215,54 @@ const EVENTS = {
                         const flare = scene.actors.find(actor => actor instanceof Flare);
 
                         if (event.timelineFrame === 0) {
+                            event.pekora.setAnimation('jump');
+                            event.pekora.vel.y = -4;
+                            game.playSound("jump");
+
+                            scene.currentSection.collisions = scene.currentSection.collisions.filter(a => !(((event.side && a.pos.x === 16 * 85) || (!event.side && a.pos.x === 16 * 94)) && a.pos.y === 16 * 6));
+                        }
+
+                        if (!event.boss && !CollisionBox.intersects(event.pekora, scene.view)) {
+                            scene.actors = scene.actors.filter(a => !(a instanceof Pekora));
+                            
+                            scene.warning = true;
+                            game.playBGM('robotic_foe');
+
                             scene.miniBoss = 'started';
-                            event.boss = new PekoMiniBoss(new Vector2(82 * 16, 0));
+                            event.boss = new PekoMiniBoss(new Vector2(82 * 16, 0), event.side);
                             scene.actors.push(event.boss);
+
+                            scene.achievement2 = true;
+                            
+                            scene.currentSection.collisions.push({ pos: { x: (event.side ? 85 : 94) * 16, y: 6 * 16 }, size: { x: 16, y: 16 }});
 
                             event.collisions = [
                                 { pos: { x: 82 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }},
                                 { pos: { x: 97 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }}
                             ];
-
-                            game.stopBGM();
-                            scene.warning = true;
                             scene.currentSection.collisions.push(...event.collisions);
-
                         }
 
-                        if (event.boss.phase === 'intro') {
-                            scene.shakeBuffer = 2;
-                            if (!(event.timelineFrame % 32)) game.playSound('rumble');
-                        }
-
-                        if (event.boss.phase === 'idle' && !flare.playerControl) {
-                            scene.warning = false;
-                            flare.playerControl = true;
-                            game.playBGM('robotic_foe');
-                        }
-                        
-                        if (event.boss.health <= 0) {
-                            event.boss.laserTarget = null;
-                            event.boss.middleVel = new Vector2(0, 0);
-                            event.next = true;
+                        if (event.boss) {
+                            if (event.boss.phase === 'intro') {
+                                scene.shakeBuffer = 2;
+                                if (!(event.timelineFrame % 32)) game.playSound('rumble');
+                            }
+    
+                            if (event.boss.phase === 'idle' && !flare.playerControl) {
+                                scene.warning = false;
+                                flare.playerControl = true;
+                            }
+                            
+                            if (event.boss.health <= 0) {
+                                if (scene.achievement2) {
+                                    localStorage.setItem('nuinui-save-achievement-2', true);
+                                    game.updateAchievements();
+                                }
+                                event.boss.laserTarget = null;
+                                event.boss.middleVel = new Vector2(0, 0);
+                                event.next = true;
+                            }
                         }
                     },
                     (game, event) => {
@@ -247,6 +278,7 @@ const EVENTS = {
 
                             scene.miniBossCleared = true;
                             event.boss.phase = 'death';
+                            if (scene.isFocus) scene.isFocus = 0;
                         }
                         
                         if (!(event.timelineFrame % 32) && event.timelineFrame <= 160) game.playSound('rumble');
@@ -303,7 +335,7 @@ const EVENTS = {
                 isPersistent: false,
                 timeline: [
                     (game, event) => {
-                        if (event.timelineFrame % 2 && Math.random() > .75) game.scene.shakeBuffer = 2;
+                        // if (event.timelineFrame % 2 && Math.random() > .75) game.scene.shakeBuffer = 2;
                         // if (!(event.timelineFrame % 120)) {
                         //     game.playSound('rumble');
                         // }
@@ -327,14 +359,30 @@ const EVENTS = {
                 ]
             },
             {
-                condition: game => {
-                    const flare = game.scene.actors.find(actor => actor instanceof Flare);
-                    return flare && !flare.hasBow && !game.scene.actors.find(actor => actor instanceof BowPickup);
-                },
-                isPersistent: true,
+                condition: game => !localStorage.getItem('nuinui-save-item-bow'),
+                isPersistent: false,
                 timeline: [
                     (game, event) => {
-                        game.scene.actors.push(new BowPickup(new Vector2(116 * 16 - 2, 62), new Vector2(20, 20)));
+                        game.scene.actors = game.scene.actors.filter(a => !(a instanceof BowPickup));
+                        game.scene.actors.push(new BowPickup(new Vector2(116 * 16 - 2, 32), new Vector2(20, 20), 'bow'));
+                        event.end = true;
+                    }
+                ]
+            }
+        ],
+
+        
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "6_0": [
+            {
+                condition: game => !localStorage.getItem('nuinui-save-item-gun'),
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.actors = game.scene.actors.filter(a => !(a instanceof BowPickup));
+                        game.scene.actors.push(new BowPickup(new Vector2(131 * 16 - 2, 4.25 * 16), new Vector2(20, 20), 'gun'));
                         event.end = true;
                     }
                 ]
@@ -394,6 +442,7 @@ const EVENTS = {
                         if (event.timelineFrame === 0) {
                             game.stopBGM();
                             flare.playerControl = false;
+                            if (scene.isFocus) scene.isFocus = 0;
                             event.pekora = new Pekora(new Vector2(123 * 16, 20 * 16), 32);
                             event.pekora.setAnimation('think');
                             scene.actors.push(event.pekora);
@@ -408,6 +457,7 @@ const EVENTS = {
                         if (flare.pos.x < 133 * 16) {
                             // flare.playerControl = true;
                             game.cpuKeys = new Object;
+                            scene.achievement3 = true;
                             event.next = true;
                         }
                     },
@@ -453,8 +503,14 @@ const EVENTS = {
                         }
 
                         if (!event.pekora.health) {
+                            
+                            if (scene.achievement3) {
+                                localStorage.setItem('nuinui-save-achievement-3', true);
+                                game.updateAchievements();
+                            }
                             event.next = true;
                             flare.playerControl = false;
+                            if (scene.isFocus) scene.isFocus = 0;
                             event.pekora.phase = 'defeated';
                             event.pekora.dir = false;
                             event.pekora.setAnimation('idle');
@@ -535,7 +591,12 @@ const EVENTS = {
                             game.checkpoint = null;
                             game.stopBGM();
                             game.score += 10000;
-                            const timerScore = Math.max(0, 500000 - (new Date().getTime() - game.timer.getTime()));
+                            const time = new Date().getTime() - game.timer.getTime();
+                            if (time <= 300000) {
+                                localStorage.setItem('nuinui-save-achievement-4', true);
+                                game.updateAchievements();
+                            }
+                            const timerScore = Math.max(0, 300000 - time);
                             game.score += timerScore;
                         }
                     }
@@ -560,9 +621,6 @@ const EVENTS = {
                         if (event.frameCount === 0) {
                             event.flare = new Flare(new Vector2(16 * 9.5, 16 * 7), new Vector2(16, 32));
                             event.flare.setAnimation('idle');
-                            event.flare.hasBow = true;
-                            event.flare.chargeTypeList = ['fire', 'rocket'];
-                            if (game.demoCleared) event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
                             
                             scene.view.target = event.flare;
                             scene.actors.push(event.flare);
@@ -672,6 +730,16 @@ const EVENTS = {
 
         "5_2": [
             {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.achievement5 = true;
+                        event.end = true;
+                    }
+                ]
+            },
+            {
                 condition: game => {
                     const flare = game.scene.actors.find(actor => actor instanceof Flare);
                     return flare && !flare.item && !game.scene.actors.find(actor => actor instanceof ClockPickup);
@@ -714,7 +782,7 @@ const EVENTS = {
                         }
 
                         if (event.timelineFrame === 240) {
-                            game.scene.actors.push(new ClockPickup(event.elfriend.pos.value(), new Vector2(20, 20)));
+                            game.scene.actors.push(new ClockPickup(event.elfriend.pos.value().plus(new Vector2(0, -16)), new Vector2(20, 20)));
                         }
 
                         if (event.timelineFrame > 240) {
@@ -736,6 +804,18 @@ const EVENTS = {
 
 
         "7_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        if (game.scene.achievement5) {
+                            localStorage.setItem('nuinui-save-achievement-5', true);
+                            game.updateAchievements();
+                        }
+                    }
+                ]
+            },
             {
                 condition: game => true,
                 isPersistent: false,
@@ -909,6 +989,10 @@ const EVENTS = {
                         if (event.timelineFrame === 120) {
                             scene.miniBossCleared = true;
                             game.playSound("noise");
+                            
+                            localStorage.setItem('nuinui-save-achievement-6', true);
+                            game.updateAchievements();
+
                             event.end = true;
                         }
                     }
@@ -989,6 +1073,8 @@ const EVENTS = {
                             game.canvas1.style.filter = 'brightness(0%)';
                             game.canvas2.style.filter = 'brightness(0%)';
                             game.stopBGM();
+                            
+                            game.scene.achievement7 = true;
                         }
                         
                         game.cpuKeys.right = true;
@@ -1027,11 +1113,17 @@ const EVENTS = {
                         
                         if (!event.miko.health) {
                             event.next = true;
+                            if (scene.isFocus) scene.isFocus = 0;
                             flare.playerControl = false;
                             event.miko.phase = 'defeated';
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
                             if (!flare.chargeTypeList.includes('petal')) scene.actors.push(new PetalPickup(event.miko.pos.value(), new Vector2(20, 20)));
                             game.stopBGM();
+                            
+                            if (game.scene.achievement7) {
+                                localStorage.setItem('nuinui-save-achievement-7', true);
+                                game.updateAchievements();
+                            }
                         }
                     },
                     (game, event) => {
@@ -1080,7 +1172,12 @@ const EVENTS = {
                             game.checkpoint = null;
                             game.stopBGM();
                             game.score += 20000;
-                            const timerScore = Math.max(0, 500000 - (new Date().getTime() - game.timer.getTime()));
+                            const time = new Date().getTime() - game.timer.getTime();
+                            if (time <= 300000) {
+                                localStorage.setItem('nuinui-save-achievement-8', true);
+                                game.updateAchievements();
+                            }
+                            const timerScore = Math.max(0, 300000 - time);
                             game.score += timerScore;
                         }
                     }
@@ -1110,10 +1207,6 @@ const EVENTS = {
                         if (event.frameCount === 0) {
                             event.flare = new Flare(new Vector2(16 * 9.5, 16 * 7), new Vector2(16, 32));
                             event.flare.setAnimation('idle');
-                            event.flare.hasBow = true;
-                            event.flare.chargeTypeList = ['fire', 'rocket', 'petal'];
-                            if (game.demoCleared) event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
-                            event.flare.item = true;
                             
                             scene.view.target = event.flare;
                             scene.actors.push(event.flare);
@@ -1252,6 +1345,23 @@ const EVENTS = {
             }
         ],
 
+        
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        "8_4": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        localStorage.setItem('nuinui-save-achievement-9', true);
+                        game.updateAchievements();
+                    }
+                ]
+            }
+        ],
+
 
         //----------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1263,7 +1373,6 @@ const EVENTS = {
                 timeline: [
                     (game, event) => {
                         const scene = game.scene;
-                        const flare = scene.actors.find(actor => actor instanceof Flare);
 
                         if (event.timelineFrame === 0) {
                             event.actors = [new Torche({ "x": 150, "y": 63.5 })];
@@ -1345,6 +1454,7 @@ const EVENTS = {
                         if (event.actors.filter(a => a instanceof Torche).every(a => a.active)) {
                             scene.miniBossCleared = true;
                             scene.blackout = false;
+                            if (scene.isFocus) scene.isFocus = 0;
                             
                             game.stopBGM();
                             game.playBGM('aquamarine_bay');
@@ -1472,7 +1582,7 @@ const EVENTS = {
                         if (flare.playerControl) {
                             flare.playerControl = false;
                             game.cpuKeys.left = true;
-                            // game.stopBGM();
+                            if (scene.isFocus) scene.isFocus = 0;
                         }
 
                         if (flare.pos.x < 45 * 16) {
@@ -1563,6 +1673,8 @@ const EVENTS = {
                             };
 
                             scene.bossStarted = true;
+                            
+                            scene.achievement11 = true;
                         }
 
                         if (event.timelineFrame < 60) {
@@ -1748,7 +1860,7 @@ const EVENTS = {
                             flare.playerControl = false;
                             event.marine.phase = 'defeated';
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet) && !(a instanceof Rock) && !(a instanceof Aircon) && !(a instanceof Dokuro));
-                            if (!flare.chargeTypeList.includes('sword')) scene.actors.push(new SwordPickup(event.marine.pos.value(), new Vector2(20, 20)));
+                            if (!flare.chargeTypeList.includes('sword')) scene.actors.push(new SwordPickup(event.marine.pos.y < 96 ? new Vector2(event.marine.pos.x, 96) : event.marine.pos.value(), new Vector2(20, 20)));
                             game.stopBGM();
                         }
                     },
@@ -1765,8 +1877,13 @@ const EVENTS = {
                             flare.playerControl = true;
 
                             game.playBGM('aquamarine_bay');
+                            
+                            if (scene.achievement11) {
+                                localStorage.setItem('nuinui-save-achievement-11', true);
+                                game.updateAchievements();
+                            }
                         }
-                        if (flare.chargeTypeList.includes('sword')) {
+                        if (flare.pos.x < 22 * 16) {
                             event.next = true;
                         }
                     },
@@ -1781,17 +1898,22 @@ const EVENTS = {
                             game.cpuKeys.left = true;
                         }
 
-                        if (flare.pos.x < 26 * 16 && game.cpuKeys.left && !event.transitionFrame) event.transitionFrame = event.timelineFrame;
+                        if (flare.pos.x < 22 * 16 && game.cpuKeys.left && !event.transitionFrame) event.transitionFrame = event.timelineFrame;
 
                         if (flare.pos.x < 21 * 16) {
                             event.end = true;
-                            game.scene.nextScene = new StageSelect(game, 2, 0);
+                            game.scene.nextScene = new StageSelect(game, 2, 3);
                             game.demoCleared = true;
                             game.checkpoint = null;
                             game.cpuKeys = new Object;
                             game.stopBGM();
                             game.score += 30000;
-                            const timerScore = Math.max(0, 500000 - (new Date().getTime() - game.timer.getTime()));
+                            const time = new Date().getTime() - game.timer.getTime();
+                            if (time <= 300000) {
+                                localStorage.setItem('nuinui-save-achievement-12', true);
+                                game.updateAchievements();
+                            }
+                            const timerScore = Math.max(0, 300000 - time);
                             game.score += timerScore;
                         }
                         
@@ -1815,33 +1937,55 @@ const EVENTS = {
                 condition: game => game.scene.frameCount === 0,
                 isPersistent: true,
                 timeline: [
+                    // Wait for player input
                     (game, event) => {
                         const scene = game.scene;
+                
                         if (event.frameCount === 0) {
-                            event.flare = new Flare(new Vector2(0, 16 * 12 * 10), new Vector2(16, 32));
+                            event.flare = new Flare(new Vector2(-24, 16 * 12 * 10), new Vector2(16, 32));
                             event.flare.setAnimation('idle');
-                            event.flare.hasBow = true;
-                            event.flare.chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
-                            event.flare.item = true;
                             event.flare.jetski = true;
                             event.flare.isGrounded = false;
-                            event.flare.vel.x = 8;
                             
                             event.flare.playerControl = false;
 
                             scene.view.target = event.flare;
                             scene.actors.push(event.flare);
                         }
+
+                        event.flare.vel.x = 0;
+                        event.flare.vel.y = -event.flare.gravity;
+                
+                        if (game.keys.jump) {
+                            event.flare.vel.x = 8;
+                            event.next = true;
+                        }
+
+                        scene.customDraw.push(game => {
+                            game.ctx3.drawImage(game.assets.images['ui_start_label'], 204, 165);
+                            if (!(Math.floor(scene.frameCount / 32) % 2)) {
+                                game.ctx3.fillStyle = "#0008";
+                                game.ctx3.fillRect(208, 167, 104, 20);
+                            }
+                        });
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+
                         if (!event.flare.vel.x) {
                             event.flare.jetski = false;
                             event.flare.playerControl = true;
+                            game.cpuKeys = new Object;
                             
-                            scene.particles.explosion(CollisionBox.center(event.flare));
+                            for (let i = 0; i < 5; i++) {
+                                scene.particles.explosion(CollisionBox.center(event.flare).plus(new Vector2(Math.floor(Math.random() * 4) - 2, Math.floor(Math.random() * 4) - 2)));
+                            } 
                             game.playSound('rumble');
                             
                             event.next = true;
                         } else {
-                            event.flare.vel.x = 4;
+                            game.cpuKeys.right = true;
+                            event.flare.vel.x = 8;
                             if(!(event.frameCount % 10)) scene.particles.explosion(CollisionBox.center(event.flare));
                             if(!(event.frameCount % 40)) game.playSound('rumble');
                         }
@@ -1852,8 +1996,46 @@ const EVENTS = {
                         scene.enableHUD = true;
                         game.timer = new Date();
 
-                        event.flare.pos = new Vector2(3.75 * 20 * 16, 12 * 16);
+                        // event.flare.pos = new Vector2(3.75 * 20 * 16, 12 * 16);
                         // event.flare.pos = new Vector2(13.75 * 20 * 16, 0);
+                    }
+                ]
+            },
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate(8.5 * 16, 0);
+                            game.ctx0.scale(-1, 1);
+                            game.ctx0.translate(-8.5 * 16, 0);
+                            game.ctx0.drawImage(game.assets.images['sp_sukonbu'],
+                                Math.floor(event.timelineFrame / 16) % 2 ? 0 : 32, 0, 32, 32, 0, (10 * 12 + 6) * 16 + 3, 32, 32);
+                            game.ctx0.restore();
+                        });
+                    }
+                ]
+            }
+        ],
+        "1_3": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        localStorage.setItem('nuinui-save-achievement-13', true);
+                        game.updateAchievements();
+
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.drawImage(game.assets.images['sp_poyoyo'],
+                                Math.floor(event.timelineFrame / 16) % 2 ? 0 : 32, 0, 32, 24, 35 * 16, 42.5 * 16 + 2, 32, 24);
+                            game.ctx0.restore();
+                        });
                     }
                 ]
             }

@@ -24,6 +24,10 @@ class Miko extends Actor {
 
     takeHit = (game, other) => {
         if (!this.invicibility) {
+
+            
+            if (game.scene.achievement7 && other.type) game.scene.achievement7 = false;
+
             this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);

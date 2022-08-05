@@ -22,7 +22,7 @@ class PekoMiniBoss extends Actor {
     middleVel = new Vector2(0, 0);
     middlePhase = null;
 
-    constructor(pos) {
+    constructor(pos, side) {
         super(pos);
 
         this.health = this.maxHealth;
@@ -43,7 +43,7 @@ class PekoMiniBoss extends Actor {
         for (let i = 0; i < 4; i++) {
             this.middleParts.push({
                 master: i === 3,
-                pos: new Vector2(pos.x + this.size.x / 4 - 10, -this.size.y + 18 * (i % 4)),
+                pos: new Vector2(pos.x + (side ? this.size.x / 4 - 10 : this.size.x - (this.size.x / 3)), -this.size.y + 18 * (i % 4)),
                 size: new Vector2(20, 20)
             });
         }
@@ -221,7 +221,7 @@ class PekoMiniBoss extends Actor {
                 size: new Vector2(8, 8),
                 lerpAmount: .01 + Math.random() * .05,
                 dist: 16 + Math.floor(Math.random() * 16),
-                health: 3
+                health: 2
             });
         }
 

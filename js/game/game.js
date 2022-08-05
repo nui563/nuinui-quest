@@ -19,6 +19,8 @@ class Game {
     score = 0;
     scoreDisplay = 0;
 
+    demoCleared = false;
+
     timer = 0;
 
     constructor(assets, data) {
@@ -54,7 +56,7 @@ class Game {
 
         if (!document.hasFocus()) {
             document.getElementById('focus-warning').style.display = 'flex';
-            document.getElementById('game-container').style.boxShadow = '0 0 2px #08f';
+            document.getElementById('game-container').style.boxShadow = '0 0 2px 1px #08f';
         }
 
         // Audio
@@ -72,6 +74,10 @@ class Game {
 
         // Init stage selection
         this.scene = new Scene(this, JSON.parse(this.data).game.stages[this.currentStage]);
+
+        if (!localStorage.getItem('nuinui-save-item-fire')) localStorage.setItem('nuinui-save-item-fire', true);
+        this.updateItems();
+        this.updateAchievements();
     }
 
     start = () => {
@@ -116,6 +122,30 @@ class Game {
         this.frameCount++;
     }
 
+    updateItems = () => {
+        ['bow', 'gun', 'clock', 'fire', 'rocket', 'petal', 'sword', 'dual', 'shield'].forEach((item, i) => {
+            if (localStorage.getItem(`nuinui-save-item-${item}`)) {
+                const elem = document.getElementById(`save-item-${i+1}`);
+                elem.classList.add("unlocked");
+                if (['bow', 'gun'].includes(item)) {
+                    elem.onclick = e => {
+                        const flare = this.scene.actors.find(actor => actor instanceof Flare);
+                        Array.from(document.getElementsByClassName('item-selected')).forEach(a => a.classList.remove('item-selected'));
+                        elem.classList.add('item-selected');
+                        flare.weapon = item;
+                        this.playSound('wakeup');
+                    }
+                }
+            }
+        });
+    }
+
+    updateAchievements = () => {
+        Array.from(document.getElementsByClassName('save-achievement')).forEach((elem, i) => {
+            if (localStorage.getItem(`nuinui-save-achievement-${i+1}`)) elem.classList.add('unlocked');
+        });
+    }
+
     resetCanvas = () => {
         for (let i = 0; i < 4; i++) {
             this[`ctx${i}`].clearRect(0, 0, this.width, this.height);
@@ -137,7 +167,7 @@ class Game {
         source.loop = false;
         source.loopStart = 0;
         source.loopEnd = source.buffer.duration;
-        if (['step', 'pew', 'bow_shoot', 'miko_chant', 'dash', 'slash'].includes(id)) source.playbackRate.value = 1 + Math.random() * .2 - .1;
+        if (['step', 'pew', 'bow_shoot', 'miko_chant', 'dash', 'slash', 'gun'].includes(id)) source.playbackRate.value = 1 + Math.random() * .2 - .1;
         sound.source = source;
         sound.gainNode = this.audioCtx.createGain();
         source.connect(sound.gainNode);

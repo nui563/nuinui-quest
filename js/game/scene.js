@@ -49,7 +49,12 @@ class Scene {
 
         // DEBUG
         const urlParams = new URLSearchParams(window.location.search);
-        const checkpoints = [[CHECKPOINT_STAGE_1_0, CHECKPOINT_STAGE_1_1, CHECKPOINT_STAGE_1_2], [CHECKPOINT_STAGE_2_0, CHECKPOINT_STAGE_2_1], [CHECKPOINT_STAGE_3_0, CHECKPOINT_STAGE_3_1]];
+        const checkpoints = [
+            [CHECKPOINT_STAGE_1_0, CHECKPOINT_STAGE_1_1, CHECKPOINT_STAGE_1_2],
+            [CHECKPOINT_STAGE_2_0, CHECKPOINT_STAGE_2_1],
+            [CHECKPOINT_STAGE_3_0, CHECKPOINT_STAGE_3_1],
+            [CHECKPOINT_STAGE_4_0, CHECKPOINT_STAGE_4_1]
+        ];
         if (urlParams.has('checkpoint')) game.checkpoint = checkpoints[game.currentStage][parseInt(urlParams.get('checkpoint')) - 1];
         
         if (game.checkpoint) game.checkpoint(game, this);
@@ -62,6 +67,20 @@ class Scene {
         this.setViewPos();
         
         game.resetCanvas();
+        
+        // Save
+        for (let i = 0; i < 5; i++) {
+            if (i === game.currentStage) localStorage.setItem(`nuinui-save-stage-${i+1}`, true);
+
+            const elem = document.getElementById(`save-stage-${i+1}`);
+            if (localStorage.getItem(`nuinui-save-stage-${i+1}`)) {
+                elem.onclick = e => {
+                    this.nextScene = new StageSelect(game, game.currentStage, i);
+                    game.playSound('wakeup');
+                }
+                elem.classList = 'save-stage unlocked';
+            } else elem.classList = 'save-stage';
+        }
     }
 
     setViewPos = () => {
@@ -211,6 +230,7 @@ class Scene {
 
         const flare = this.actors.find(actor => actor instanceof Flare);
         if (flare) {
+            cx.save();
             const maxHealthWidth = 64;
             flare.healthBar = flare.healthBar ? (1 - .1) * flare.healthBar + .1 * flare.health : flare.health;
             const healthWidth = Math.ceil(flare.healthBar * maxHealthWidth / flare.maxHealth);
@@ -220,10 +240,10 @@ class Scene {
             cx.fillRect(9, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
             cx.drawImage(game.assets.images['ui_healthbar'], 4, 0);
 
-            cx.drawImage(game.assets.images['ui_slot'], 0, game.height - 32);
+            if (flare.hasBow || flare.jetski) cx.drawImage(game.assets.images['ui_slot'], 0, game.height - 32);
 
             if (flare.hasBow && !flare.jetski) {
-                cx.drawImage(game.assets.images['sp_bow_pickup'], 2, game.height - 22);
+                cx.drawImage(game.assets.images['sp_bow_pickup'], flare.weapon === 'bow' ? 0 : 20, 0, 20, 20, 2, game.height - 22, 20, 20);
                 if (flare.chargeShot) {
                     cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, 12, game.height - 12, 12, 12);
                 }
@@ -248,6 +268,7 @@ class Scene {
             if (flare.jetski) {
                 cx.drawImage(game.assets.images['sp_jetski_item'], 2, game.height - 22);
             }
+            cx.restore();
         }
 
         const pekora = this.actors.find(a => a instanceof Pekora);
@@ -314,7 +335,7 @@ class Scene {
             const cx = game[`ctx${i}`];
             cx.save();
             if (SCREENSHAKE && this.shakeBuffer) {
-                cx.translate(Math.floor(Math.random() * 8) - 4, 0);
+                cx.translate(Math.floor(Math.random() * 6) - 3, 0);
                 // if (KEYMODE === 'gamepad' && game.inputManager.gamepad !== null) {
                 //     const gamepad = navigator.getGamepads()[game.inputManager.gamepad];
                 //     if (this.shakeBuffer === 1 && gamepad.vibrationActuator && gamepad.vibrationActuator.type === "dual-rumble") {

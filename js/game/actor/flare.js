@@ -18,15 +18,14 @@ class Flare extends Actor {
     jumpInput = false;
     jumpPower = 0;
 
-    hasBow = false;
+    hasBow = true;
     item = false;
 
     chargeShot = true;
     chargeShotBuffer = 0;
     chargeTypeBuffer = false;
     chargeTypeBufferAnim = 0;
-    chargeTypeList = ['fire'];
-    // chargeTypeList = ['fire', 'rocket', 'petal', 'sword'];
+    chargeTypeList = [];
     chargeTypeData = {
         fire: {
             xVel: 5,
@@ -80,6 +79,12 @@ class Flare extends Actor {
             speed: .3,
             frames: 10
         },
+        run_attack: {
+            offset: new Vector2(-30, -18),
+            size: new Vector2(64, 64),
+            speed: .3,
+            frames: 10
+        },
         jump: {
             offset: new Vector2(-10, -6),
             size: new Vector2(32, 40),
@@ -116,6 +121,24 @@ class Flare extends Actor {
             speed: .25,
             frames: 3
         },
+        gun: {
+            offset: new Vector2(-9, -6),
+            size: new Vector2(40, 40),
+            speed: .25,
+            frames: 3
+        },
+        gun_jump: {
+            offset: new Vector2(-9, -6),
+            size: new Vector2(40, 40),
+            speed: .25,
+            frames: 3
+        },
+        gun_fall: {
+            offset: new Vector2(-9, -6),
+            size: new Vector2(40, 40),
+            speed: .25,
+            frames: 3
+        },
         slide: {
             offset: new Vector2(0, -11),
             size: new Vector2(32, 32),
@@ -135,6 +158,21 @@ class Flare extends Actor {
 
         this.health = this.maxHealth;
         this.chargeType = 0;
+
+        const elems = Array.from(document.getElementsByClassName('item-selected'));
+        if (elems.length) this.weapon = elems[0].id === 'save-item-1' ? 'bow' : 'gun';
+        else if (localStorage.getItem('nuinui-save-item-gun')) this.weapon = 'gun';
+        else if (localStorage.getItem('nuinui-save-item-bow')) this.weapon = 'bow';
+        else this.hasBow = false;
+        this.updateSkills();
+        if (localStorage.getItem('nuinui-save-item-clock')) this.item = true;
+    }
+
+    updateSkills = () => {
+        this.chargeTypeList = [];
+        ['fire', 'rocket', 'petal', 'sword', 'dual', 'shield'].forEach(item => {
+            if (localStorage.getItem(`nuinui-save-item-${item}`)) this.chargeTypeList.push(item);
+        });
     }
 
     update = game => {
@@ -195,6 +233,7 @@ class Flare extends Actor {
             this.jumpBuffer = true;
             this.isJumping = true;
             this.jumpInput = true;
+            if (game.scene.achievement3) game.scene.achievement3 = false;
             if (this.isSliding) {
                 this.isSliding = false;
                 this.pos.y -= 16;
@@ -327,19 +366,23 @@ class Flare extends Actor {
                         this
                     ));
                 } else {
-                    game.scene.actors.push(new Arrow(
-                        this.pos.plus(new Vector2(0, 8)),
+                    if(this.weapon !== 'bow') this.gunshotBuffer = !this.gunshotBuffer;
+                    const arrow = new Arrow(
+                        this.pos.plus(new Vector2(this.weapon === 'gun' ? 8 * (this.dir ? 1 : -1) : 0, this.weapon === 'gun' && this.gunshotBuffer ? 12 : 8)),
                         new Vector2(20, 7),
-                        new Vector2(xVel * (this.dir ? 1 : -1), 0),
+                        new Vector2(xVel * (this.dir ? 1 : -1) * (this.weapon === 'gun' ? 1.1 : 1), 0),
                         keyChargeAttack ? this.chargeTypeList[this.chargeType] : null,
                         this
-                    ));
+                    );
+                    if (this.weapon === 'gun' && !arrow.type) arrow.damage = .75;
+                    game.scene.actors.push(arrow);
                 }
             }
-            game.playSound(this.jetski ? "pew" : "bow_shoot");
+            game.playSound(this.jetski ? "pew" : this.weapon === 'bow' ? "bow_shoot" : 'gun');
             this.attackBuffer = true;
-            this.attackCooldown = keyChargeAttack ? 36 : this.jetski ? 9 : 12;
+            this.attackCooldown = keyChargeAttack ? 36 : this.jetski ? 9 : this.weapon === 'gun' ? 9 : 12;
             this.attackCooldownAnim = 12;
+            this.animationFrameGun = 0;
         }
 
         if (this.jetski && this.isGrounded && !(this.frameCount % 6) && game.currentStage === 2) game.scene.particles.water_trail(this);
@@ -358,11 +401,12 @@ class Flare extends Actor {
             }
             else newAnimation = this.vel.y <= .6 ? 'jump' : 'fall';
         } else if (isAttacking) {
-            if (!this.isGrounded) newAnimation = this.vel.y > 0 ? 'bow_fall' : 'bow_jump';
-            else newAnimation = 'bow';
+            if (!this.isGrounded) newAnimation = this.vel.y > 0 ? `${this.weapon}_fall` : `${this.weapon}_jump`;
+            else newAnimation = this.vel.x === 0 || this.weapon === 'bow' ? this.weapon : `run_attack`;
         }
         if (this.jetski) newAnimation = 'jetski';
 
+        if (this.animation === 'run_attack') this.animationFrameGun++;
         if (newAnimation && !this.animationLocked && newAnimation !== this.animation) this.setAnimation(newAnimation);
         else this.animationFrame++;
 
@@ -377,10 +421,13 @@ class Flare extends Actor {
 
     takeHit = (game, other) => {
         if (!this.invicibility) {
+            if (game.scene.achievement2) game.scene.achievement2 = false;
+            if (game.scene.achievement5) game.scene.achievement5 = false;
+
             game.playSound('damage');
             const damage = other.damage ? other.damage : 1;
             this.health = Math.max(0, this.health - damage);
-            this.invicibility = 30;
+            this.invicibility = 45;
             this.chargeShotBuffer = 0;
             game.scene.shakeBuffer = 8;
             if (other instanceof Scythe || other instanceof Pirate || (other instanceof Aqua && other.playerAggro && !other.vel.x)) {
@@ -403,8 +450,10 @@ class Flare extends Actor {
     }
 
     setAnimation = animation => {
+        if (!(animation === 'run_attack' && this.animation === 'run') &&
+            !(animation === 'run' && this.animation === 'run_attack')) this.animationFrame = 0;
         this.animation = animation;
-        this.animationFrame = 0;
+        this.runAttackBuffer = (this.animation === 'run' && this.runAttackBuffer) || this.animation === 'run_attack';
     }
 
     playAnimation = (game, cx) => {
@@ -412,7 +461,7 @@ class Flare extends Actor {
 
         if (!['sleep', 'wakeup'].includes(this.animation)) {
             const velX = this.vel.x;
-            const side = Math.round(velX) || ['bow', 'bow_fall', 'bow_jump'].includes(this.animation);
+            const side = Math.round(velX) || [this.weapon, `${this.weapon}_fall`, `${this.weapon}_jump`].includes(this.animation);
             const spd = Math.round(16 / (1 + Math.abs(velX)));
             const fallOffset = (this.vel.y > this.gravity ? -2 : 0);
             cx.drawImage(game.assets.images['sp_ponytail'],
@@ -421,21 +470,45 @@ class Flare extends Actor {
             
             cx.drawImage(game.assets.images['sp_ribbon'],
                 (Math.floor(this.animationFrame / spd * 1.5) % 3) * 16, side ? 16 : 0, 16, 16,
-                side ? (this.animation === 'run' ? -14 : -9) : -8, (side ? 16 : 18) + fallOffset * 2, 16, 16);
+                side ? (['run', 'run_attack'].includes(this.animation) ? -14 : -9) : -8, (side ? 16 : 18) + fallOffset * 2, 16, 16);
             
-            if (this.animation !== 'run') {
+            if (!['run', 'run_attack'].includes(this.animation)) {
                 cx.save();
                 cx.translate(this.size.x / 2, 0);
                 cx.scale(-1, 1);
                 cx.drawImage(game.assets.images['sp_ribbon'],
                     (Math.floor(this.animationFrame / spd * 1.5) % 3) * 16, side ? 16 : 0, 16, 16,
-                    side ? (this.animation === 'run' ? -12 : -9) : -8, (side ? 16 : 18) + fallOffset, 16, 16);
+                    side ? (['run', 'run_attack'].includes(this.animation) ? -12 : -9) : -8, (side ? 16 : 18) + fallOffset, 16, 16);
                 cx.restore();
             }
         }
 
-        cx.drawImage(game.assets.images[`sp_flare_${this.animation}`], (Math.floor(this.animationFrame * speed) % frames) * size.x, 0, size.x, size.y,
+        const gunOffset = ['gun', 'gun_fall', 'gun_jump'].includes(this.animation) && this.gunshotBuffer ? 40 : 0;
+
+        const animFrame = Math.floor(this.animationFrame * speed) % frames;
+        if ((this.animation === 'run_attack' && this.animationFrameGun < 12) || this.runAttackBuffer) {
+            const gunSize = this.animations['gun'].size;
+            const gunOffset2 = this.animations['gun'].offset.plus(new Vector2(
+                [0, 1, 2, 6, 7].includes(animFrame) ? 1 : [3, 4, 8].includes(animFrame) > 3 ? 0 : 1,
+                [0, 1, 2, 6, 7].includes(animFrame) ? 1 : [3, 4, 8].includes(animFrame) > 3 ? 0 : -1));
+            cx.drawImage(game.assets.images[`sp_flare_gun_arms_back`],
+                (Math.floor(this.animationFrameGun * this.animations['gun'].speed) % this.animations['gun'].frames) * gunSize.x, this.gunshotBuffer || (this.animation === 'run' && this.runAttackBuffer) ? 40 : 0, gunSize.x, gunSize.y,
+                gunOffset2.x, gunOffset2.y, gunSize.x, gunSize.y);
+        }
+
+        const anim = this.animation === 'run' && this.runAttackBuffer ? 'run_attack' : this.animation;
+        cx.drawImage(game.assets.images[`sp_flare_${anim}`], animFrame * size.x, gunOffset, size.x, size.y,
             offset.x, offset.y, size.x, size.y);
+        
+        if ((this.animation === 'run_attack' && this.animationFrameGun < 12) || this.runAttackBuffer) {
+            const gunSize = this.animations['gun'].size;
+            const gunOffset2 = this.animations['gun'].offset.plus(new Vector2(
+                [0, 1, 2, 6, 7].includes(animFrame) ? -1 : [3, 4, 8].includes(animFrame) > 3 ? 0 : -1,
+                [0, 1, 2, 6, 7].includes(animFrame) ? -1 : [3, 4, 8].includes(animFrame) > 3 ? 0 : 1));
+            cx.drawImage(game.assets.images[`sp_flare_gun_arms`],
+                (Math.floor(this.animationFrameGun * this.animations['gun'].speed) % this.animations['gun'].frames) * gunSize.x, !this.gunshotBuffer || (this.animation === 'run' && this.runAttackBuffer) ? 0 : 40, gunSize.x, gunSize.y,
+                gunOffset2.x, gunOffset2.y, gunSize.x, gunSize.y);
+        }
     }
 
     draw = (game, cx) => {

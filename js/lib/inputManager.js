@@ -25,22 +25,28 @@ class KeyboardListener {
 
 class InputManager {
     keyboard = null;
-    gamepad = null;
+    gamepadIndex = null;
 
     constructor() {
         this.keyboard = new KeyboardListener();
         window.addEventListener('gamepadconnected', event => {
-            if (this.gamepad === null) {
-                this.gamepad = event.gamepad.index;
-                toggleKeyMode(document.getElementById('key-mode-opt-gamepad'), 'gamepad');
-                document.getElementById('key-mode-opt-gamepad').disabled = false;
-            }
+            this.gamepadIndex = event.gamepad.index;
+            const gp = navigator.getGamepads()[this.gamepadIndex];
+            console.log("Gamepad connected at index %d: %s.", gp.index, gp.id);
+
+            toggleKeyMode(document.getElementById('key-mode-opt-gamepad'), 'gamepad');
+            document.getElementById('key-mode-opt-gamepad').disabled = false;
+            console.log('Gamepad mode enabled');
         });
         window.addEventListener("gamepaddisconnected", event => {
-            if (event.gamepad.index === this.gamepad) {
-                this.gamepad = null;
+            console.log("Gamepad disconnected from index %d: %s", event.gamepad.index, event.gamepad.id);
+
+            if (event.gamepad.index === this.gamepadIndex) {
+                this.gamepadIndex = null;
+
                 toggleKeyMode(document.getElementById('key-mode-opt-keyboard'), 'keyboard');
                 document.getElementById('key-mode-opt-gamepad').disabled = true;
+                console.log('Gamepad mode disabled');
             }
         });
     }
@@ -48,8 +54,8 @@ class InputManager {
     getKeyboardKeys = () => this.keyboard.keys;
 
     getGamepadKeys = () => {
-        if (this.gamepad === null) return {}
-        const gamepad = navigator.getGamepads()[this.gamepad];
+        if (this.gamepadIndex === null || this.gamepadIndex > navigator.getGamepads().length || !navigator.getGamepads()[this.gamepadIndex]) return {}
+        const gamepad = navigator.getGamepads()[this.gamepadIndex];
         switch (GAMEPADTYPE) {
             case 'a':
                 return {
@@ -158,11 +164,13 @@ const resetKeys = () => {
     document.getElementById('key-keyboard-item').innerHTML = 'KeyC';
 }
 
+let OPTIONSENABLED = false;
 const toggleOptions = () => {
     const container = document.getElementById("options-container");
     const toggle = container.style.display === 'none';
     container.style.display = toggle ? 'flex' : 'none';
     document.getElementById('options-icon').innerHTML = toggle ? '<img src="./img/icon_close.png">' : '<img src="./img/icon_settings.png">';
+    OPTIONSENABLED = !OPTIONSENABLED;
 }
 
 const setScreenDisplay = (e, value) => {

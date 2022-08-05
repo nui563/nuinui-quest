@@ -1,6 +1,7 @@
 class BowPickup extends Actor {
-    constructor(pos, size) {
+    constructor(pos, size, type) {
         super(pos, size);
+        this.type = type;
     }
 
     update = game => {
@@ -10,9 +11,17 @@ class BowPickup extends Actor {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (CollisionBox.intersects(this, flare)) {
             flare.hasBow = true;
+            flare.weapon = this.type;
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
+
+            localStorage.setItem(`nuinui-save-item-${this.type}`, true);
+            if (this.type === 'gun') {
+                localStorage.setItem('nuinui-save-achievement-1', true);
+                game.updateAchievements();
+            }
+            game.updateItems();
         }
 
         this.frameCount++;
@@ -21,7 +30,7 @@ class BowPickup extends Actor {
     draw = (game, cx) => {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
-        cx.drawImage(game.assets.images['sp_bow_pickup'], 0, 0, 20, 20, 0, 0, 20, 20);
+        cx.drawImage(game.assets.images['sp_bow_pickup'], this.type === 'bow' ? 0 : 20, 0, 20, 20, 0, 0, 20, 20);
         cx.restore();
     }
 }
@@ -40,6 +49,9 @@ class RocketPickup extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
+            
+            localStorage.setItem('nuinui-save-item-rocket', true);
+            game.updateItems();
         }
 
         this.frameCount++;
@@ -67,6 +79,9 @@ class PetalPickup extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
+            
+            localStorage.setItem('nuinui-save-item-petal', true);
+            game.updateItems();
         }
 
         this.frameCount++;
@@ -94,6 +109,9 @@ class SwordPickup extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
+            
+            localStorage.setItem('nuinui-save-item-sword', true);
+            game.updateItems();
         }
 
         this.frameCount++;
@@ -122,6 +140,9 @@ class ClockPickup extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
+            
+            localStorage.setItem('nuinui-save-item-clock', true);
+            game.updateItems();
         }
 
         this.frameCount++;
