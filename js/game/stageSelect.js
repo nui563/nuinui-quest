@@ -5,7 +5,7 @@ class StageSelect {
     constructor(game, currentStage, selectedStage) {
         this.currentStage = currentStage;
         this.selectedStage = selectedStage;
-        game.checkpoint = null;
+        if (currentStage !== selectedStage) game.checkpoint = null;
 
         game.resetCanvas();
         
