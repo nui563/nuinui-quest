@@ -74,32 +74,40 @@ const debugSave = () => {
     localStorage.setItem('nuinui-save-stage-1', true);
     localStorage.setItem('nuinui-save-stage-2', true);
     localStorage.setItem('nuinui-save-stage-3', true);
+    localStorage.setItem('nuinui-save-stage-4', true);
+    localStorage.setItem('nuinui-save-stage-5', true);
 
     localStorage.setItem('nuinui-save-item-bow', true);
     localStorage.setItem('nuinui-save-item-gun', true);
     localStorage.setItem('nuinui-save-item-clock', true);
+    localStorage.setItem('nuinui-save-item-jump', true);
 
     localStorage.setItem('nuinui-save-item-fire', true);
     localStorage.setItem('nuinui-save-item-rocket', true);
     localStorage.setItem('nuinui-save-item-petal', true);
     localStorage.setItem('nuinui-save-item-sword', true);
+    localStorage.setItem('nuinui-save-item-shield', true);
     
     localStorage.setItem('nuinui-save-achievement-1', true);
     localStorage.setItem('nuinui-save-achievement-2', true);
     localStorage.setItem('nuinui-save-achievement-3', true);
     localStorage.setItem('nuinui-save-achievement-4', true);
+
     localStorage.setItem('nuinui-save-achievement-5', true);
     localStorage.setItem('nuinui-save-achievement-6', true);
     localStorage.setItem('nuinui-save-achievement-7', true);
     localStorage.setItem('nuinui-save-achievement-8', true);
+
     localStorage.setItem('nuinui-save-achievement-9', true);
     // localStorage.setItem('nuinui-save-achievement-10', true);
     localStorage.setItem('nuinui-save-achievement-11', true);
     localStorage.setItem('nuinui-save-achievement-12', true);
-    // localStorage.setItem('nuinui-save-achievement-13', true);
-    // localStorage.setItem('nuinui-save-achievement-14', true);
-    // localStorage.setItem('nuinui-save-achievement-15', true);
-    // localStorage.setItem('nuinui-save-achievement-16', true);
+
+    localStorage.setItem('nuinui-save-achievement-13', true);
+    localStorage.setItem('nuinui-save-achievement-14', true);
+    localStorage.setItem('nuinui-save-achievement-15', true);
+    localStorage.setItem('nuinui-save-achievement-16', true);
+
     // localStorage.setItem('nuinui-save-achievement-17', true);
     // localStorage.setItem('nuinui-save-achievement-18', true);
     // localStorage.setItem('nuinui-save-achievement-19', true);
@@ -111,7 +119,7 @@ window.onload = () => {
     INPUTMANAGER = new InputManager();
     // Game
     fetch("save.json").then(res => res.json()).then(res => {
-        console.log("save file loaded", res);
+        console.log("game file loaded", res);
         const game = new Game(new Assets(), JSON.stringify(res));
         game.assets.load().then(game.start());
     });

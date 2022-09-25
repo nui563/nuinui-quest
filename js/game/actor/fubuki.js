@@ -79,6 +79,7 @@ class Fubuki extends Actor {
             const iceSpike = new Bullet(CollisionBox.center(this).plus(new Vector2(vel.x * 10, vel.y * 10 - 8)), vel, this);
             iceSpike.angle = angle;
             game.scene.actors.push(iceSpike);
+            game.playSound("step");
         }
 
         if (this.phaseBuffer === 89) {
@@ -129,8 +130,9 @@ class Fubuki extends Actor {
                     const iceSpike = new Bullet(p2, vel, this);
                     iceSpike.angle = angle;
                     game.scene.actors.push(iceSpike);
+                    game.playSound("no_damage");
                 }
-            })
+            });
         }
 
         if (this.phaseBuffer > 3 && this.isGrounded) {

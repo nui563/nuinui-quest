@@ -7,6 +7,8 @@ class Flare extends Actor {
     gravity = .3;
     dir = true;
 
+    isPersistent = true;
+
     focusCooldownTime = 6 * 60;
     focusCooldown = 0;
     focusTime = 6 * 60;
@@ -20,6 +22,7 @@ class Flare extends Actor {
 
     hasBow = true;
     item = false;
+    doubleJump = false;
 
     chargeShot = true;
     chargeShotBuffer = 0;
@@ -42,6 +45,12 @@ class Flare extends Actor {
         sword: {
             xVel: 2.5,
             particle: 'charge_fire_4'
+        },
+        shield: {
+            particle: 'charge'
+        },
+        dual: {
+            particle: 'charge'
         }
     }
 
@@ -150,7 +159,13 @@ class Flare extends Actor {
             size: new Vector2(32, 40),
             speed: 1,
             frames: 1
-        }
+        },
+        hit: {
+            offset: new Vector2(-10, -6),
+            size: new Vector2(32, 40),
+            speed: 1,
+            frames: 1
+        },
     }
 
     constructor(pos, size) {
@@ -166,11 +181,12 @@ class Flare extends Actor {
         else this.hasBow = false;
         this.updateSkills();
         if (localStorage.getItem('nuinui-save-item-clock')) this.item = true;
+        if (localStorage.getItem('nuinui-save-item-jump')) this.doubleJump = true;
     }
 
     updateSkills = () => {
         this.chargeTypeList = [];
-        ['fire', 'rocket', 'petal', 'sword', 'dual', 'shield'].forEach(item => {
+        ['fire', 'rocket', 'petal', 'sword', 'shield', 'dual'].forEach(item => {
             if (localStorage.getItem(`nuinui-save-item-${item}`)) this.chargeTypeList.push(item);
         });
     }
@@ -179,13 +195,21 @@ class Flare extends Actor {
         const keys = this.playerControl ? game.keys : game.cpuKeys;
         const movement = this.isSliding || keys.left === keys.right ? 0 : this.runSpeed * (keys.right ? 1 : -1);
 
+        // DEBUG
+        // if (keys.up) this.pos = new Vector2(290 * 16, 0 * 16);
+
+        const sceneCollistions = [...game.scene.currentSection.collisions];
+        if (game.scene.actors.find(a => a instanceof FubuzillaBody && a.type !== 2 )) sceneCollistions.push(...game.scene.actors.filter(a => a instanceof FubuzillaBody && a.type !== 2 ));
+
+        if (this.frameCount > 1 && this.playerControl && CollisionBox.intersectingCollisionBoxes(this, sceneCollistions.filter(a => !(a instanceof FubuzillaBody))).length) this.die(game);
+
         // if (this.isSleeping && Object.values(keys).some(key => key)) this.isSleeping = false;
         const wasGrounded = this.isGrounded;
-        this.isGrounded = game.scene.currentSection.collisions.find(collision => 
+        this.isGrounded = sceneCollistions.find(collision => 
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y+this.size.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(this, collision, 'x'));
         
-        let ceilObstacle = game.scene.currentSection.collisions.find(collision => 
+        let ceilObstacle = sceneCollistions.find(collision => 
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(this, collision, 'x'));
         
@@ -210,7 +234,7 @@ class Flare extends Actor {
                     if (!this.isGrounded !== !ceilObstacle) this.pos.y -= 16;
                     else {
                         this.pos.y = this.pos.round(16).y;
-                        while (CollisionBox.intersectingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
+                        while (CollisionBox.intersectingCollisionBoxes(this, sceneCollistions).length) {
                             this.pos.y--;
                         }
                     }
@@ -218,18 +242,19 @@ class Flare extends Actor {
             }
         }
         
-        this.isGrounded = game.scene.currentSection.collisions.find(collision => 
+        this.isGrounded = sceneCollistions.find(collision => 
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y+this.size.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(this, collision, 'x'));
-        ceilObstacle = game.scene.currentSection.collisions.find(collision => 
+        ceilObstacle = sceneCollistions.find(collision => 
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(this, collision, 'x'));
 
         // Jump
         this.isJumping = false;
         if (this.jumpBuffer && !keys.jump) this.jumpBuffer = false;
-        if (this.isGrounded && keys.jump && !this.jumpBuffer && !this.vel.y && !this.slideBuffer && !ceilObstacle && !(keys.down && this.slideBuffer)) {
-            this.jumpPower = this.jumpSpeed;
+        if (((this.isGrounded && !this.vel.y) || (this.doubleJump && !this.doubleJumpBuffer)) && keys.jump && !this.jumpBuffer && !this.slideBuffer && !ceilObstacle && !(keys.down && this.slideBuffer)) {
+            if (!this.isGrounded) this.doubleJumpBuffer = true;
+            this.jumpPower = this.isGrounded ? this.jumpSpeed : 2;
             this.jumpBuffer = true;
             this.isJumping = true;
             this.jumpInput = true;
@@ -242,6 +267,10 @@ class Flare extends Actor {
         }
 
         if (this.jumpInput && keys.jump) {
+            if (this.doubleJumpBuffer) {
+                this.vel.y = -this.jumpPower * 2;
+                this.jumpInput = false;
+            }
             this.vel.y -= this.jumpPower;
             this.jumpPower /= 1.5;
         }
@@ -257,6 +286,7 @@ class Flare extends Actor {
                 game.playSound('land');
                 game.scene.particles.land(this);
             }
+            this.doubleJumpBuffer = false;
         }
 
         // Direction
@@ -271,9 +301,9 @@ class Flare extends Actor {
         this.vel = new Vector2(Math.max(-8, Math.min(8, this.vel.x)), Math.max(-8, Math.min(8, this.vel.y)));
 
         // Collisions
-        if (CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + this.vel.x, this.pos.y), size:this.size }, game.scene.currentSection.collisions).length) {
+        if (CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + this.vel.x, this.pos.y), size:this.size }, sceneCollistions).length) {
             this.pos.x = Math.round(this.pos.x);
-            while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, game.scene.currentSection.collisions).length) {
+            while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, sceneCollistions).length) {
                 this.pos.x = this.pos.x + Math.sign(this.vel.x);
             }
             if (this.isSliding) {
@@ -285,9 +315,9 @@ class Flare extends Actor {
         }
         this.pos.x = Math.round((this.pos.x + this.vel.x) * 100) / 100;
 
-        if (CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, game.scene.currentSection.collisions).length) {
+        if (CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, sceneCollistions).length) {
             this.pos.y = Math.round(this.pos.y);
-            while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + Math.sign(this.vel.y)), size:this.size }, game.scene.currentSection.collisions).length) {
+            while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + Math.sign(this.vel.y)), size:this.size }, sceneCollistions).length) {
                 this.pos.y = this.pos.y + Math.sign(this.vel.y);
             }
             this.vel.y = 0;
@@ -336,7 +366,14 @@ class Flare extends Actor {
         if (this.attackCooldownAnim) this.attackCooldownAnim--;
         const isAttacking = this.hasBow && keyAttack && (this.jetski || !this.attackBuffer) && !this.attackCooldown && !this.invicibility && !this.isSliding;
         if (isAttacking) {
-            if (keyChargeAttack && this.chargeTypeList[this.chargeType] === 'petal') {
+            if (keyChargeAttack && this.chargeTypeList[this.chargeType] === 'shield') {
+                game.scene.actors = game.scene.actors.filter(a => !(a instanceof IceShield && a.originActor === this));
+                const shieldCount = 6;
+                for (let i = 0; i < shieldCount; i++) {
+                    game.scene.actors.push(new IceShield(CollisionBox.center(this), (Math.PI * 2 / shieldCount) * i, this));
+                }
+            }
+            else if (keyChargeAttack && this.chargeTypeList[this.chargeType] === 'petal') {
                 for (let i = 0; i < 4; i++) {
                     const angle = (Math.PI / 8) * i - (1.5 * Math.PI / 8);
                     const vel = new Vector2(Math.cos(angle) * (this.dir ? 1 : -1), Math.sin(angle)).times(this.chargeTypeData[this.chargeTypeList[this.chargeType]].xVel)
@@ -389,9 +426,15 @@ class Flare extends Actor {
         if (this.jetski && game.currentStage === 2) game.scene.particles.smoke_white(this.pos.plus(new Vector2(this.size.x, this.size.y - 8)), new Vector2(4, 0), 0);
 
         //hit
-        const actorCollisions = game.scene.actors.filter(actor => [Robot, Nousabot, Nousakumo, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko, Scythe, Dokuro, Cannon, Pirate, Neko, Rock, Marine, Aqua, Fubuki]
+        const actorCollisions = game.scene.actors.filter(actor => [
+            Robot, Nousabot, Nousakumo, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko, Scythe,
+            Dokuro, Cannon, Pirate, Neko, Rock, Marine, Aqua, Fubuki, Fubuzilla, Miteiru, Oni, Ayame, Sword, Spirit, EvilNoel]
             .some(e => actor instanceof e) && actor.checkHit(game, this));
         if (actorCollisions.length) actorCollisions.forEach(collision => this.takeHit(game, collision));
+
+        if (this.deathTransitionPhase) {
+            if (!game.scene.bossKillEffect) this.deathTransition(game);
+        }
 
         let newAnimation;
         if (!this.attackCooldownAnim || this.isSliding) {
@@ -419,8 +462,17 @@ class Flare extends Actor {
         this.frameCount++;
     }
 
+    die = game => {
+        game.stopBGM();
+        game.scene.nextScene = new StageSelect(game, null, game.currentStage);
+        game.score = 0;
+        game.scoreDisplay = 0;
+    }
+
     takeHit = (game, other) => {
-        if (!this.invicibility) {
+        if (other instanceof Robot && other.sleep) return;
+        
+        if (!this.invicibility && !this.deathTransitionPhase) {
             if (game.scene.achievement2) game.scene.achievement2 = false;
             if (game.scene.achievement5) game.scene.achievement5 = false;
 
@@ -441,12 +493,41 @@ class Flare extends Actor {
             if (this.vel.y > -2) this.vel.y -= 2;
         }
 
-        if (!this.health) {
-            game.stopBGM();
-            game.scene.nextScene = new StageSelect(game, null, game.currentStage);
-            game.score = 0;
-            game.scoreDisplay = 0;
+        if (!this.health && !this.deathTransitionPhase) {
+            if (game.scene.actors.find(a => a instanceof EvilNoel)) {
+                this.deathTransitionPhase = true;
+                this.invicibility = 0;
+                this.playerControl = false;
+                this.setAnimation('hit');
+                this.animationLocked = true;
+                game.playSound('level_start');
+                game.scene.bossKillEffect = 60;
+                game.scene.isFocus = 0;
+                game.scene.blackout = false;
+                game.stopBGM();
+            }
+            else this.die(game);
         }
+    }
+
+    deathTransition = game => {
+        game.scene.nextScene = new StageSelect(game, 3, 4);
+        game.checkpoint = null;
+        game.score += 40000;
+
+        const noelTimer = new Date().getTime() - game.scene.noelTime;
+        if (noelTimer >= 60000) {
+            localStorage.setItem('nuinui-save-achievement-15', true);
+            game.updateAchievements();
+        }
+
+        const time = new Date().getTime() - game.timer.getTime();
+        if (time <= 420000) {
+            localStorage.setItem('nuinui-save-achievement-16', true);
+            game.updateAchievements();
+        }
+        const timerScore = Math.max(0, 420000 - time);
+        game.score += timerScore;
     }
 
     setAnimation = animation => {

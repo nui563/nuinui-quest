@@ -54,7 +54,7 @@ class Pekora extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= 31) {
+        if (this.phaseBuffer >= (game.scene.name !== 'casino' ? 31 : 127)) {
             if (Math.random() < (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .2)) {
                 if (game.scene.name === 'casino' || Math.random() > .75) {
                     this.phase = 'rocket';
@@ -95,6 +95,7 @@ class Pekora extends Actor {
         }
         if (this.phaseBuffer === 39) {
             this.lastMove = this.phase;
+            this.setAnimation('idle');
             this.phase = 'idle';
         }
     }

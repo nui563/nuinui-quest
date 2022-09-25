@@ -54,7 +54,7 @@ class Miko extends Actor {
 
     idlePhase = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
-        if (this.phaseBuffer >= 31) {
+        if (this.phaseBuffer >= (game.scene.miniBossCleared ? 31 : 127)) {
             if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
                 if (!game.scene.miniBossCleared) {
                     this.phase = 'sniper';
@@ -122,6 +122,7 @@ class Miko extends Actor {
         }
         if (this.phaseBuffer === 60) {
             this.lastMove = this.phase;
+            this.setAnimation('idle');
             this.phase = 'idle';
         }
     }

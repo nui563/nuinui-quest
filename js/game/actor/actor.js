@@ -143,7 +143,7 @@ class Arrow extends Projectile {
         // if (this.frameCount % 2) game.scene.particles.smoke2(CollisionBox.center(this), new Vector2(-Math.sign(this.vel.x), -(Math.sign(this.vel.y) + 1)), 0);
 
         let collision = false;
-        const actorCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || ((this.type === 'fire' && actor instanceof Bullet && actor.originActor instanceof Fubuki) ||actor instanceof Rocket || (actor instanceof IceShield && actor.originActor !== this.originActor))) && !(actor instanceof Torche) && !(actor instanceof Heart) && !(actor instanceof ATField) && !(actor instanceof Scythe) && (![this.originActor].includes(actor) || this.reflected) && actor.checkHit(game, this));
+        const actorCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || ((this.type === 'fire' && actor instanceof Bullet && actor.iceSpike) ||actor instanceof Rocket || (actor instanceof IceShield && actor.originActor !== this.originActor))) && !(actor instanceof Torche) && !(actor instanceof Heart) && !(actor instanceof ATField) && !(actor instanceof Scythe) && (![this.originActor].includes(actor) || this.reflected) && actor.checkHit(game, this));
         if (actorCollisions.length) {
             actorCollisions.forEach(collision => {
                 collision.takeHit(game, this);
@@ -234,10 +234,22 @@ class Bullet extends Projectile {
             this.dir = Math.random() > .5;
             // this.damage = 2;
         }
+        else if (this.originActor instanceof Oni) {
+            this.size = new Vector2(8, 8);
+            this.dir = this.originActor.dir;
+            this.damage = 2;
+        } else if (this.originActor instanceof EvilNoel) {
+            this.mace = true;
+            this.size = new Vector2(16, 16);
+        }
     }
     
     takeHit = (game, other) => {
-        if (!(this.originActor instanceof Fubuki)) return;
+        if (other instanceof IceShield) {
+            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+            this.dropHeart(game, .9);
+        }
+        if (!this.iceSpike) return;
         if (other instanceof Arrow && other.type === 'fire') this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
@@ -256,19 +268,21 @@ class Bullet extends Projectile {
 
     update = game => {
         if ([Dokuro, Marine].some(a => this.originActor instanceof a)) this.vel.y += .1;
-        if (!this.iceSpike || this.frameCount > 60) this.pos = this.pos.plus(this.vel);
+        if (!(this.iceSpike && this.originActor instanceof Fubuki && this.frameCount < 60)) this.pos = this.pos.plus(this.vel);
         // if (this.frameCount % 2) game.scene.particles.smoke2(CollisionBox.center(this), new Vector2(-Math.sign(this.vel.x), -(Math.sign(this.vel.y) + 1)), 0);
+
+        if (this.mace && !this.stoppedMace) this.angle += Math.PI / 16;
 
         let collision = false;
         const actorCollisions = game.scene.actors.filter(actor => actor instanceof Flare && actor.checkHit(game, this));
-        if (actorCollisions.length) {
+        if (actorCollisions.length && !this.stoppedMace) {
             actorCollisions.forEach(collision => {
                 collision.takeHit(game, this);
             });
             for (let i = 0; i < 3; i++) game.scene.particles.smoke_white(this.pos, new Vector2(0, 0), 1);
             collision = true;
         }
-        else if (!(this.originActor instanceof Marine) && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
+        else if (!(this.originActor instanceof Marine) && !this.stoppedMace && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
             collision = true;
             // game.playSound('no_damage');
             for (let i = 0; i < 3; i++) game.scene.particles.smoke_white(this.pos, new Vector2(0, 0), 1);
@@ -276,11 +290,15 @@ class Bullet extends Projectile {
         else if (!CollisionBox.intersects(this, game.scene.currentSection)) collision = true;
 
         if (collision) {
-            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+            if (this.mace && !actorCollisions.length) {
+                this.vel = new Vector2(0, 0);
+                this.stoppedMace = true;
+            } else game.scene.actors = game.scene.actors.filter(actor => actor !== this);
         }
         
         if (this.petal && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_3(CollisionBox.center(this));
         if (this.originActor instanceof Marine && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_4(CollisionBox.center(this));
+        if (this.originActor instanceof EvilNoel && !(this.frameCount % 2) && !this.stoppedMace) game.scene.particles.smoke_spirit(CollisionBox.center(this), new Vector2(0, 0), 1);
         if (this.iceSpike && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_2(CollisionBox.center(this), 0);
 
         this.frameCount++;
@@ -293,6 +311,19 @@ class Bullet extends Projectile {
             cx.translate(8, 8);
             cx.rotate(this.angle + Math.PI * .75);
             cx.drawImage(game.assets.images['sp_ice_spike'], -12, -12);
+        }
+        else if (this.mace) {
+            cx.translate(8, 8);
+            cx.rotate(this.angle + Math.PI * .75);
+            cx.drawImage(game.assets.images['sp_mace'], -12, -12);
+        }
+        else if (this.originActor instanceof Oni) {
+            if (!this.dir) {
+                cx.translate(this.size.x / 2, 0);
+                cx.scale(-1, 1);
+                cx.translate(-this.size.x / 2, 0);
+            }
+            cx.drawImage(game.assets.images['sp_thunder'], 0, 0, 16, 16, -4, -4, 16, 16);
         }
         else if (this.originActor instanceof Marine) {
             cx.translate(10, 10);
@@ -309,7 +340,8 @@ class Bullet extends Projectile {
 }
 
 class IceShield extends Projectile {
-
+    isPersistent = true;
+    
     constructor(pos, rotationOffset, originActor) {
         super(pos, new Vector2(12, 12), new Vector2(0, 0), originActor);
         this.rotationOffset = rotationOffset;
@@ -331,7 +363,10 @@ class IceShield extends Projectile {
 
         let collision = false;
         const enemyCollisions = game.scene.actors.filter(actor => (actor instanceof Flare || actor instanceof Arrow) && actor.checkHit(game, this));
-        const playerCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || actor instanceof Rocket) && !(actor instanceof Torche) && !(actor instanceof Heart) && !(actor instanceof Scythe) && ![this.originActor].includes(actor) && actor.checkHit(game, this));
+        const playerCollisions = game.scene.actors.filter(actor => [
+            Bullet, Rocket, Robot, Nousabot, Nousakumo, Pekora, Mikobell, Casinochip, Miko,
+            Dokuro, Cannon, Pirate, Neko, Marine, Aqua, Fubuki, Fubuzilla, Miteiru, Oni, Ayame, Sword, Spirit, EvilNoel]
+            .some(e => actor instanceof e) && actor.checkHit(game, this));
         const actorCollisions = this.originActor instanceof Flare ? playerCollisions : enemyCollisions;
         if (actorCollisions.length) {
             actorCollisions.forEach(collision => {
@@ -346,7 +381,7 @@ class IceShield extends Projectile {
             game.playSound('no_damage');
         }
         
-        if (!(this.frameCount % 8)) game.scene.particles.sparkle_fire_2(CollisionBox.center(this), 0);
+        if (!(this.frameCount % 8)) game.scene.particles.sparkle_white(CollisionBox.center(this), 0);
 
         this.frameCount++;
     }

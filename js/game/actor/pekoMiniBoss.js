@@ -3,7 +3,7 @@ class PekoMiniBoss extends Actor {
 
     size = new Vector2(16 * 16, 6 * 16);
 
-    maxHealth = 20;
+    maxHealth = 16;
 
     moveSpeed = 4;
 
@@ -104,7 +104,7 @@ class PekoMiniBoss extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= 60) {
+        if (this.phaseBuffer >= 90) {
             if (Math.random() > .4) {
                 this.phase = 'attack';
                 this.laserTarget = this.middleParts[3].pos;
@@ -215,7 +215,7 @@ class PekoMiniBoss extends Actor {
             shield.pos = shield.pos.lerp(CollisionBox.center(this.middleParts[3]).plus(new Vector2(-4 + Math.cos(angle) ** 3 * shield.dist, -4 + Math.sin(angle) ** 3 * shield.dist)), shield.lerpAmount);
         })
 
-        if (this.health && this.shields.length < 8 && Math.random() > .995) {
+        if (this.health && this.shields.length < 8 && Math.random() > .997) {
             this.shields.push({
                 pos: CollisionBox.center(this.middleParts[3]).plus(new Vector2(Math.random() * 64, 16 * 8)),
                 size: new Vector2(8, 8),

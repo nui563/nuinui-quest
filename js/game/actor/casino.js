@@ -159,7 +159,7 @@ class Casinochip extends Actor {
 
     maxHealth = 4;
     gravity = .2;
-    moveSpeed = 2;
+    moveSpeed = 1.75;
 
     aggro = false;
 
@@ -245,7 +245,7 @@ class Casinochip extends Actor {
     draw = (game, cx) => {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
-        cx.drawImage(game.assets.images['sp_casino_chip'], Math.floor(this.frameCount / 6) % 2 ? 0 : 32, game.currentStage === 2 ? 64 : this.color ? 0 : 32, 32, 32, 0, 0, 32, 32);
+        cx.drawImage(game.assets.images['sp_casino_chip'], Math.floor(this.frameCount / 6) % 2 ? 0 : 32, game.currentStage === 3 ? 64 : this.color ? 0 : 32, 32, 32, 0, 0, 32, 32);
         cx.restore();
     }
 }

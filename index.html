@@ -22,8 +22,8 @@
     <!-- Game -->
     <script src="js/game/event/gameEvent.js"></script>
     <script src="js/game/event/sectionEvents.js"></script>
-    <script src="js/game/event/checkpoints.js"></script>
     <script src="js/game/actor/actor.js"></script>
+    <script src="js/game/event/checkpoints.js"></script>
     <script src="js/game/actor/drop.js"></script>
     <script src="js/game/actor/flare.js"></script>
     <script src="js/game/actor/pekora.js"></script>
@@ -32,6 +32,7 @@
     <script src="js/game/actor/aqua.js"></script>
     <script src="js/game/actor/ayame.js"></script>
     <script src="js/game/actor/fubuki.js"></script>
+    <script src="js/game/actor/evilNoel.js"></script>
     <script src="js/game/actor/falls.js"></script>
     <script src="js/game/actor/casino.js"></script>
     <script src="js/game/actor/portcity.js"></script>
@@ -161,55 +162,58 @@
             <div class="save-item selectable-item" id="save-item-1"></div>
             <div class="save-item selectable-item" id="save-item-2"></div>
             <div class="save-item selectable-item" id="save-item-3"></div>
+            <div class="save-item selectable-item" id="save-item-4"></div>
             <div id="skill-container">
-                <div class="save-item" id="save-item-4"></div>
                 <div class="save-item" id="save-item-5"></div>
                 <div class="save-item" id="save-item-6"></div>
                 <div class="save-item" id="save-item-7"></div>
                 <div class="save-item" id="save-item-8"></div>
                 <div class="save-item" id="save-item-9"></div>
+                <div class="save-item" id="save-item-10"></div>
             </div>
         </fieldset>
         <fieldset id="stage-container">
             <legend>Achievements - 実績</legend>
             <span>
-                <div class="save-achievement" id="save-achievement-1" title="Find the not-so-secret weapon"></div>
-                <div class="save-achievement" id="save-achievement-2" title="Defeat the first boss (no hit)"></div>
-                <div class="save-achievement" id="save-achievement-3" title="Defeat Pekora (no jump)"></div>
-                <div class="save-achievement" id="save-achievement-4" title="Clear stage (in under 5 minutes)"></div>
+                <div class="save-achievement" id="save-achievement-1" title="Find the not-so-secret weapon&#13;&#10;秘密ではない武器を探す"></div>
+                <div class="save-achievement" id="save-achievement-2" title="Defeat the first boss (no hit)&#13;&#10;最初のボスを倒す(ノーヒット)"></div>
+                <div class="save-achievement" id="save-achievement-3" title="Defeat Pekora (no jump)&#13;&#10;兎田ペコラを倒す(ジャンプなし)"></div>
+                <div class="save-achievement" id="save-achievement-4" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
             </span>
             <span>
-                <div class="save-achievement" id="save-achievement-5" title="Clear the scythe room (no hit)"></div>
-                <div class="save-achievement" id="save-achievement-6" title="Daisensou!!"></div>
-                <div class="save-achievement" id="save-achievement-7" title="Defeat Miko (no charge shot)"></div>
-                <div class="save-achievement" id="save-achievement-8" title="Clear stage (in under 5 minutes)"></div>
+                <div class="save-achievement" id="save-achievement-5" title="Clear the scythe room (no hit)&#13;&#10;大鎌の部屋をクリアする（ノーヒット）"></div>
+                <div class="save-achievement" id="save-achievement-6" title="Daisensou!!&#13;&#10;大戦争！！"></div>
+                <div class="save-achievement" id="save-achievement-7" title="Defeat Miko (no charge shot)&#13;&#10;さくらみこを倒す(チャージショットなし)"></div>
+                <div class="save-achievement" id="save-achievement-8" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
             </span>
             <span>
-                <div class="save-achievement" id="save-achievement-9" title="Find the secret room"></div>
-                <div class="save-achievement" id="save-achievement-10" title="Defeat Aqua (currently not possible)"></div>
-                <div class="save-achievement" id="save-achievement-11" title="Clear the jetski phase (no hit from rocks)"></div>
-                <div class="save-achievement" id="save-achievement-12" title="Clear stage (in under 5 minutes)"></div>
+                <div class="save-achievement" id="save-achievement-9" title="Find the secret room&#13;&#10;秘密の部屋を探す"></div>
+                <div class="save-achievement" id="save-achievement-10" title="Defeat Aqua (currently not possible)&#13;&#10;湊あくあを倒す（現在不可能）"></div>
+                <div class="save-achievement" id="save-achievement-11" title="Clear the jetski phase (no hit from rocks)&#13;&#10;ジェットスキー部分をクリアする（岩石ヒットなし）"></div>
+                <div class="save-achievement" id="save-achievement-12" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
             </span>
             <span>
-                <div class="save-achievement" id="save-achievement-13" title="Find Poyoyo"></div>
-                <div class="save-achievement" id="save-achievement-14" title="Defeat Ayame (scimitar only)"></div>
-                <div class="save-achievement" id="save-achievement-15" title="Survive 2 minutes in the last room"></div>
-                <div class="save-achievement" id="save-achievement-16" title="Clear stage (in under 5 minutes)"></div>
+                <div class="save-achievement" id="save-achievement-13" title="Find Poyoyo&#13;&#10;ぽよ余を探す"></div>
+                <div class="save-achievement" id="save-achievement-14" title="Defeat Ayame with her own A.T. Field&#13;&#10;自分のA.T.フィールドで百鬼あやめを倒す"></div>
+                <div class="save-achievement" id="save-achievement-15" title="Survive 1 minute in the last room&#13;&#10;最後の部屋で1分間生き残る"></div>
+                <div class="save-achievement" id="save-achievement-16" title="Clear stage (in under 7 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
             </span>
             <span>
                 <div class="save-achievement" id="save-achievement-17" title="???"></div>
                 <div class="save-achievement" id="save-achievement-18" title="???"></div>
                 <div class="save-achievement" id="save-achievement-19" title="???"></div>
-                <div class="save-achievement" id="save-achievement-20" title="Clear stage (in under 5 minutes)"></div>
+                <div class="save-achievement" id="save-achievement-20" title="Clear stage (in under ? minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
             </span>
         </fieldset>
         <button id="save-delete" onclick="deleteSaveData()">Delete Save Data - セーブデータの消去</button>
     </div>
     <div id="info-container" style="display: none;">
-        <div style="width:300px;font-size:32px;border-bottom: 2px solid #fff;margin-bottom: 4px;justify-content: start;">credits</div>
+        <div style="width:300px;font-size:24px;border-bottom: 1px solid #fff;margin-bottom: 4px;justify-content: start;">credits</div>
         <div style="color: #99c;margin:8px 0">Created by <a href="https://twitter.com/sulpx" target="_blank">Sulpx</a></div>
         <div style="color: #99c;margin:8px 0">Music <a href="https://twitter.com/FBLSReindeer" target="_blank">FabulousReindeer</a></div>
+        <div style="width:300px;font-size:24px;border-bottom: 1px solid #fff;margin-bottom: 4px;justify-content: start;">special thanks</div>
         <div style="color: #99c;margin:8px 0">Musical Inspiration <a href="https://soundcloud.com/commandycan/spanishpiraterobotfrenzy" target="_blank">commandycan</a></div>
+        <div style="color: #99c;margin:8px 0">Sora game<a href="https://bugzyfloaty.itch.io/sora-game" target="_blank">Bugzy Floaty Mon</a></div>
     </div>
 </body>
 

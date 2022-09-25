@@ -176,7 +176,7 @@ const EVENTS = {
                 ]
             },
             {
-                condition: game => game.scene.actors.find(actor => actor instanceof Flare).hasBow && !game.scene.miniBossStarted && !game.scene.miniBossCleared,
+                condition: game => game.scene.actors.find(actor => actor instanceof Flare).hasBow && !game.scene.miniBossCleared,
                 isPersistent: true,
                 timeline: [
                     (game, event) => {
@@ -197,7 +197,6 @@ const EVENTS = {
                             event.pekora.dir = event.side;
                             scene.actors.push(event.pekora);
                         }
-                        scene.miniBossStarted = true;
 
                         if (flare && ((event.side && flare.pos.x < 16 * 94) || (!event.side && flare.pos.x > 16 * 85))) {
                             if (game.cpuKeys.left || game.cpuKeys.right) {
@@ -237,8 +236,8 @@ const EVENTS = {
                             scene.currentSection.collisions.push({ pos: { x: (event.side ? 85 : 94) * 16, y: 6 * 16 }, size: { x: 16, y: 16 }});
 
                             event.collisions = [
-                                { pos: { x: 82 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }},
-                                { pos: { x: 97 * 16, y: 0 }, size: { x: 16, y: 6 * 16 }}
+                                { pos: { x: 82 * 16, y: -2 * 16 }, size: { x: 16, y: 8 * 16 }},
+                                { pos: { x: 97 * 16, y: -2 * 16 }, size: { x: 16, y: 8 * 16 }}
                             ];
                             scene.currentSection.collisions.push(...event.collisions);
                         }
@@ -261,6 +260,11 @@ const EVENTS = {
                                 }
                                 event.boss.laserTarget = null;
                                 event.boss.middleVel = new Vector2(0, 0);
+
+                                game.playSound('level_start');
+                                scene.bossKillEffect = 60;
+                                scene.isFocus = 0;
+                                
                                 event.next = true;
                             }
                         }
@@ -320,17 +324,6 @@ const EVENTS = {
 
         "5_0": [
             {
-                condition: game => true,
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.checkpoint = CHECKPOINT_STAGE_1_0;
-                        console.log('checkpoint')
-                        event.end = true;
-                    }
-                ]
-            },
-            {
                 condition: game => game.scene.miniBoss !== 'started',
                 isPersistent: false,
                 timeline: [
@@ -357,18 +350,18 @@ const EVENTS = {
                         });
                     }
                 ]
-            },
-            {
-                condition: game => !localStorage.getItem('nuinui-save-item-bow'),
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.scene.actors = game.scene.actors.filter(a => !(a instanceof BowPickup));
-                        game.scene.actors.push(new BowPickup(new Vector2(116 * 16 - 2, 32), new Vector2(20, 20), 'bow'));
-                        event.end = true;
-                    }
-                ]
             }
+            // {
+            //     condition: game => !localStorage.getItem('nuinui-save-item-bow'),
+            //     isPersistent: false,
+            //     timeline: [
+            //         (game, event) => {
+            //             game.scene.actors = game.scene.actors.filter(a => !(a instanceof BowPickup));
+            //             game.scene.actors.push(new BowPickup(new Vector2(116 * 16 - 2, 32), new Vector2(20, 20), 'bow'));
+            //             event.end = true;
+            //         }
+            //     ]
+            // }
         ],
 
         
@@ -383,42 +376,6 @@ const EVENTS = {
                     (game, event) => {
                         game.scene.actors = game.scene.actors.filter(a => !(a instanceof BowPickup));
                         game.scene.actors.push(new BowPickup(new Vector2(131 * 16 - 2, 4.25 * 16), new Vector2(20, 20), 'gun'));
-                        event.end = true;
-                    }
-                ]
-            }
-        ],
-
-        
-        //----------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-        "7_3": [
-            {
-                condition: game => true,
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.checkpoint = CHECKPOINT_STAGE_1_1;
-                        console.log('checkpoint')
-                        event.end = true;
-                    }
-                ]
-            }
-        ],
-
-        
-        //----------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-        "7_1": [
-            {
-                condition: game => true,
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.checkpoint = CHECKPOINT_STAGE_1_2;
-                        console.log('checkpoint')
                         event.end = true;
                     }
                 ]
@@ -508,9 +465,8 @@ const EVENTS = {
                                 localStorage.setItem('nuinui-save-achievement-3', true);
                                 game.updateAchievements();
                             }
-                            event.next = true;
+
                             flare.playerControl = false;
-                            if (scene.isFocus) scene.isFocus = 0;
                             event.pekora.phase = 'defeated';
                             event.pekora.dir = false;
                             event.pekora.setAnimation('idle');
@@ -518,6 +474,12 @@ const EVENTS = {
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
                             scene.actors = scene.actors.filter(a => !(a instanceof Rocket));
                             game.stopBGM();
+
+                            game.playSound('level_start');
+                            scene.bossKillEffect = 60;
+                            scene.isFocus = 0;
+
+                            event.next = true;
                         }
                     },
                     (game, event) => {
@@ -815,17 +777,6 @@ const EVENTS = {
                         }
                     }
                 ]
-            },
-            {
-                condition: game => true,
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.checkpoint = CHECKPOINT_STAGE_2_0;
-                        console.log('checkpoint')
-                        event.end = true;
-                    }
-                ]
             }
         ],
 
@@ -1019,17 +970,6 @@ const EVENTS = {
                         });
                     }
                 ]
-            },
-            {
-                condition: game => true,
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.checkpoint = CHECKPOINT_STAGE_2_1;
-                        console.log('checkpoint')
-                        event.end = true;
-                    }
-                ]
             }
         ],
 
@@ -1112,8 +1052,13 @@ const EVENTS = {
                         }
                         
                         if (!event.miko.health) {
+                            
+                            game.playSound('level_start');
+                            scene.bossKillEffect = 60;
+                            scene.isFocus = 0;
+
                             event.next = true;
-                            if (scene.isFocus) scene.isFocus = 0;
+
                             flare.playerControl = false;
                             event.miko.phase = 'defeated';
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
@@ -1331,17 +1276,6 @@ const EVENTS = {
                         });
                     }
                 ]
-            },
-            {
-                condition: game => true,
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.checkpoint = CHECKPOINT_STAGE_3_0;
-                        console.log('checkpoint')
-                        event.end = true;
-                    }
-                ]
             }
         ],
 
@@ -1514,24 +1448,6 @@ const EVENTS = {
                         }
                     },
                     (game, event) => {}
-                ]
-            }
-        ],
-
-        
-        //----------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-        "4_0": [
-            {
-                condition: game => true,
-                isPersistent: false,
-                timeline: [
-                    (game, event) => {
-                        game.checkpoint = CHECKPOINT_STAGE_3_1;
-                        console.log('checkpoint')
-                        event.end = true;
-                    }
                 ]
             }
         ],
@@ -1856,7 +1772,12 @@ const EVENTS = {
                         }
                         
                         if (!event.marine.health) {
+                            game.playSound('level_start');
+                            scene.bossKillEffect = 60;
+                            scene.isFocus = 0;
+
                             event.next = true;
+
                             flare.playerControl = false;
                             event.marine.phase = 'defeated';
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet) && !(a instanceof Rock) && !(a instanceof Aircon) && !(a instanceof Dokuro));
@@ -1903,7 +1824,7 @@ const EVENTS = {
                         if (flare.pos.x < 21 * 16) {
                             event.end = true;
                             game.scene.nextScene = new StageSelect(game, 2, 3);
-                            game.demoCleared = true;
+                            // game.demoCleared = true;
                             game.checkpoint = null;
                             game.cpuKeys = new Object;
                             game.stopBGM();
@@ -1942,7 +1863,7 @@ const EVENTS = {
                         const scene = game.scene;
                 
                         if (event.frameCount === 0) {
-                            event.flare = new Flare(new Vector2(-24, 16 * 12 * 10), new Vector2(16, 32));
+                            event.flare = new Flare(new Vector2(16, (-16 + 16 * 12) * 10), new Vector2(16, 32));
                             event.flare.setAnimation('idle');
                             event.flare.jetski = true;
                             event.flare.isGrounded = false;
@@ -1972,7 +1893,7 @@ const EVENTS = {
                     (game, event) => {
                         const scene = game.scene;
 
-                        if (!event.flare.vel.x) {
+                        if (event.flare.isGrounded) {
                             event.flare.jetski = false;
                             event.flare.playerControl = true;
                             game.cpuKeys = new Object;
@@ -1985,9 +1906,8 @@ const EVENTS = {
                             event.next = true;
                         } else {
                             game.cpuKeys.right = true;
-                            event.flare.vel.x = 8;
+                            event.flare.vel.x = 3;
                             if(!(event.frameCount % 10)) scene.particles.explosion(CollisionBox.center(event.flare));
-                            if(!(event.frameCount % 40)) game.playSound('rumble');
                         }
                     },
                     (game, event) => {
@@ -1995,6 +1915,9 @@ const EVENTS = {
                         event.end = true;
                         scene.enableHUD = true;
                         game.timer = new Date();
+                        game.playBGM('beat_of_a_hundred_flowers');
+
+                        // event.flare.pos = new Vector2(53 * 16, 64 * 16);
 
                         // event.flare.pos = new Vector2(3.75 * 20 * 16, 12 * 16);
                         // event.flare.pos = new Vector2(13.75 * 20 * 16, 0);
@@ -2020,6 +1943,135 @@ const EVENTS = {
                 ]
             }
         ],
+        "2_9": [
+            {
+                condition: game => {
+                    const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                    return flare && !flare.doubleJump && !game.scene.actors.find(actor => actor instanceof JumpPickup);
+                },
+                isPersistent: true,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 0) {
+                            flare.playerControl = false;
+                        
+                            event.elfriend = new Elfriend(new Vector2((9 + 2 * 20) * 16, 10.25 * 12 * 16), false);
+                            game.scene.actors.unshift(event.elfriend);
+
+                            game.cpuKeys.right = true;
+                        }
+
+                        if (flare.pos.x > (4 + 2 * 20) * 16) {
+                            game.cpuKeys = new Object;
+                            event.next = true;
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame > 59 && event.timelineFrame < 240) {
+                            if (event.timelineFrame === 60) {
+                                flare.setAnimation('look');
+                                game.playSound('level_start');
+                                flare.animationLocked = true;
+                            }
+                        }
+
+                        if (event.timelineFrame === 180) {
+                            flare.animationLocked = false;
+                            flare.setAnimation('idle');
+                        }
+
+                        if (event.timelineFrame === 240) {
+                            game.scene.actors.push(new JumpPickup(event.elfriend.pos.value().plus(new Vector2(0, -16)), new Vector2(20, 20)));
+                        }
+
+                        if (event.timelineFrame > 240) {
+                            event.elfriend.pos.y -= 2;
+                        }
+
+                        if (!CollisionBox.intersects(event.elfriend, scene.view)) {
+                            scene.actors = scene.actors.filter(a => a !== event.elfriend);
+                            flare.playerControl = true;
+                            event.end = true;
+                        }
+                    }
+                ]
+            }
+        ],
+        "4_5": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        if (event.timelineFrame && !(event.timelineFrame % 360)) {
+                            game.scene.iceWind = 180;
+                            game.scene.iceWindDir = (event.timelineFrame / 180) % 4;
+                        }
+                    }
+                ]
+            }
+        ],
+        "1_4": [
+            {
+                condition: game => !game.scene.fubuzillaCleared,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        if (flare.pos.x < 54 * 16) {
+                            if (scene.isFocus) scene.isFocus = 0;
+                            if (scene.iceWind) scene.iceWind = 0;
+                            event.fubuzilla = new Fubuzilla(new Vector2(40 * 16, 70 * 16));
+                            scene.actors.push(event.fubuzilla);
+                            
+                            for (let y = 0; y < 7; y++) {
+                                scene.foreground[`30_${63 + y}`] = "27";
+                                scene.foreground[`60_${63 + y}`] = "27";
+                            }
+                            event.collisions = [
+                                { pos: { x: 30 * 16, y: 63 * 16 }, size: { x: 16, y: 16 * 7 }},
+                                { pos: { x: 60 * 16, y: 63 * 16 }, size: { x: 16, y: 16 * 7 }}
+                            ];
+                            scene.sections[5].collisions.push(...event.collisions);
+
+                            scene.shakeBuffer = 4;
+
+                            // game.stopBGM();
+                            event.next = true;
+
+                            scene.warning = true;
+                        }
+                    },
+                       (game, event) => {
+                        const scene = game.scene;
+
+                        if (!event.fubuzilla.health) {
+                            for (let y = 0; y < 7; y++) {
+                                delete scene.foreground[`30_${63 + y}`];
+                                delete scene.foreground[`60_${63 + y}`];
+                            }
+
+                            game.playSound('level_start');
+                            scene.bossKillEffect = 60;
+                            scene.isFocus = 0;
+
+                            scene.sections[5].collisions = scene.sections[5].collisions.filter(a => !event.collisions.includes(a));
+
+                            scene.fubuzillaCleared = true;
+
+                            event.end = true;
+                        }
+                    }
+                ]
+            }
+        ],
         "1_3": [
             {
                 condition: game => true,
@@ -2040,9 +2092,23 @@ const EVENTS = {
                 ]
             }
         ],
+        "1_2": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        if (event.timelineFrame % 180 < 120) {
+                            game.scene.iceWind = 2;
+                            game.scene.iceWindDir = false;
+                        }
+                    }
+                ]
+            }
+        ],
         "4_1": [
             {
-                condition: game => !game.scene.miniBossCleared,
+                condition: game => !game.scene.ayameBossCleared,
                 isPersistent: false,
                 timeline: [
                     (game, event) => {
@@ -2052,13 +2118,10 @@ const EVENTS = {
                         if (flare.pos.y <= 18 * 16) {
                             if (scene.isFocus) scene.isFocus = 0;
                             
-                            event.ayame = new Ayame(new Vector2(104.5 * 16, 18 * 16), 48);
+                            event.ayame = new Ayame(new Vector2(104.5 * 16, 18 * 16), 40);
                             event.ayame.setAnimation('idle');
                             event.ayame.dir = false;
                             scene.actors.push(event.ayame);
-
-                            let atfield = new ATField(new Vector2(102 * 16, 17 * 16), false);
-                            scene.actors.push(atfield);
                             
                             for (let x = 0; x < 3; x++) {
                                 scene.foreground[`${88 + x}_19`] = "f";
@@ -2070,41 +2133,85 @@ const EVENTS = {
                                 { pos: { x: 88 * 16, y: 20 * 16 }, size: { x: 16 * 3, y: 16 }},
                                 { pos: { x: 109 * 16, y: 20 * 16 }, size: { x: 16 * 3, y: 16 }}
                             ];
-                            scene.sections[7].collisions.push(...event.collisions);
+                            scene.currentSection.collisions.push(...event.collisions);
 
                             game.playSound('rumble');
                             scene.shakeBuffer = 4;
 
                             scene.lockedViewPos = new Vector2(0, 12 * 16);
+                            scene.warning = true;
 
-                            game.stopBGM();
+                            // game.stopBGM();
                             event.next = true;
                         }
-                        
-                        // game.cpuKeys.right = true;
-
-                        // if (event.fubuki.isGrounded) event.fubuki.setAnimation('idle');
-
-                        // if (flare.pos.x > 14.25 * 20 * 16) {
-                        //     game.cpuKeys = new Object;
-
-                        //     event.collisions = [
-                        //         { pos: { x: (14 * 20 - 1) * 16, y: 0 }, size: { x: 16, y: 12 * 16 }},
-                        //         { pos: { x: 15 * 20 * 16, y: 0 }, size: { x: 16, y: 12 * 16 }}
-                        //     ];
-
-                        //     scene.currentSection.collisions.push(...event.collisions);
-
-                            
-
-                        //     event.next = true;
-                        // }
                     },
                     (game, event) => {
                         const scene = game.scene;
                         const flare = scene.actors.find(actor => actor instanceof Flare);
 
                         scene.lockedViewPos.x = Math.round((flare.pos.x + event.ayame.pos.x) / 2) - game.width / 2;
+
+                        if (event.timelineFrame === 120) {
+                            scene.warning = false;
+                            event.ayame.setAnimation('idle');
+                            event.ayame.phase = 'idle';
+                        }
+
+                        if (!event.ayame.health) {
+                            scene.lockedViewPos = null;
+
+                            flare.playerControl = false;
+                            game.playSound('level_start');
+                            scene.bossKillEffect = 60;
+                            scene.isFocus = 0;
+
+                            event.ayame.phase = 'defeated';
+                            scene.actors = scene.actors.filter(a => !(a instanceof Sword));
+
+                            event.next = true;
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+
+                        if (event.timelineFrame === 120) scene.ayameBossCleared = true;
+
+                        if (event.timelineFrame === 180) {
+                            scene.currentSection.collisions = scene.currentSection.collisions.filter(collision => !event.collisions.includes(collision));
+                            scene.actors = scene.actors.filter(a => !(a instanceof Ayame));
+
+                            for (let x = 0; x < 3; x++) {
+                                delete scene.foreground[`${88 + x}_19`];
+                                delete scene.foreground[`${88 + x}_20`];
+                                delete scene.foreground[`${109 + x}_19`];
+                                delete scene.foreground[`${109 + x}_20`];
+                            }
+                            game.playSound('rumble');
+                            scene.shakeBuffer = 4;
+
+                            const flare = scene.actors.find(actor => actor instanceof Flare);
+                            flare.playerControl = true;
+                            event.end = true;
+                        }
+                    }
+                ]
+            }
+        ],
+        "13_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate(13 * 20 * 16, 0);
+                            game.ctx0.drawImage(game.assets.images['sp_sukonbu'], Math.floor(event.timelineFrame / 16) % 2 ? 0 : 32, 0, 32, 32, 4 * 16, 8 * 16 + 4, 32, 32);
+                            game.ctx0.scale(-1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_sukonbu'], Math.floor(event.timelineFrame / 16) % 2 ? 0 : 32, 0, 32, 32, -19 * 16, 8 * 16 + 4, 32, 32);
+                            game.ctx0.restore();
+                        });
                     }
                 ]
             }
@@ -2123,6 +2230,7 @@ const EVENTS = {
                             if (scene.isFocus) scene.isFocus = 0;
                             
                             event.fubuki = new Fubuki(new Vector2((14 * 20 + 13) * 16, -64), 48);
+                            // event.fubuki = new Fubuki(new Vector2((14 * 20 + 13) * 16, -64), 1);
                             event.fubuki.setAnimation('jump');
                             event.fubuki.dir = false;
                             scene.actors.push(event.fubuki);
@@ -2157,6 +2265,7 @@ const EVENTS = {
 
                         if (event.timelineFrame === 60) {
                             scene.warning = true;
+                            game.playBGM('dethroneworld');
                         }
 
                         if (event.timelineFrame === 240) {
@@ -2166,11 +2275,16 @@ const EVENTS = {
                         }
                         
                         if (!event.fubuki.health) {
+                            
+                            game.playSound('level_start');
+                            scene.bossKillEffect = 60;
+                            scene.isFocus = 0;
+
                             event.next = true;
                             flare.playerControl = false;
                             event.fubuki.phase = 'defeated';
                             scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
-                            // scene.actors.push(new PetalPickup(event.fubuki.pos.value(), new Vector2(20, 20)));
+                            if (!flare.chargeTypeList.includes('shield')) scene.actors.push(new ShieldPickup(event.fubuki.pos.value(), new Vector2(20, 20)));
                             game.stopBGM();
                         }
                     },
@@ -2186,6 +2300,119 @@ const EVENTS = {
                             const flare = scene.actors.find(actor => actor instanceof Flare);
                             flare.playerControl = true;
                             event.end = true;
+                            
+                            game.playBGM('beat_of_a_hundred_flowers');
+                        }
+                    }
+                ]
+            }
+        ],
+        "16_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (flare.pos.y > 12 * 16) {
+                            scene.blackout = true;
+                        }
+
+                        if (scene.blackout && flare.isGrounded) {
+                            event.next = true;
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+
+                        if (event.timelineFrame === 60) {
+                            scene.warning = true;
+                        }
+
+                        if (event.timelineFrame === 120) {
+                            event.noel = new EvilNoel(new Vector2(329.5 * 16, 24 * 16));
+                            event.noel.phase = 'move';
+                            scene.actors.push(event.noel);
+                        }
+
+                        if (event.noel && event.noel.pos.y > 28 * 16) {
+                            scene.warning = false;
+                            
+                            scene.noelTime = new Date().getTime();
+                            event.end = true;
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    "westa": {
+        "0_0": [
+            {
+                condition: game => game.scene.frameCount === 0,
+                isPersistent: true,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                
+                        if (event.frameCount === 0) {
+                            event.flare = new Flare(new Vector2(9.5 * 16, 9 * 16), new Vector2(16, 32));
+                            event.flare.setAnimation('sleep');
+                            event.flare.animationLocked = true;
+                
+                            scene.view.target = event.flare;
+                            scene.blackout = true;
+                
+                            scene.actors.push(event.flare);
+                            game.demoCleared = true;
+                        }
+                
+                        // if (game.keys.jump) event.next = true;
+
+                        if (event.timelineFrame < 120) {
+                            const alpha = 1 - (event.timelineFrame / 120 === 0 ? 0 : Math.pow(2, 10 * event.timelineFrame / 120 - 10));
+                            scene.customDraw.push(game => {
+                                game.ctx3.save();
+                                game.ctx3.globalAlpha = alpha;
+                                game.ctx3.fillStyle = "#000";
+                                game.ctx3.fillRect(0, 0, game.width, game.height);
+                                game.ctx3.restore();
+                            });
+                        }
+
+                        // scene.customDraw.push(game => {
+                        //     game.ctx3.drawImage(game.assets.images['ui_start_label'], 204, 165);
+                        //     if (!(Math.floor(scene.frameCount / 32) % 2)) {
+                        //         game.ctx3.fillStyle = "#0008";
+                        //         game.ctx3.fillRect(208, 167, 104, 20);
+                        //     }
+                        // });
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        switch (event.timelineFrame) {
+                            case 00:
+                                event.flare.setAnimation('wakeup');
+                                game.playSound('wakeup');
+                                break;
+                            case 39:
+                                event.flare.setAnimation('idle');
+                                event.flare.playerControl = true;
+                                event.flare.animationLocked = false;
+                                event.end = true;
+                                scene.enableHUD = true;
+                                // game.playBGM('smile_&_go_slow');
+                                game.timer = new Date();
+                                break;
+                            default:
+                                break;
                         }
                     }
                 ]

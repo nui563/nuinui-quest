@@ -21,7 +21,7 @@ class Aqua extends Actor {
     
     checkHit = (game, collisionBox) => {
         const collision = CollisionBox.intersects(this.playerAggro && !this.vel.x && collisionBox instanceof Flare ? this.aggroZone : this, collisionBox);
-        return !['flee', 'defeated'].includes(this.phase) ? collision : null;
+        return this.phase && !['flee', 'defeated'].includes(this.phase) ? collision : null;
     }
 
     takeHit = (game, other) => {

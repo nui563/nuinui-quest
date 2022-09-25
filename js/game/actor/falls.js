@@ -101,10 +101,12 @@ class Robot extends Actor {
 
     aggro = false;
 
-    constructor(pos) {
+    constructor(pos, sleep) {
         super();
         this.pos = new Vector2(pos.x * 16, pos.y * 16 - 32);
         this.health = this.maxHealth;
+        this.sleep = sleep;
+        this.phase = sleep ? 'sleep' : 'idle';
     }
     
     checkHit = (game, collisionBox) => {
@@ -113,7 +115,7 @@ class Robot extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+        if (game.currentStage !== 3) this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
@@ -172,6 +174,10 @@ class Robot extends Actor {
         }
     }
 
+    sleepPhase = game => {
+
+    }
+
     update = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
 
@@ -200,8 +206,14 @@ class Robot extends Actor {
 
         this.pos.y += this.vel.y;
 
-        this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
+        if (!this.sleep) this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
+        if (this.spirit) {
+            game.scene.particles.smoke_spirit(this.pos.plus(new Vector2(this.size.x / 2, 0)), new Vector2(0, -1), 0);
+        } else if (this.sleep && Math.random() > .9) {
+            game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(0, -.25), 1);
+        }
+
         if (this.health < this.maxHealth / 2) {
             if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
@@ -224,7 +236,7 @@ class Robot extends Actor {
         }
         const offset = new Vector2(12, 12);
         if (this.waterOffset)cx.drawImage(game.assets.images['sp_pirate_jetski'], -10, -8);
-        else cx.drawImage(game.assets.images['sp_robot'], this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, game.currentStage === 2 ? 48 : 0, 48, 48, -offset.x, -offset.y, 48, 48);
+        else cx.drawImage(game.assets.images['sp_robot'], this.sleep ? 144 : this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, game.currentStage === 3 ? 96 : game.currentStage === 2 ? 48 : 0, 48, 48, -offset.x, -offset.y, 48, 48);
         cx.restore();
     }
 }

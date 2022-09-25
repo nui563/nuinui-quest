@@ -48,16 +48,7 @@ class Scene {
         });
 
         // DEBUG
-        const urlParams = new URLSearchParams(window.location.search);
-        const checkpoints = [
-            [CHECKPOINT_STAGE_1_0, CHECKPOINT_STAGE_1_1, CHECKPOINT_STAGE_1_2],
-            [CHECKPOINT_STAGE_2_0, CHECKPOINT_STAGE_2_1],
-            [CHECKPOINT_STAGE_3_0, CHECKPOINT_STAGE_3_1],
-            [CHECKPOINT_STAGE_4_0, CHECKPOINT_STAGE_4_1]
-        ];
-        if (urlParams.has('checkpoint')) game.checkpoint = checkpoints[game.currentStage][parseInt(urlParams.get('checkpoint')) - 1];
-        
-        if (game.checkpoint) game.checkpoint(game, this);
+        if (game.checkpoint) game.checkpoint.respawn(game, this);
         else {
             this.currentSection = this.sections[0];
             this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
@@ -119,10 +110,19 @@ class Scene {
                 this.events.forEach(e => {
                     if (e.actors) persistentActors.push(...e.actors);
                 });
-                this.actors = this.actors.filter(actor => actor instanceof Flare || persistentActors.includes(actor));
+                this.actors.forEach(a => {
+                    if (a.isPersistent) persistentActors.push(a);
+                });
+                this.actors = this.actors.filter(actor => persistentActors.includes(actor));
                 this.currentSection.actors.forEach(event => {
                     this.actors.push(eval("new " + event.className + "(...event.data)"));
                 });
+                
+                if (this.actors.some(a => a instanceof Checkpoint) && game.checkpoint && game.checkpoint.pos) {
+                    this.actors.filter(a => a instanceof Checkpoint).forEach(checkpoint => {
+                        if (checkpoint.pos.equals(game.checkpoint.pos)) game.checkpoint = checkpoint;
+                    });
+                }
             }
         }
     }
@@ -135,25 +135,17 @@ class Scene {
                 if (event.end) this.events = this.events.filter(e => e !== event);
             })
         }
-
-        const bossClass = (this.name === 'forest' ? Pekora : game.currentStage === 2 ? Marine : Miko);
-        const boss = this.actors.find(actor => actor instanceof bossClass);
-        this.bossKillEffect = boss && !boss.health && !this.bossCleared;
-
         
         const flare = this.actors.find(actor => actor instanceof Flare);
         if(flare && flare.item && game.keys.item && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect && !flare.jetski) {
             this.isFocus = flare.focusTime;
             flare.focusCooldown = flare.focusCooldownTime;
             game.playSound("focus");
-            // if (game.bgm) {
-            //     game.bgm.source.playbackRate = .5;
-            // }
         }
 
         // Update actors
         this.actors = this.actors.filter(a => !a.toFilter);
-        if (this.isFocus && this.frameCount % 4) this.actors.filter(actor => actor instanceof Flare || actor instanceof Arrow).forEach(actor => actor.update(game));
+        if (this.isFocus && this.frameCount % 4) this.actors.filter(actor => actor instanceof Flare || actor instanceof Ayame || actor instanceof Arrow).forEach(actor => actor.update(game));
         else if (!this.bossKillEffect || this.frameCount % 2) this.actors.forEach(actor => actor.update(game));
 
         // Update section
@@ -168,7 +160,7 @@ class Scene {
         this.drawHUD = true;
 
         if (this.shakeBuffer) this.shakeBuffer--;
-
+        if (this.bossKillEffect) this.bossKillEffect--;
         if (this.iceWind) this.iceWind--;
         if (this.isFocus) this.isFocus--;
         this.sectionFrame++;
@@ -308,6 +300,18 @@ class Scene {
             cx.drawImage(game.assets.images['ui_healthbar_marine'], 24, 0);
         }
 
+        const ayame = this.actors.find(a => a instanceof Ayame);
+        if (ayame) {
+            const maxHealthWidth = 64;
+            ayame.healthBar = ayame.healthBar ? (1 - .1) * ayame.healthBar + .1 * ayame.health : ayame.health;
+            const healthWidth = Math.ceil(ayame.healthBar * maxHealthWidth / ayame.maxHealth);
+            cx.fillStyle = '#000';
+            cx.fillRect(29, 16, 6, maxHealthWidth);
+            cx.fillStyle = '#D82800';
+            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
+            cx.drawImage(game.assets.images['ui_healthbar_ayame'], 24, 0);
+        }
+
         const fubuki = this.actors.find(a => a instanceof Fubuki);
         if (fubuki) {
             const maxHealthWidth = 64;
@@ -402,15 +406,6 @@ class Scene {
                     // if (this.drawView) {
                     cx.clearRect(0, 0, game.width, game.height);
                     if (this.bossKillEffect) break;
-                    if (this.iceWind) {
-                        cx.save();
-                        if (!this.iceWindDir) {
-                            cx.translate(game.width, 0);
-                            cx.scale(-1, 1);
-                        }
-                        cx.drawImage(game.assets.images['sp_ice_wind'], 16 - this.frameCount % 16, 16 - this.frameCount % 16, 320, 192, 0, 0, 320, 192);
-                        cx.restore();
-                    }
                     cx.translate(-this.view.pos.x, -this.view.pos.y);
                     this.drawTiles(game, cx, this.foreground);
                     if (DEBUGMODE) this.currentSection.collisions.forEach(a => {
@@ -431,13 +426,13 @@ class Scene {
                     cx.clearRect(0, 0, game.width, game.height);
                     if (this.bossKillEffect) break;
 
-                    if (game.currentStage === 2 && this.blackout && !this.miniBossCleared) {
+                    if (this.blackout) {
                         cx.save();
                         cx.fillStyle = '#000c';
                         cx.fillRect(0, 0, game.width, game.height);
                         cx.globalCompositeOperation = "destination-out";
 
-                        const largeLight = this.actors.filter(a => a instanceof Flare || a instanceof Aqua || (a instanceof Torche && a.active));
+                        const largeLight = this.actors.filter(a => a instanceof Flare || a instanceof EvilNoel || a instanceof Aqua || (a instanceof Torche && a.active));
                         largeLight.forEach(a => {
                             cx.save();
                             const pos = CollisionBox.center(a).round();
@@ -462,6 +457,15 @@ class Scene {
                         })
                         cx.restore();
                     }
+                    if (this.iceWind) {
+                        cx.save();
+                        if (!this.iceWindDir) {
+                            cx.translate(game.width, 0);
+                            cx.scale(-1, 1);
+                        }
+                        cx.drawImage(game.assets.images['sp_ice_wind'], 16 - Math.floor(this.frameCount / 2) % 16, 16 - Math.floor(this.frameCount / 2) % 16, 320, 192, 0, 0, 320, 192);
+                        cx.restore();
+                    }
 
                     if (game.demoCleared) {
                         cx.drawImage(game.assets.images['ui_level_thanks'], game.width / 2 - 64, 0);
@@ -481,7 +485,7 @@ class Scene {
                         cx.fillRect(focusPos.x, focusPos.y, Math.ceil(this.isFocus * focusWidth / flare.focusTime), 4);
                         cx.restore();
                     }
-                    if (game.currentStage === 2 && this.blackout && !this.miniBossCleared) {
+                    if (this.blackout && this.currentStage === 2) {
                         const count = this.actors.filter(a => a instanceof Torche && a.active).length;
                         for (let y = 0; y < 8; y++) {
                             cx.drawImage(game.assets.images['vfx_smoke_white'], 0, 0, 8, 8, 22, 4 + y * 10, 8, 8);

@@ -21,6 +21,7 @@ class Assets {
         'sp_flare_gun_fall',
         'sp_flare_slide',
         "sp_flare_jetski",
+        "sp_flare_hit",
 
         'sp_ponytail',
         'sp_ribbon',
@@ -68,7 +69,19 @@ class Assets {
         'sp_fubuki_charge',
 
         'sp_ayame_idle',
+        'sp_ayame_back',
+        'sp_ayame_focus',
+        'sp_ayame_crouch',
+        'sp_ayame_charge',
+        'sp_ayame_hit',
+        'sp_ayame_swords',
+        'sp_ayame_rasetsu',
+        'sp_ayame_asura',
 
+        'sp_noel_evil',
+
+        'sp_mace',
+        'sp_vending_machine',
         'sp_vapor_block',
         'sp_nousabot',
         'sp_robot',
@@ -81,6 +94,10 @@ class Assets {
         'sp_ice_spike',
         'sp_ice_wind',
         'sp_ice_shield',
+        'sp_fubuzilla',
+        'sp_miteiru',
+        'sp_oni',
+        'sp_thunder',
 
         'sp_nousagi',
         'sp_nousakumo',
@@ -97,7 +114,9 @@ class Assets {
         'sp_rock',
         'sp_atfield',
 
+        "sp_checkpoint",
         "sp_clock",
+        "sp_jump",
         "sp_moon",
         "sp_anchor",
         "sp_flag",
@@ -129,6 +148,9 @@ class Assets {
         'ts_yamato',
         'bg_yamato',
 
+        'ts_westa',
+        'bg_westa',
+
         // HUD
         'ui_start_label',
         'ui_forest_label',
@@ -136,6 +158,7 @@ class Assets {
         'ui_healthbar_pekora',
         'ui_healthbar_miko',
         'ui_healthbar_marine',
+        'ui_healthbar_ayame',
         'ui_healthbar_fubuki',
         'ui_slot',
         'ui_slot2',
@@ -206,7 +229,9 @@ class Assets {
         { id: 'warning' },
         { id: 'dash' },
         { id: 'slash' },
-        { id: 'gun' }
+        { id: 'gun' },
+        { id: 'death' },
+        { id: 'stage_clear' }
     ]
     
     bgmData = [
@@ -249,6 +274,14 @@ class Assets {
         {
             id: "cosplay_pirate_idol_frenzy",
             loopStart: 6.033
+        },
+        {
+            id: "beat_of_a_hundred_flowers",
+            loopStart: 9.683
+        },
+        {
+            id: "dethroneworld",
+            loopStart: 12.467
         }
     ];
     

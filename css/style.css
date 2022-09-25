@@ -62,7 +62,7 @@ body {
   margin: 4px;
   background-image: url('../img/ui_items.png');
   image-rendering: pixelated;
-  background-size: 256px 48px;
+  background-size: 264px 48px;
   opacity: 0;
   pointer-events: none;
 }
@@ -104,19 +104,22 @@ body {
   background-position: -144px 0;
 }
 #save-item-5 {
-  background-position: -168px 0;
-}
-#save-item-6 {
   background-position: -192px 0;
 }
+#save-item-6 {
+  background-position: -216px 0;
+}
 #save-item-7 {
-  background-position: -144px 24px;
+  background-position: -240px 0;
 }
 #save-item-8 {
-  background-position: -168px 24px;
+  background-position: -192px 24px;
 }
 #save-item-9 {
-  background-position: -192px 24px;
+  background-position: -216px 24px;
+}
+#save-item-10 {
+  background-position: -240px 24px;
 }
 
 .save-achievement {
@@ -251,6 +254,7 @@ body {
   background: #000;
   box-shadow: 0 0 2px #000;
   z-index: 0;
+  white-space: break-spaces;
 }
 
 canvas {

@@ -11,6 +11,11 @@ class Ayame extends Actor {
 
     chantLevel = 0;
 
+    angle = null;
+
+    rasetsu = null;
+    asura = null;
+
     constructor(pos, maxHealth) {
         super(pos);
         this.maxHealth = maxHealth;
@@ -23,6 +28,7 @@ class Ayame extends Actor {
     }
 
     takeHit = (game, other) => {
+        if (this.phase === 'charge') return;
         if (!this.invicibility) {
             this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             this.shakeBuffer = 15;
@@ -31,8 +37,14 @@ class Ayame extends Actor {
             game.playSound('damage');
             
             if (!this.health) {
+                this.isUpsideDown = false;
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
                 game.score += 5000;
+
+                if (other instanceof Arrow && other.reflected) {
+                    localStorage.setItem('nuinui-save-achievement-14', true);
+                    game.updateAchievements();
+                }
             } else {
                 game.score += 100;
                 this.invicibility = 30;
@@ -47,100 +59,134 @@ class Ayame extends Actor {
     }
 
     idlePhase = game => {
-        // const flare = game.scene.actors.find(actor => actor instanceof Flare);
-        // if (this.phaseBuffer >= 31) {
-        //     if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
-        //         if (!game.scene.actors.find(a => a instanceof IceShield && a.originActor === this)) {
-        //             this.phase = 'shield';
-        //             this.setAnimation('charge');
-        //         } else if (this.pos.distance(flare.pos) < 16 * 8) {
-        //             this.phase = 'wind';
-        //             this.setAnimation('charge');
-        //         } else {
-        //             this.phase = 'attack';
-        //         }
-        //     } else {
-        //         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
-        //         this.phase = 'move';
-        //         game.playSound("jump");
-        //         if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
-        //         else this.moveDir = Math.random() > .5 ? 1 : -1;
-        //         this.moveAttack = Math.random() > .25;
-        //         this.vel.y = this.moveAttack ? -5 : -4;
-        //     }
-        // }
-    }
+        const flare = game.scene.actors.find(actor => actor instanceof Flare);
 
-    attackPhase = game => {
-        if (this.phaseBuffer > 29 && !(this.phaseBuffer % 6)) {
-            const i = Math.floor((this.phaseBuffer - 30) / 6);
-            const angle = i * (Math.PI / 8) * (this.dir ? 1 : -1) + (!this.dir ? Math.PI : 0);
-            const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-3);
-            const iceSpike = new Bullet(CollisionBox.center(this).plus(new Vector2(vel.x * 10, vel.y * 10 - 8)), vel, this);
-            iceSpike.angle = angle;
-            game.scene.actors.push(iceSpike);
-        }
-
-        if (this.phaseBuffer === 89) {
-            this.lastMove = this.phase;
-            this.phase = 'idle';
-        }
-    }
-
-    shieldPhase = game => {
-        if (this.phaseBuffer === 30) {
-            for (let i = 0; i < 4; i++) {
-                game.scene.actors.push(new IceShield(CollisionBox.center(this), Math.PI / 2 * i, this));
+        if (this.vel.x) {
+            game.scene.particles.smoke_white(new Vector2(this.pos.x + this.size.x / 2, this.pos.y + this.size.y), new Vector2(0, 0), 0);
+            this.vel.x *= .8;
+            if (Math.abs(this.vel.x) < .75) {
+                this.vel.x = 0;
             }
         }
-        if (this.phaseBuffer === 60) {
+
+        if (this.phaseBuffer >= (this.health < this.maxHealth * .5 ? 10 : 30)) {
+            if (Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : .5)) {
+                if (game.scene.actors.some(a => a instanceof Arrow) && !game.scene.actors.some(a => a instanceof ATField)) {
+                    this.phase = 'shield';
+                    this.setAnimation('idle');
+                } else if (this.pos.distance(flare.pos) < 16 * 8) {
+                    this.phase = 'attack';
+                    this.setAnimation('focus');
+                // } else {
+                //     this.phase = 'attack';
+                }
+            } else {
+                this.maxMoveCount = this.health < this.maxHealth * .25 ? 6 : (this.health < this.maxHealth * .75 ? 4 : 2);
+                this.moveCount = this.maxMoveCount;
+                this.phase = 'focus';
+                this.setAnimation('focus');
+            }
+        }
+    }
+
+    focusPhase = game => {
+        // const flare = game.scene.actors.find(actor => actor instanceof Flare);
+        
+        this.angle = (Math.PI * .5 + Math.PI * .25 * (this.dir ? -1 : 1)) * (this.isUpsideDown ? 1 : -1);
+        if (this.vel.x) {
+            game.scene.particles.smoke_white(new Vector2(this.pos.x + this.size.x / 2, this.pos.y + this.size.y), new Vector2(0, 0), 0);
+            this.vel.x *= .8;
+            if (Math.abs(this.vel.x) < .75) {
+                this.vel.x = 0;
+            }
+        }
+
+        if (!(this.phaseBuffer % 4)) game.scene.particles.charge(CollisionBox.center(this));
+        if (this.phaseBuffer >= (this.moveCount < this.maxMoveCount ? (this.isUpsideDown ? 12 : 20) : 60)) {
+
+            this.moveCount--;
             this.lastMove = this.phase;
-            this.phase = 'idle';
+            this.phase = 'move';
+            this.vel = new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(12);
+            game.playSound('miko_kick');
+        }
+    }
+
+    movePhase = game => {
+        game.scene.particles.smoke_spirit(CollisionBox.center(this), new Vector2(0, 0), 0);
+        if (this.isGrounded || this.isCeilling) {
+            this.lastMove = this.phase;
+            this.setAnimation('crouch');
+            this.phase = this.moveCount ? 'focus' : 'idle';
         }
     }
     
-    windPhase = game => {
+    attackPhase = game => {
         if (this.phaseBuffer === 30) {
-            game.scene.iceWind = 120;
-            game.scene.iceWindDir = Math.random() > .5;
-            // game.playSound("miko_chant");
+            this.rasetsu = new Sword(CollisionBox.center(this).plus(new Vector2(-12, -12)), this, 'rasetsu');
+            game.scene.actors.push(this.rasetsu);
+            this.asura = new Sword(CollisionBox.center(this).plus(new Vector2(-12, -12)), this, 'asura');
+            game.scene.actors.push(this.asura);
         }
+
         if (this.phaseBuffer === 60) {
+            this.lastMove = this.phase;
+
+            const flare = game.scene.actors.find(actor => actor instanceof Flare);
+            if (this.pos.distance(flare.pos) < 16 * 5) {
+                this.phase = 'throw';
+                this.setAnimation('crouch');
+            } else {
+                this.phase = 'charge';
+                this.setAnimation('charge');
+                this.vel = new Vector2(12 * (this.dir ? 1 : -1), 0);
+                game.playSound('slash');
+            }
+        }
+    }
+
+    throwPhase = game => {
+        if (this.phaseBuffer === 110) {
+            game.scene.actors = game.scene.actors.filter(a => !(a instanceof Sword));
+            this.rasetsu = null;
+            this.asura = null;
+
             this.lastMove = this.phase;
             this.setAnimation('idle');
             this.phase = 'idle';
         }
     }
-
-    movePhase = game => {
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
-        
-        this.vel.x = this.moveDir * this.moveSpeed * (this.moveAttack ? .5 : 1);
-        if (this.moveAttack) {
-            if (Math.abs(this.vel.y) < 1) this.vel = new Vector2(this.vel.x * .5, this.vel.y - this.gravity * .9 * (1 - Math.abs(this.vel.y)));
-
-            [20, 35, 50].forEach((frame, i) => {
-                if (this.phaseBuffer === frame) {
-                    const flare = game.scene.actors.find(actor => actor instanceof Flare);
-                    const p1 = CollisionBox.center(flare);
-                    const p2 = CollisionBox.center(this).plus(new Vector2(16 * (i === 0 ? 1 : i === 1 ? -1 : 0), i === 2 ? -16 : 0));
-                    const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-                    const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-3);
-                    const iceSpike = new Bullet(p2, vel, this);
-                    iceSpike.angle = angle;
-                    game.scene.actors.push(iceSpike);
-                }
-            })
+    
+    chargePhase = game => {
+        if (this.vel.x) {
+            game.scene.particles.smoke_white(new Vector2(this.pos.x + this.size.x / 2, this.pos.y + this.size.y), new Vector2(0, 0), 0);
+            this.vel.x *= (this.health < this.maxHealth * .5 ? .97 : .95);
         }
 
-        if (this.phaseBuffer > 3 && this.isGrounded) {
+        if (Math.abs(this.vel.x) < .75) {
+
+            game.scene.actors = game.scene.actors.filter(a => !(a instanceof Sword));
+            this.rasetsu = null;
+            this.asura = null;
+
+            this.vel.x = 0;
             this.lastMove = this.phase;
+            this.setAnimation('crouch');
             this.phase = 'idle';
-            this.vel = new Vector2(0, 0);
         }
-        this.setAnimation(this.vel.y ? 'jump' : 'idle');
     }
     
+    shieldPhase = game => {
+        if (this.phaseBuffer === 30) {
+            game.scene.actors.push(new ATField(new Vector2(this.pos.x + (this.dir ? this.size.x : -24), this.pos.y - 16), this.dir));
+        }
+
+        if (this.phaseBuffer === 60) {
+            this.lastMove = this.phase;
+            this.phase = 'idle';
+        }
+    }
+
     setAnimation = animation => {
         this.animation = animation;
         this.animationFrame = 0;
@@ -152,7 +198,7 @@ class Ayame extends Actor {
         if (this.phase) this[`${this.phase}Phase`](game);
         // if (this.phase !== 'chant' && this.health > this.maxHealth / 2) this.chantPhase(game);
 
-        this.vel.y = Math.round((this.vel.y + this.gravity) * 100) / 100;
+        if (this.phase === 'defeated') this.vel.y = Math.round((this.vel.y + this.gravity) * 100) / 100;
         this.vel = new Vector2(Math.max(-8, Math.min(8, this.vel.x)), Math.max(-8, Math.min(8, this.vel.y)));
 
         const newCollisionBox = { pos:new Vector2(this.pos.x + this.vel.x, this.pos.y), size:this.size }
@@ -162,13 +208,16 @@ class Ayame extends Actor {
             while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, game.scene.currentSection.collisions).length) {
                 this.pos.x = this.pos.x + Math.sign(this.vel.x);
             }
-            this.moveDir *= -1;
+            this.dir = !this.dir;
             this.vel.x = 0;
         }
 
         this.isGrounded = false;
-        if (CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, game.scene.currentSection.collisions).length) {
-            this.isGrounded = CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, game.scene.currentSection.collisions).some(c => c.other.pos.y > this.pos.y);
+        this.isCeilling = false;
+        const updatedYCollisionBox = { pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size };
+        if (CollisionBox.intersectingCollisionBoxes(updatedYCollisionBox, game.scene.currentSection.collisions).length) {
+            this.isGrounded = CollisionBox.intersectingCollisionBoxes(updatedYCollisionBox, game.scene.currentSection.collisions).some(c => c.other.pos.y > this.pos.y);
+            this.isCeilling = CollisionBox.intersectingCollisionBoxes(updatedYCollisionBox, game.scene.currentSection.collisions).some(c => c.other.pos.y < this.pos.y);
             this.pos.y = Math.round(this.pos.y);
             while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + Math.sign(this.vel.y)), size:this.size }, game.scene.currentSection.collisions).length) {
                 this.pos.y = this.pos.y + Math.sign(this.vel.y);
@@ -176,14 +225,27 @@ class Ayame extends Actor {
             if (this.health) this.vel.y = 0;
         }
 
+        this.isUpsideDown = this.isCeilling ? true : this.isGrounded ? false : this.isUpsideDown;
+
         this.pos.y = Math.round((this.pos.y + this.vel.y) * 100) / 100;
         this.pos.x = Math.round((this.pos.x + this.vel.x) * 100) / 100;
 
-        if (flare.playerControl && this.health && this.animation === 'idle') this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
+        if (flare.playerControl && !this.isUpsideDown && this.health && ['idle', 'focus', 'attack'].includes(this.phase)) this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
+
+        if (this.health < this.maxHealth * .5 && Math.random() > .9) {
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(0, -2), 1);
+            }
+        }
+        if (this.phase === 'charge') {
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(-this.vel.x, 0), 0);
+            }
+        }
 
         if (this.invicibility) this.invicibility--;
         this.animationFrame++;
@@ -197,7 +259,7 @@ class Ayame extends Actor {
     }
 
     draw = (game, cx) => {
-        if (this.invicibility % 2) return;
+        if (this.invicibility % 2 || this.phase === 'move' || (this.phase === 'charge' && this.frameCount % 2)) return;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (!this.dir) {
@@ -205,13 +267,96 @@ class Ayame extends Actor {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
+        if (this.isUpsideDown) {
+            cx.translate(0, this.size.y / 2);
+            cx.scale(1, -1);
+            cx.translate(0, -this.size.y / 2);
+        }
         const offset = new Vector2(16, 16);
         const xSize = 48;
         const spd = this.animation === 'chant' ? 16 : 1;
         const frame = this.animation === 'chant' ? 4 : 1;
-        cx.drawImage(game.assets.images[`sp_ayame_${this.animation}`],
-            (Math.floor(this.animationFrame / spd) % frame) * xSize, 0, 48, 48,
-            -offset.x, -offset.y, 48, 48);
+
+        // swords
+        if (!this.asura && !this.rasetsu) cx.drawImage(game.assets.images['sp_ayame_swords'], 0, 0, 48, 32, -17, -2, 48, 32);
+
+        // back
+        if (this.phase !== 'charge') cx.drawImage(game.assets.images['sp_ayame_back'], 0, 0, 32, 20, -8, 11, 32, 20);
+
+        // animation
+        if (this.phase === 'charge') {
+            cx.drawImage(game.assets.images[`sp_ayame_${this.animation}`],
+                (Math.floor(this.animationFrame / spd) % frame) * xSize, 0, 96, 48,
+                -offset.x - 48, -offset.y, 96, 48);
+        } else {
+            cx.drawImage(game.assets.images[`sp_ayame_${this.animation}`],
+                (Math.floor(this.animationFrame / spd) % frame) * xSize, 0, 48, 48,
+                -offset.x, -offset.y, 48, 48);
+        }
+        cx.restore();
+
+        // focus
+        // if (this.angle !== null) {
+        //     const p1 = CollisionBox.center(this);
+        //     const p2 = p1.plus(new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(16));
+        //     const p3 = p1.plus(new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(32));
+        //     cx.strokeStyle = '#0ff';
+        //     cx.beginPath();
+        //     cx.moveTo(p2.x, p2.y);
+        //     cx.lineTo(p3.x, p3.y);
+        //     cx.stroke();
+        // }
+    }
+}
+
+class Sword extends Actor {
+    size = new Vector2(24, 24);
+    vel = new Vector2(0, 0);
+
+    constructor(pos, ayame, type) {
+        super(pos);
+        this.ayame = ayame;
+        this.type = type;
+        this.randomAngle = Math.floor(Math.random() * 360);
+    }
+    
+    checkHit = (game, collisionBox) => {
+        const collision = CollisionBox.intersects(this, collisionBox);
+        return collision;
+    }
+    
+    takeHit = (game, other) => {
+        this.shakeBuffer = 15;
+        game.playSound('no_damage');
+    }
+
+    update = game => {
+        this.throwPhase = this.ayame.phase === 'throw';
+        if (this.throwPhase) {
+            this.pos.x += Math.cos((this.frameCount / 256) * (180 / Math.PI)) * (this.type === 'asura' ? 1 : -1) * 8;
+        } else {
+            this.pos.x += Math.cos((this.frameCount / 512) * (180 / Math.PI)) * (this.type === 'asura' ? 1 : -1);
+        }
+
+        this.pos = this.pos.plus(this.ayame.vel);
+
+        if (this.type !== 'asura' && Math.random() > .75) {
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 8 - 4, Math.random() * 8 - 4)), new Vector2(-this.vel.x, 0), 0);
+            }
+        }
+
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        if (this.ayame.phase === 'charge') return;
+        if (this.throwPhase && this.frameCount % 2) return;
+        cx.save();
+        cx.translate(Math.round(this.pos.x + this.size.x / 2), Math.round(this.pos.y + this.size.y / 2));
+        if (this.type === 'asura') cx.scale(-1, 1);
+        cx.rotate((this.randomAngle + this.frameCount * (this.throwPhase ? 30 : 15)) * Math.PI / 180);
+        cx.drawImage(game.assets.images[`sp_ayame_${this.type}`], 0, 0, 38, 38, -19, -19, 38, 38);
         cx.restore();
     }
 }

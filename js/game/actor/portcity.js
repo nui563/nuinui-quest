@@ -139,7 +139,14 @@ class Cannon extends Actor {
             if (this.dir) vel.x *= -1;
 
             const pos = CollisionBox.center(this).plus(new Vector2(vel.x * 4, vel.y * 4 - 4));
-            game.scene.actors.push(new Bullet(pos, vel, this));
+            const bullet = new Bullet(pos, vel, this);
+            if (game.currentStage === 3) {
+                bullet.pos = bullet.pos.plus(new Vector2(vel.x * 8 * (this.dir ? 0.5 : 1.75), vel.y * 8));
+                bullet.angle = this.angle * (this.dir ? -1 : 1) + (this.dir ? Math.PI : 0);
+                bullet.size = new Vector2(16, 16);
+                bullet.iceSpike = true;
+            }
+            game.scene.actors.push(bullet);
             if (CollisionBox.intersects(this, game.scene.view)) game.playSound("pew");
 
             this.angle += (Math.PI / 7) * this.angleOrder;
@@ -167,7 +174,7 @@ class Cannon extends Actor {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
-        cx.drawImage(game.assets.images['sp_cannon'], 48 * this.angleIndex + (Math.floor(this.frameCount / 16) % 2) * 24, 0, 24, 32, 0, -8, 24, 32);
+        cx.drawImage(game.assets.images['sp_cannon'], 48 * this.angleIndex + (Math.floor(this.frameCount / 16) % 2) * 24, game.currentStage === 3 ? 32 : 0, 24, 32, 0, -8, 24, 32);
         cx.restore();
     }
 }

@@ -59,6 +59,10 @@ class Game {
             document.getElementById('game-container').style.boxShadow = '0 0 2px 1px #08f';
         }
 
+        if (!SAVEOK) {
+            document.getElementById('game-container').innerHTML = 'The saving system is incompatible with your browser, please exit incognito mode or go to <a href="https://nuinui-quest.net" target="_blank">nuinui-quest.net</a>';
+        }
+
         // Audio
         this.audioCtx = assets.audioCtx;
 
@@ -123,7 +127,7 @@ class Game {
     }
 
     updateItems = () => {
-        ['bow', 'gun', 'clock', 'fire', 'rocket', 'petal', 'sword', 'dual', 'shield'].forEach((item, i) => {
+        ['bow', 'gun', 'clock', 'jump', 'fire', 'rocket', 'petal', 'sword', 'shield', 'dual'].forEach((item, i) => {
             if (localStorage.getItem(`nuinui-save-item-${item}`)) {
                 const elem = document.getElementById(`save-item-${i+1}`);
                 elem.classList.add("unlocked");
