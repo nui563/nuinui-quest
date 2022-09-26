@@ -59,23 +59,23 @@ class InputManager {
         switch (GAMEPADTYPE) {
             case 'a':
                 return {
-                    left: gamepad.axes[0] < -0.5 || gamepad.buttons[14].value,
-                    right: gamepad.axes[0] > 0.5 || gamepad.buttons[15].value,
-                    up: gamepad.axes[1] < -0.5 || gamepad.buttons[12].value,
-                    down: gamepad.axes[1] > 0.5 || gamepad.buttons[13].value,
-                    jump: gamepad.buttons[1].value || gamepad.buttons[2].value,
-                    attack: gamepad.buttons[3].value,
-                    item: gamepad.buttons[0].value
+                    left: (gamepad.axes[0] && gamepad.axes[0] < -0.5) || (gamepad.buttons[14] && gamepad.buttons[14].value),
+                    right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
+                    up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
+                    down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
+                    jump: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
+                    attack: (gamepad.buttons[3] && gamepad.buttons[3].value),
+                    item: (gamepad.buttons[0] && gamepad.buttons[0].value)
                 }
             case 'b':
                 return {
-                    left: gamepad.axes[0] < -0.5 || gamepad.buttons[14].value,
-                    right: gamepad.axes[0] > 0.5 || gamepad.buttons[15].value,
-                    up: gamepad.axes[1] < -0.5 || gamepad.buttons[12].value,
-                    down: gamepad.axes[1] > 0.5 || gamepad.buttons[13].value,
-                    jump: gamepad.buttons[0].value,
-                    attack: gamepad.buttons[1].value || gamepad.buttons[2].value,
-                    item: gamepad.buttons[3].value
+                    left: (gamepad.axes[0] && gamepad.axes[0] < -0.5) || (gamepad.buttons[14] && gamepad.buttons[14].value),
+                    right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
+                    up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
+                    down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
+                    jump: (gamepad.buttons[0] && gamepad.buttons[0].value),
+                    attack: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
+                    item: (gamepad.buttons[3] && gamepad.buttons[3].value)
                 }
             // case 'c':
             //     return {
