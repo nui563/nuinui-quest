@@ -1,6 +1,5 @@
 class Game {
     frameCount = 0;
-    drawFrameCount = 0;
 
     width = 16 * 20;
     height = 16 * 12;
@@ -19,9 +18,15 @@ class Game {
     score = 0;
     scoreDisplay = 0;
 
-    demoCleared = false;
+    // noelMode = true;
 
+    isPaused = false;
+    manualPause = false;
     timer = 0;
+
+    tick = 60;
+    fpsSkipMode = false;
+    drawBuffer = false;
 
     constructor(assets, data) {
         // Assets
@@ -60,21 +65,22 @@ class Game {
         }
 
         if (!SAVEOK) {
-            document.getElementById('game-container').innerHTML = 'The saving system is incompatible with your browser, please exit incognito mode or go to <a href="https://nuinui-quest.net" target="_blank">nuinui-quest.net</a>';
+            document.getElementById('game-container').innerHTML = 'The saving system is incompatible with your navigator, please enable cookies/localstorage';
+        }
+
+        document.getElementById('pause-icon').onclick = () => this.togglePause();
+
+        document.getElementById('fps-checkbox').onclick = () => {
+            this.fpsSkipMode = !this.fpsSkipMode;
+            console.log('fps skip mode:', this.fpsSkipMode);
         }
 
         // Audio
         this.audioCtx = assets.audioCtx;
 
-        // Init animation
-        this.skipTicks = 1000 / 60;
-        this.maxFrameSkip = 10;
-        this.startTime = performance.now();
-        this.nextGameTick = this.startTime;
-
         // DEBUG
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('stage')) this.currentStage = parseInt(urlParams.get('stage')) - 1;
+        // const urlParams = new URLSearchParams(window.location.search);
+        // if (urlParams.has('stage')) this.currentStage = parseInt(urlParams.get('stage')) - 1;
 
         // Init stage selection
         this.scene = new Scene(this, JSON.parse(this.data).game.stages[this.currentStage]);
@@ -87,32 +93,43 @@ class Game {
     start = () => {
         // Manage pausing game when window out of focus
         document.onvisibilitychange = () => {
-            if (document.visibilityState === 'hidden') this.pause();
-            else if (this.isPaused) this.resume();
+            if (document.visibilityState === 'hidden' && !this.isPaused) this.pause();
+            else if (this.isPaused && !this.manualPause) this.resume();
         };
         if (document.visibilityState !== 'hidden') this.run();
         else this.isPaused = true;
     }
 
+    togglePause = () => {
+        this.manualPause = !this.manualPause;
+        if (this.isPaused) this.resume();
+        else this.pause();
+    }
+
     pause = () => {
         console.log('game paused');
         if (this.audioCtx.state === 'running') this.audioCtx.suspend();
+        clearInterval(this.updateInterval);
+        this.updateInterval = null;
         this.isPaused = true;
+        document.getElementById('pause-icon').firstChild.src = "./img/icon_resume.png";
     }
 
     resume = () => {
         console.log('resumed');
         if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
         this.isPaused = false;
+        document.getElementById('pause-icon').firstChild.src = "./img/icon_pause.png";
         this.run();
     }
 
     run = () => {
-        this.nextGameTick = performance.now();
-        this.animation = requestAnimationFrame(this.loop);
+        this.animation = requestAnimationFrame(this.draw);
+        this.updateInterval = setInterval(() => this.update(), 1000 / this.tick);
     }
 
     update = () => {
+        if (this.drawBuffer) this.drawBuffer = false;
         this.soundFrame = {};
         this.keys = this.inputManager[KEYMODE === 'keyboard' ? 'getKeyboardKeys' : 'getGamepadKeys']();
         this.scene.update(this);
@@ -137,6 +154,12 @@ class Game {
                         Array.from(document.getElementsByClassName('item-selected')).forEach(a => a.classList.remove('item-selected'));
                         elem.classList.add('item-selected');
                         flare.weapon = item;
+                        if (item === 'bow') {
+                            flare.maxHealth = 1;
+                            flare.health = 1;
+                        } else {
+                            flare.maxHealth = 16;
+                        }
                         this.playSound('wakeup');
                     }
                 }
@@ -145,6 +168,7 @@ class Game {
     }
 
     updateAchievements = () => {
+        if (Object.entries(localStorage).filter(a => a[0].search("nuinui-save-achievement-") !== -1 && a[1]).length === 20) localStorage.setItem('nuinui-save-item-bow', true);
         Array.from(document.getElementsByClassName('save-achievement')).forEach((elem, i) => {
             if (localStorage.getItem(`nuinui-save-achievement-${i+1}`)) elem.classList.add('unlocked');
         });
@@ -158,8 +182,11 @@ class Game {
     }
 
     draw = () => {
-        this.scene.draw(this);
-        this.drawFrameCount++;
+        this.animation = requestAnimationFrame(this.draw);
+        if(!this.drawBuffer && (!this.fpsSkipMode || this.scene.frameCount % 2)) {
+            this.drawBuffer = true;
+            this.scene.draw(this);
+        }
     }
 
     playSound = id => {
@@ -231,22 +258,12 @@ class Game {
         }
     }
 
-    loop = timestamp => {
-        let loops = 0;
-        while (timestamp - this.startTime > this.nextGameTick && loops < this.maxFrameSkip) {
-            this.update();
-            this.nextGameTick += this.skipTicks;
-            loops++;
-        }
-        if (loops) this.draw();
-        if (!this.isPaused) this.animation = requestAnimationFrame(this.loop);
-    }
-
     // Resize display canvas
     resize = () => {
         const scaleX = window.innerWidth / this.width;
         const scaleY = window.innerHeight / this.height;
         const scaleToFit = Math.floor(Math.max(1, Math.min(scaleX, scaleY)));
+        // const scaleToFit = Math.max(1, Math.min(scaleX, scaleY));
         document.getElementById('game-container').style.transform = 'scale(' + (SCREENDISPLAY ? SCREENDISPLAY : scaleToFit) + ')';
     }
 }

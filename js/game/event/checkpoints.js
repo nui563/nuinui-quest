@@ -18,9 +18,20 @@ class Checkpoint extends Actor {
         game.playSound('level_start');
         game.scene.particles.explosion(this.pos);
         game.scene.shakeBuffer = 15;
+        // const flare = game.scene.actors.find(actor => actor instanceof Flare);
+        // flare.health = flare.maxHealth;
+    }
+
+    checkHit = (game, collisionBox) => {
+        if (collisionBox instanceof Comet) return null;
+        if (collisionBox.type === 'mace') return null;
+        if (collisionBox.type === 'dual') return null;
+        if (collisionBox instanceof Arrow && collisionBox.type === 'sword') return null;
+        return CollisionBox.intersects(this, collisionBox);
     }
 
     takeHit = (game, other) => {
+
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
@@ -39,7 +50,7 @@ class Checkpoint extends Actor {
 
     respawn = (game, scene) => {
         scene.currentSection = scene.sections[this.section];
-        const flare = new Flare(this.pos.plus(new Vector2(0, -8)), new Vector2(16, 32));
+        const flare = new (game.noelMode ? Noel : Flare)(this.pos.plus(new Vector2(0, -8)), new Vector2(16, 32));
         flare.setAnimation('idle');
         flare.playerControl = true;
         flare.dir = this.dir;
@@ -51,106 +62,4 @@ class Checkpoint extends Actor {
 
         if (this.bgm) game.playBGM(this.bgm);
     }
-}
-
-const CHECKPOINT_STAGE_1_2 = (game, scene) => {
-    scene.currentSection = scene.sections[13];
-    const flare = new Flare(new Vector2(149.5 * 16, 16 * 16), new Vector2(16, 32));
-    flare.setAnimation('idle');
-    flare.playerControl = true;
-    flare.dir = false;
-    scene.enableHUD = true;
-    scene.actors.push(flare);
-    
-    scene.view.target = flare;
-    scene.miniBossCleared = true;
-
-    game.playBGM('serious_&_go');
-}
-
-const CHECKPOINT_STAGE_2_0 = (game, scene) => {
-    scene.currentSection = scene.sections[5];
-    const flare = new Flare(new Vector2(146.5 * 16, 4 * 16), new Vector2(16, 32));
-    flare.setAnimation('idle');
-    flare.playerControl = true;
-    flare.dir = true;
-    scene.enableHUD = true;
-    scene.actors.push(flare);
-    
-    scene.view.target = flare;
-
-    game.playBGM('red_sus');
-}
-
-const CHECKPOINT_STAGE_2_1 = (game, scene) => {
-    scene.currentSection = scene.sections[10];
-    const flare = new Flare(new Vector2(269.5 * 16, 31 * 16), new Vector2(16, 32));
-    flare.setAnimation('idle');
-    flare.playerControl = true;
-    flare.dir = true;
-    scene.enableHUD = true;
-    scene.actors.push(flare);
-    
-    scene.view.target = flare;
-    scene.miniBossCleared = true;
-
-    game.playBGM('red_sus');
-}
-
-const CHECKPOINT_STAGE_3_0 = (game, scene) => {
-    scene.currentSection = scene.sections[3];
-    const flare = new Flare(new Vector2(129.5 * 16, 68 * 16), new Vector2(16, 32));
-    flare.setAnimation('idle');
-    flare.playerControl = true;
-    flare.dir = true;
-    scene.enableHUD = true;
-    scene.actors.push(flare);
-    
-    scene.view.target = flare;
-
-    game.playBGM('aquamarine_bay');
-}
-
-const CHECKPOINT_STAGE_3_1 = (game, scene) => {
-    scene.currentSection = scene.sections[3];
-    const flare = new Flare(new Vector2(89.5 * 16, 8 * 16), new Vector2(16, 32));
-    flare.setAnimation('idle');
-    flare.playerControl = true;
-    flare.dir = false;
-    scene.enableHUD = true;
-    scene.actors.push(flare);
-    
-    scene.view.target = flare;
-    scene.miniBossCleared = true;
-
-    game.playBGM('aquamarine_bay');
-}
-
-const CHECKPOINT_STAGE_4_0 = (game, scene) => {
-    scene.currentSection = scene.sections[7];
-    const flare = new Flare(new Vector2(83 * 16, 32 * 16), new Vector2(16, 32));
-    flare.setAnimation('idle');
-    flare.playerControl = true;
-    flare.dir = true;
-    scene.enableHUD = true;
-    scene.actors.push(flare);
-    
-    scene.view.target = flare;
-
-    // game.playBGM('aquamarine_bay');
-}
-
-const CHECKPOINT_STAGE_4_1 = (game, scene) => {
-    scene.currentSection = scene.sections[12];
-    const flare = new Flare(new Vector2(270 * 16, 6 * 16), new Vector2(16, 32));
-    flare.setAnimation('idle');
-    flare.playerControl = true;
-    flare.dir = true;
-    scene.enableHUD = true;
-    scene.actors.push(flare);
-    
-    scene.view.target = flare;
-    scene.miniBossCleared = true;
-
-    // game.playBGM('aquamarine_bay');
 }

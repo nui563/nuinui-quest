@@ -1,6 +1,8 @@
 class Assets {
     images = new Object;
     imageList = [
+        'ms_flare',
+        'ms_miko',
         // Actors
         'sp_flare_idle',
         'sp_flare_jump',
@@ -22,6 +24,9 @@ class Assets {
         'sp_flare_slide',
         "sp_flare_jetski",
         "sp_flare_hit",
+        "sp_flare_sit",
+        "sp_flare_back",
+        "sp_flare_chant",
 
         'sp_ponytail',
         'sp_ribbon',
@@ -47,6 +52,11 @@ class Assets {
         'sp_miko_sniper',
         'sp_miko_chant',
         'sp_miko_kick',
+        'sp_miko_evil',
+        'sp_miko_charge',
+        'sp_miko_sit',
+        'sp_miko_hit2',
+        'sp_miko_release',
 
         'sp_aqua_sleep',
         'sp_aqua_attack',
@@ -54,6 +64,7 @@ class Assets {
         'sp_aqua_walk_aggro',
         'sp_aqua_jump',
         'sp_aqua_jump_aggro',
+        'sp_aqua_hit',
 
         'sp_marine_idle',
         'sp_marine_intro',
@@ -78,8 +89,33 @@ class Assets {
         'sp_ayame_rasetsu',
         'sp_ayame_asura',
 
+        'sp_noel_idle',
         'sp_noel_evil',
+        'sp_noel_hit',
+        'sp_noel_jump',
+        'sp_noel_fall',
+        'sp_noel_slide',
+        'sp_noel_weak',
+        'sp_noel_run',
+        'sp_noel_attack',
+        'sp_noel_aerial',
+        'sp_noel_jetski',
+        "sp_noel_back",
+        
+        'sp_suisei_idle',
+        'sp_suisei_stand',
+        'sp_suisei_axe',
+        'sp_suisei_hit',
 
+        'sp_polka_idle',
+        'sp_polka_charge',
+        'sp_polka_release',
+        'sp_polka_attack',
+
+        'sp_kirito',
+        'sp_stardust',
+        'sp_card',
+        'sp_wand',
         'sp_mace',
         'sp_vending_machine',
         'sp_vapor_block',
@@ -99,6 +135,8 @@ class Assets {
         'sp_oni',
         'sp_thunder',
 
+        'sp_hand',
+        'sp_watame',
         'sp_nousagi',
         'sp_nousakumo',
         'sp_35p',
@@ -113,6 +151,7 @@ class Assets {
         "sp_scythe",
         'sp_rock',
         'sp_atfield',
+        'sp_throne',
 
         "sp_checkpoint",
         "sp_clock",
@@ -133,7 +172,33 @@ class Assets {
         "sp_jetski_item",
         "sp_boat",
 
+        "sp_comet",
+        "sp_axe",
+        "sp_axe2",
+        "sp_axe3",
+        "sp_axe_chain",
+        "sp_axe2_chain",
+        "sp_axe3_chain",
+        "sp_dragon",
+        "sp_crystal",
+        "sp_block",
+        "sp_wing",
+        "sp_bucket",
+
+        "sp_demon_ribcage",
+        "sp_demon_spine",
+        "sp_demon_hand",
+        "sp_demon_head",
+        "sp_demon_laser",
+        "sp_demon_orb",
+
         // Stage
+        'bg_intro1',
+        'bg_intro2',
+        'bg_intro3',
+        'bg_shiraken',
+        'bg_shikemura',
+
         'ts_forest',
         'bg_forest',
 
@@ -150,18 +215,19 @@ class Assets {
 
         'ts_westa',
         'bg_westa',
+        'bg_westa2',
+        'bg_sword',
+        'tmp',
 
         // HUD
         'ui_start_label',
         'ui_forest_label',
         'ui_healthbar',
-        'ui_healthbar_pekora',
-        'ui_healthbar_miko',
-        'ui_healthbar_marine',
-        'ui_healthbar_ayame',
-        'ui_healthbar_fubuki',
+        'ui_healthbar_vertical',
+        'ui_boss_icon',
         'ui_slot',
         'ui_slot2',
+        'ui_slot3',
         'ui_level_icon',
         'ui_level_label',
         'ui_arrow_down',
@@ -174,12 +240,21 @@ class Assets {
         'ui_digit',
         'ui_score',
         'ui_timer',
+        'ui_text_bubble',
+        'ui_title',
+        'ui_tuto_1',
+        'ui_tuto_2',
+        'ui_tuto_3',
+        'ui_tuto_4',
+        'ui_bad_end',
+        'ui_end',
 
         // Particles
         'vfx_explosion',
         'vfx_smoke_white',
         'vfx_smoke_black',
         'vfx_smoke_spirit',
+        'vfx_smoke_pink',
         'vfx_jump',
         'vfx_run',
         'vfx_step',
@@ -198,7 +273,8 @@ class Assets {
         'vfx_ray_4',
         'vfx_transition',
         'vfx_rapid_fire',
-        'vfx_water_trail'
+        'vfx_water_trail',
+        'vfx_mace'
     ];
 
     audioList = [
@@ -214,7 +290,9 @@ class Assets {
         { id: 'damage' },
         { id: 'rumble' },
         { id: 'charge' },
+        { id: 'charge2' },
         { id: 'pew' },
+        { id: 'pew2' },
         { id: 'boss_move' },
         { id: 'peko' },
         { id: 'fanfare' },
@@ -231,7 +309,9 @@ class Assets {
         { id: 'slash' },
         { id: 'gun' },
         { id: 'death' },
-        { id: 'stage_clear' }
+        { id: 'stage_clear' },
+        { id: 'explosion' },
+        { id: 'laser' }
     ]
     
     bgmData = [
@@ -282,6 +362,38 @@ class Assets {
         {
             id: "dethroneworld",
             loopStart: 12.467
+        },
+        {
+            id: "corrupted_partner",
+            loopStart: 11.817
+        },
+        {
+            id: "axe_dungeon",
+            loopStart: 19.283
+        },
+        {
+            id: "axe_dungeon_tatakae",
+            loopStart: 0.383
+        },
+        {
+            id: "polkata_fugue",
+            loopStart: 3.083
+        },
+        {
+            id: "polkata_fugue_tatakae",
+            loopStart: 0.383
+        },
+        {
+            id: "bridging_the_gap",
+            loopStart: 14.750
+        },
+        {
+            id: "elite_devil",
+            loopStart: 7.283
+        },
+        {
+            id: "unlimited",
+            loopStart: 24.417
         }
     ];
     

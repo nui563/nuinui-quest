@@ -9,7 +9,7 @@ class Actor {
     update = game => this.frameCount++;
 
     draw = (game, cx) => {
-        if (DEBUGMODE) this.displayCollisionBox(game);
+        if (DEBUGMODE) this.displayCollisionBox(game, cx);
     }
 
     checkHit = (game, collisionBox) => {
@@ -130,32 +130,37 @@ class Arrow extends Projectile {
         }
         if (this.type === 'petal') this.dir = Math.random() > .5;
         if (this.type === 'rocket') this.order = Math.random() > .5 ? 1 : -1;
-        this.damage = ['rocket', 'sword'].includes(this.type) ? 3 : ['fire'].includes(this.type) ? 2 : 1;
+        if (this.type !== 'mace') this.damage = this.type === 'dual' ? 2 : ['rocket', 'sword'].includes(this.type) ? 5 : ['fire'].includes(this.type) ? 3 : 1;
+        if (this.type === 'mace2') this.damage = 32;
         if (this.type === 'bullet') {
             this.size = new Vector2(4, 4);
-            this.damage = .5;
         }
     }
     
     update = game => {
-        if (this.type === 'sword') this.vel.y += .2;
+        if (this.type === 'dual') {
+            if (!(this.frameCount % 20)) game.playSound('slash');
+            this.dir = this.originActor.dir;
+            this.pos = CollisionBox.center(this.originActor).plus(new Vector2(this.dir ? 0 : -this.size.x, -16));
+        }
+        if (this.type === 'sword' || this.type === 'mace2') this.vel.y += .2;
         this.pos = this.pos.plus(this.vel);
         // if (this.frameCount % 2) game.scene.particles.smoke2(CollisionBox.center(this), new Vector2(-Math.sign(this.vel.x), -(Math.sign(this.vel.y) + 1)), 0);
 
         let collision = false;
-        const actorCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || ((this.type === 'fire' && actor instanceof Bullet && actor.iceSpike) ||actor instanceof Rocket || (actor instanceof IceShield && actor.originActor !== this.originActor))) && !(actor instanceof Torche) && !(actor instanceof Heart) && !(actor instanceof ATField) && !(actor instanceof Scythe) && (![this.originActor].includes(actor) || this.reflected) && actor.checkHit(game, this));
+        const actorCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || ((this.type === 'fire' && actor instanceof Bullet && actor.iceSpike) ||actor instanceof Rocket || actor.orb || (actor instanceof IceShield && actor.originActor !== this.originActor))) && !(actor instanceof Torche) && !(actor instanceof Heart) && !(actor instanceof ATField) && !(actor instanceof ShirakenHelper) && !(actor instanceof Scythe) && (![this.originActor].includes(actor) || this.reflected) && actor.checkHit(game, this));
         if (actorCollisions.length) {
             actorCollisions.forEach(collision => {
                 collision.takeHit(game, this);
             });
-            collision = true;
+            if (this.type !== 'dual') collision = true;
             if (this.type === 'rocket') {
                 game.scene.particles.explosion(CollisionBox.center(this));
                 game.scene.shakeBuffer = 4;
                 game.playSound("rumble");
             }
         }
-        else if (!['bullet', 'sword'].includes(this.type) && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
+        else if (!['bullet', 'sword', 'dual', 'mace'].includes(this.type) && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
             collision = true;
             if (this.type === 'rocket') {
                 game.scene.particles.explosion(CollisionBox.center(this));
@@ -166,12 +171,14 @@ class Arrow extends Projectile {
                 game.scene.particles.sparkle_white(CollisionBox.center(this));
             }
         }
-        else if (!CollisionBox.intersects(this, game.scene.view) && !(this.type === 'sword' && this.pos.y < game.scene.view.pos.y)) collision = true;
+        else if (!CollisionBox.intersects(this, game.scene.view) && !(['sword', 'dual'].includes(this.type) && this.pos.y < game.scene.view.pos.y)) collision = true;
 
+        if (this.type === 'dual' && this.frameCount > 9 * 4) collision = true;
+        if (this.type === 'mace') collision = true;
         if (collision) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
         }
-        if (!['petal', 'bullet', 'sword'].includes(this.type)) this.vel.y = 0;
+        if (!['petal', 'bullet', 'sword', 'mace2'].includes(this.type)) this.vel.y = 0;
 
         if (this.type === 'fire' && this.frameCount % 2) game.scene.particles.sparkle_fire(CollisionBox.center(this));
         else if (this.type === 'sword' && !(this.frameCount % 4)) game.scene.particles.sparkle_fire_4(CollisionBox.center(this));
@@ -182,11 +189,14 @@ class Arrow extends Projectile {
             if (!(this.frameCount % 60)) this.order = -this.order;
             game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(this.vel.x > 0 ? -4 : 4, 0)), new Vector2(0, 0), 0);
         }
+
+        if (this.type === 'mace') game.scene.actors = game.scene.actors.filter(actor => !(actor instanceof Bullet && actor.checkHit(game, this)));
         
         this.frameCount++;
     }
 
     draw = (game, cx) => {
+        if (this.type === 'mace') return;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (this.vel.x < 0) {
@@ -194,7 +204,20 @@ class Arrow extends Projectile {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
-        if (this.type === 'sword') {
+        if (this.type === 'dual') {
+            if (!this.dir) {
+                cx.translate(this.size.x / 2, 0);
+                cx.scale(-1, 1);
+                cx.translate(-this.size.x / 2, 0);
+            }
+            cx.drawImage(game.assets.images['sp_stardust'], 160 * Math.floor(this.frameCount / 4), 0, 160, 144, -72, -32, 160, 144);
+        }
+        else if (this.type === 'mace2') {
+            cx.translate(8, 8);
+            cx.rotate(this.frameCount * (Math.PI / 180));
+            cx.drawImage(game.assets.images['sp_mace'], 0, 0, 32, 32, -16, -16, 32, 32);
+        }
+        else if (this.type === 'sword') {
             cx.translate(10, 10);
             cx.rotate(Math.floor(this.frameCount * 16 / 45) * 45 * (Math.PI / 180) * (this.dir ? 1 : -1));
             cx.drawImage(game.assets.images['sp_marine_sword'], -16, -16);
@@ -218,18 +241,19 @@ class Arrow extends Projectile {
 
 class Bullet extends Projectile {
 
-    constructor(pos, vel, originActor) {
+    constructor(pos, vel, originActor, forceBullet) {
         super(pos, new Vector2(4, 4), vel, originActor);
         if (originActor instanceof Fubuki) {
             this.size = new Vector2(16, 16);
             this.iceSpike = true;
             this.health = 1;
         }
-        else if (originActor instanceof Miko && vel.y !== 0) {
+        else if ((originActor instanceof Miko && vel.y !== 0) || (originActor instanceof EvilFlare && originActor.phase === 'attack') || (originActor instanceof EvilMiko && !forceBullet)) {
             this.petal = true;
             this.dir = Math.random() > .5;
         }
-        else if (this.originActor instanceof Marine) {
+        else if (this.originActor instanceof Marine || (this.originActor instanceof EvilFlare && this.originActor.phase === 'attack2')) {
+            this.anchor = true;
             this.size = new Vector2(20, 20);
             this.dir = Math.random() > .5;
             // this.damage = 2;
@@ -241,23 +265,27 @@ class Bullet extends Projectile {
         } else if (this.originActor instanceof EvilNoel) {
             this.mace = true;
             this.size = new Vector2(16, 16);
+        } else if (this.originActor instanceof Demon) {
+            this.size = new Vector2(16, 16);
+            this.orb = true;
         }
     }
     
     takeHit = (game, other) => {
-        if (other instanceof IceShield) {
+        if (other instanceof IceShield && !(this.originActor instanceof EvilNoel)) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             this.dropHeart(game, .9);
         }
-        if (!this.iceSpike) return;
+        if (!this.iceSpike && !this.orb) return;
         if (other instanceof Arrow && other.type === 'fire') this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+        if (this.orb) this.health = 0;
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            this.dropHeart(game, .7);
+            if (!this.orb) this.dropHeart(game, .7);
             game.playSound('damage');
             game.score += 50;
         } else {
@@ -267,14 +295,29 @@ class Bullet extends Projectile {
     }
 
     update = game => {
-        if ([Dokuro, Marine].some(a => this.originActor instanceof a)) this.vel.y += .1;
-        if (!(this.iceSpike && this.originActor instanceof Fubuki && this.frameCount < 60)) this.pos = this.pos.plus(this.vel);
+        if ([Dokuro, Marine].some(a => this.originActor instanceof a) || (this.originActor instanceof Cannon && game.currentStage === 4) || this.anchor) this.vel.y += .1;
+        if (!(((this.iceSpike && this.originActor instanceof Fubuki) || this.orb) && this.frameCount < 60)) this.pos = this.pos.plus(this.vel);
         // if (this.frameCount % 2) game.scene.particles.smoke2(CollisionBox.center(this), new Vector2(-Math.sign(this.vel.x), -(Math.sign(this.vel.y) + 1)), 0);
 
-        if (this.mace && !this.stoppedMace) this.angle += Math.PI / 16;
+        if ((this.mace || this.orb) && !this.stoppedMace) this.angle += Math.PI / (this.orb ? 64 : 16);
+
+        if (this.orb) {
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+            }
+        }
+
+        if (this.orb && this.frameCount > 60) {
+            const p1 = CollisionBox.center(game.scene.actors.find(actor => actor instanceof Flare));
+            const p2 = CollisionBox.center(this);
+            const a = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+            const targetVel = new Vector2(Math.cos(a), Math.sin(a)).times(-8);
+            this.vel = this.vel.lerp(targetVel, .025);
+        }
 
         let collision = false;
-        const actorCollisions = game.scene.actors.filter(actor => actor instanceof Flare && actor.checkHit(game, this));
+        if (this.mace && this.frameCount > 150) collision = true;
+        const actorCollisions = game.scene.actors.filter(actor => actor instanceof Flare && !actor.isSliding && actor.checkHit(game, this));
         if (actorCollisions.length && !this.stoppedMace) {
             actorCollisions.forEach(collision => {
                 collision.takeHit(game, this);
@@ -282,8 +325,9 @@ class Bullet extends Projectile {
             for (let i = 0; i < 3; i++) game.scene.particles.smoke_white(this.pos, new Vector2(0, 0), 1);
             collision = true;
         }
-        else if (!(this.originActor instanceof Marine) && !this.stoppedMace && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
-            collision = true;
+        else if (!(this.originActor instanceof Marine) && !this.anchor && !this.stoppedMace && CollisionBox.collidingCollisionBoxes(this, game.scene.currentSection.collisions).length) {
+            if (this.originActor instanceof Cannon && game.currentStage === 4) this.vel.y = -this.vel.y;
+            else collision = true;
             // game.playSound('no_damage');
             for (let i = 0; i < 3; i++) game.scene.particles.smoke_white(this.pos, new Vector2(0, 0), 1);
         }
@@ -297,15 +341,18 @@ class Bullet extends Projectile {
         }
         
         if (this.petal && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_3(CollisionBox.center(this));
-        if (this.originActor instanceof Marine && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_4(CollisionBox.center(this));
-        if (this.originActor instanceof EvilNoel && !(this.frameCount % 2) && !this.stoppedMace) game.scene.particles.smoke_spirit(CollisionBox.center(this), new Vector2(0, 0), 1);
-        if (this.iceSpike && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_2(CollisionBox.center(this), 0);
+        if ((this.originActor instanceof Marine || this.anchor) && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_4(CollisionBox.center(this));
+        if (this.originActor instanceof EvilNoel && !(this.frameCount % 2) && !this.stoppedMace) game.scene.particles.smoke_pink(CollisionBox.center(this), new Vector2(0, 0), 1);
+        if (this.iceSpike && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_2(CollisionBox.center(this), null, 0);
 
         this.frameCount++;
     }
 
     draw = (game, cx) => {
+        if (this.mace && this.frameCount > 120 && Math.floor(this.frameCount / 2) % 2) return;
         cx.save();
+        if (this.originActor instanceof Cannon && game.currentStage === 4) cx.filter = 'invert(100%)';
+        if (this.orb && this.frameCount < 60) cx.filter = `brightness(${this.frameCount / 60})`;
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (this.iceSpike) {
             cx.translate(8, 8);
@@ -317,6 +364,11 @@ class Bullet extends Projectile {
             cx.rotate(this.angle + Math.PI * .75);
             cx.drawImage(game.assets.images['sp_mace'], -12, -12);
         }
+        else if (this.orb) {
+            cx.translate(8, 8);
+            cx.rotate(this.angle + Math.PI * .75);
+            cx.drawImage(game.assets.images['sp_demon_orb'], (Math.floor(this.frameCount * .25) % 2) * 24, 0, 24, 24, -12, -12, 24, 24);
+        }
         else if (this.originActor instanceof Oni) {
             if (!this.dir) {
                 cx.translate(this.size.x / 2, 0);
@@ -325,7 +377,7 @@ class Bullet extends Projectile {
             }
             cx.drawImage(game.assets.images['sp_thunder'], 0, 0, 16, 16, -4, -4, 16, 16);
         }
-        else if (this.originActor instanceof Marine) {
+        else if (this.originActor instanceof Marine || this.anchor) {
             cx.translate(10, 10);
             cx.rotate(Math.floor(this.frameCount * 16 / 45) * 45 * (Math.PI / 180) * (this.dir ? 1 : -1));
             cx.drawImage(game.assets.images['sp_marine_sword'], -16, -16);
@@ -365,7 +417,7 @@ class IceShield extends Projectile {
         const enemyCollisions = game.scene.actors.filter(actor => (actor instanceof Flare || actor instanceof Arrow) && actor.checkHit(game, this));
         const playerCollisions = game.scene.actors.filter(actor => [
             Bullet, Rocket, Robot, Nousabot, Nousakumo, Pekora, Mikobell, Casinochip, Miko,
-            Dokuro, Cannon, Pirate, Neko, Marine, Aqua, Fubuki, Fubuzilla, Miteiru, Oni, Ayame, Sword, Spirit, EvilNoel]
+            Dokuro, Cannon, Pirate, Neko, Marine, Aqua, Fubuki, Fubuzilla, Miteiru, Oni, Ayame, Sword, Spirit, EvilNoel, Suisei, Polka, Card]
             .some(e => actor instanceof e) && actor.checkHit(game, this));
         const actorCollisions = this.originActor instanceof Flare ? playerCollisions : enemyCollisions;
         if (actorCollisions.length) {
@@ -486,7 +538,7 @@ class Aircon extends Actor {
         if (Math.random() > .75) {
             game.scene.particles.shine_vel_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, 16)), new Vector2(this.dir, -3), 1);
         }
-        const actors = game.scene.actors.filter(actor => ![this].includes(actor) && actor.checkHit(game, this));
+        const actors = game.scene.actors.filter(actor => ![this].includes(actor) && !actor.isSliding && actor.checkHit(game, this));
         actors.forEach(actor => {
             if ((actor instanceof Arrow && ['petal', 'bullet'].includes(actor.type)) || actor instanceof Bullet || (actor instanceof Aqua && !actor.playerAggro)) return;
             if (this.dir) actor.vel.x = Math.min(8, Math.max(-8, actor.vel.x + 6 * this.dir));
@@ -513,7 +565,7 @@ class Torche extends Actor {
 
     update = game => {
         const actorCollisions = game.scene.actors.filter(actor => actor instanceof Arrow && actor.type === 'fire' && actor.checkHit(game, this));
-        if (!this.active && actorCollisions.length) {
+        if (!this.active && (actorCollisions.length || game.scene.actors.find(a => a instanceof Noel))) {
             game.scene.shakeBuffer = 2;
             game.playSound("noise");
             this.active = true;
@@ -533,5 +585,38 @@ class Torche extends Actor {
         }
         cx.drawImage(game.assets.images['sp_elfriend_idle'], Math.floor((this.randomFlight % 2 + this.frameCount) * .2) % 2 * 24, 0, 24, 24, 0, 0, 24, 24);
         cx.restore();
+    }
+}
+
+class MovingBlock extends Actor {
+
+    constructor(pos, xSize, dir) {
+        super(new Vector2(pos.x * 16, pos.y * 16 - 1), new Vector2(xSize * 16, 16));
+        this.dir = dir;
+    }
+
+    checkHit = (game, collisionBox) => {
+        const collision = CollisionBox.intersects(this, collisionBox);
+        return collision;
+    }
+    
+    takeHit = (game, other) => {
+        this.shakeBuffer = 15;
+        game.scene.particles.ray(this.checkHit(game, other).pos);
+        game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.playSound('hit');
+        this.dir = !this.dir;
+    }
+
+    update = game => {
+        if (!(this.frameCount % 8)) {
+            game.scene.particles[this.dir ? 'sparkle_fire' : 'sparkle_fire_2'](this.pos.plus(new Vector2(this.dir ? 0 : this.size.x, 8)), new Vector2((this.dir ? 1 : -1) * (this.size.x / 32), 0), 1);
+        }
+        
+        const actors = game.scene.actors.filter(actor => ![this].includes(actor) && !(actor instanceof Projectile) && CollisionBox.intersects(this, actor));
+        actors.forEach(actor => {
+            actor.vel.x = Math.min(8, Math.max(-8, actor.vel.x + .5 * (this.dir ? 1 : -1)));
+        });
+        this.frameCount++;
     }
 }

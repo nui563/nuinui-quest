@@ -11,7 +11,7 @@ class Aqua extends Actor {
     phaseBuffer = 0;
     playerAggro = 0;
 
-    damage = .5;
+    damage = 1;
 
     constructor(pos, maxHealth) {
         super(pos);
@@ -38,54 +38,41 @@ class Aqua extends Actor {
             } else {
                 this.invicibility = 8;
             }
+
+            if (other.type === 'sword' && this.phase !== 'defeated') {
+                
+                if (this.playerAggro) {
+                    this.playerAggro = 0;
+                    game.stopBGM();
+                    game.playBGM('sneak');
+                }
+                this.phase = 'defeated';
+                game.playSound('death');
+                game.scene.bossKillEffect = 60;
+                game.scene.isFocus = 0;
+                this.vel.y = -4;
+                const flare = game.scene.actors.find(actor => actor instanceof Flare);
+                localStorage.setItem('nuinui-save-achievement-10', true);
+                game.updateAchievements();
+                if (!flare.chargeTypeList.includes('dual')) game.scene.actors.push(new KiritoPickup(this.pos.value(), new Vector2(20, 20)));
+            }
         }
 
-        if (!this.playerAggro) {
-            game.stopBGM();
-            game.playBGM('dummy_th000');
+        if (this.phase !== 'defeated') {
+            if (!this.playerAggro) {
+                game.stopBGM();
+                game.playBGM('dummy_th000');
+            }
+            this.playerAggro = 480;
         }
-        this.playerAggro = 480;
         
     }
 
-    // introPhase = game => {
-    //     if (this.animation !== 'intro') this.setAnimation(!this.isGrounded? 'jump' : 'intro');
-    //     if (this.phaseBuffer > 3 && this.isGrounded) {
-    //         this.vel = new Vector2(0, 0);
-    //     }
-    // }
-
-    // idlePhase = game => {
-    //     if (this.phaseBuffer >= 31) {
-    //         if (this.isGrounded && Math.random() > (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .4)) {
-    //             // Move action
-    //             this.phase = 'move';
-    //             game.playSound("jump");
-    //             this.moveDir = this.pos.x < 30 * 16 ? 1 : -1;
-    //             this.vel.y = -4;
-    //         } else {
-    //             if (this.health < this.maxHealth / 2 && Math.random() > .5 && false) {
-    //                 this.phase = 'attack';
-    //                 // this.setAnimation('think');
-    //                 // game.playSound("charge");
-    //             } else {
-    //                 if (Math.random() > .5) {
-    //                     this.phase = 'dash';
-    //                     game.playSound("miko_kick");
-    //                     this.moveDir = this.pos.x < 30 * 16 ? 1 : -1;
-    //                     this.dir = this.moveDir > 0;
-    //                     this.vel.y = -2;
-    //                     // this.setAnimation('laugh');
-    //                     // game.playSound('peko');
-    //                 }
-    //                 else {
-    //                     this.phase = 'attack';
-    //                     // game.playSound('peko');
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+    defeatedPhase = game => {
+        //velloss
+        this.setAnimation('hit');
+        this.vel = this.vel.mult(new Vector2(0.9, 1));
+    }
 
     attackPhase = game => {
         if (!(this.phaseBuffer % 20)) {
@@ -164,33 +151,35 @@ class Aqua extends Actor {
         }
         this.vel = new Vector2(Math.max(-8, Math.min(8, this.vel.x)), Math.max(-8, Math.min(8, this.vel.y)));
 
-        const newCollisionBox = { pos:new Vector2(this.pos.x + this.vel.x, this.pos.y), size:this.size }
+        if (this.phase !== 'defeated') {
+            const newCollisionBox = { pos:new Vector2(this.pos.x + this.vel.x, this.pos.y), size:this.size }
 
-        if (CollisionBox.intersectingCollisionBoxes(newCollisionBox, this.currentSection.collisions).length) {
-            this.pos.x = Math.round(this.pos.x);
-            while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, this.currentSection.collisions).length) {
-                this.pos.x = this.pos.x + Math.sign(this.vel.x);
-            }
-            
-            if (this.isGrounded) {
-                this.dir = !this.dir;
-                if (this.playerAggro) {
-                    game.stopBGM();
-                    game.playBGM('sneak');
+            if (CollisionBox.intersectingCollisionBoxes(newCollisionBox, this.currentSection.collisions).length) {
+                this.pos.x = Math.round(this.pos.x);
+                while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, this.currentSection.collisions).length) {
+                    this.pos.x = this.pos.x + Math.sign(this.vel.x);
                 }
-                this.playerAggro = 0;
+                
+                if (this.isGrounded) {
+                    this.dir = !this.dir;
+                    if (this.playerAggro) {
+                        game.stopBGM();
+                        game.playBGM('sneak');
+                    }
+                    this.playerAggro = 0;
+                }
+                this.vel.x = 0;
             }
-            this.vel.x = 0;
-        }
-
-        this.isGrounded = false;
-        if (CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, this.currentSection.collisions).length) {
-            this.isGrounded = CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, this.currentSection.collisions).some(c => c.other.pos.y > this.pos.y);
-            this.pos.y = Math.round(this.pos.y);
-            while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + Math.sign(this.vel.y)), size:this.size }, this.currentSection.collisions).length) {
-                this.pos.y = this.pos.y + Math.sign(this.vel.y);
+    
+            this.isGrounded = false;
+            if (CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, this.currentSection.collisions).length) {
+                this.isGrounded = CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + this.vel.y), size:this.size }, this.currentSection.collisions).some(c => c.other.pos.y > this.pos.y);
+                this.pos.y = Math.round(this.pos.y);
+                while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x, this.pos.y + Math.sign(this.vel.y)), size:this.size }, this.currentSection.collisions).length) {
+                    this.pos.y = this.pos.y + Math.sign(this.vel.y);
+                }
+                if (this.health) this.vel.y = 0;
             }
-            if (this.health) this.vel.y = 0;
         }
 
         this.pos.y = Math.round((this.pos.y + this.vel.y) * 100) / 100;
@@ -224,11 +213,11 @@ class Aqua extends Actor {
             cx.translate(-this.size.x / 2, 0);
         }
         
-        const asset = (!this.isGrounded ? 'jump' : this.animation) + (this.playerAggro && this.animation !== 'attack' ? '_aggro' : '');
-        const offset = new Vector2(['sleep', 'walk', 'jump', 'walk_aggro', 'jump_aggro'].includes(asset) ? 26 : asset === 'attack' ? 64 : 12, asset === 'attack' ? 36 : 11);
+        const asset = this.phase === 'defeated' ? 'hit' : (!this.isGrounded ? 'jump' : this.animation) + (this.playerAggro && this.animation !== 'attack' ? '_aggro' : '');
+        const offset = new Vector2(['sleep', 'walk', 'jump', 'walk_aggro', 'jump_aggro', 'hit'].includes(asset) ? 26 : asset === 'attack' ? 64 : 12, asset === 'attack' ? 36 : 11);
         const spd = ['sleep', 'walk'].includes(asset) ? 16 : ['walk_aggro'].includes(asset) ? 8 : asset === 'attack' ? 4 : 1;
         const frame = ['sleep', 'walk', 'walk_aggro'].includes(asset) ? 4 : asset === 'attack' ? 9 : 1;
-        const xSize = asset === 'attack' ? 160 : ['sleep', 'walk', 'jump', 'walk_aggro'].includes(asset) ? 64 : ['jump_aggro'].includes(asset) ? 80 : 48;
+        const xSize = asset === 'attack' ? 160 : ['sleep', 'walk', 'jump', 'walk_aggro', 'hit'].includes(asset) ? 64 : ['jump_aggro'].includes(asset) ? 80 : 48;
 
         const xOffset = (Math.floor(this.animationFrame / spd) % frame) * xSize;
         cx.drawImage(game.assets.images[`sp_aqua_${asset}`],

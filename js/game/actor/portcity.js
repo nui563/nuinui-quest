@@ -174,7 +174,7 @@ class Cannon extends Actor {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
-        cx.drawImage(game.assets.images['sp_cannon'], 48 * this.angleIndex + (Math.floor(this.frameCount / 16) % 2) * 24, game.currentStage === 3 ? 32 : 0, 24, 32, 0, -8, 24, 32);
+        cx.drawImage(game.assets.images['sp_cannon'], 48 * this.angleIndex + (Math.floor(this.frameCount / 16) % 2) * 24, game.currentStage === 4 ? 64 : game.currentStage === 3 ? 32 : 0, 24, 32, 0, -8, 24, 32);
         cx.restore();
     }
 }
@@ -329,6 +329,7 @@ class Pirate extends Actor {
     }
 
     draw = (game, cx) => {
+        const skinOffset = game.currentStage === 4;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (this.waterOffset) cx.translate(0, Math.round(Math.cos(Math.floor(this.frameCount / 16) * (180 / Math.PI))));
@@ -338,10 +339,10 @@ class Pirate extends Actor {
             cx.translate(-this.size.x / 2, 0);
         }
         if (this.phase === 'attack') {
-            cx.drawImage(game.assets.images['sp_pirate_spin'], (Math.floor(this.frameCount / 4) % 3) * 64, 0, 64, 40, -24, -6, 64, 40);
+            cx.drawImage(game.assets.images['sp_pirate_spin'], (Math.floor(this.frameCount / 4) % 3) * 64, skinOffset ? 40 : 0, 64, 40, -24, -6, 64, 40);
         } else {
             const offset = new Vector2(12, 12);
-            cx.drawImage(game.assets.images['sp_pirate'], this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, 0, 48, 48, -offset.x, -offset.y, 48, 48);
+            cx.drawImage(game.assets.images['sp_pirate'], this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, skinOffset ? 48 :0, 48, 48, -offset.x, -offset.y, 48, 48);
         }
         cx.restore();
     }
@@ -421,7 +422,7 @@ class Neko extends Actor {
 class Rock extends Actor {
     size = new Vector2(48, 32);
     vel = new Vector2(0, 0);
-    damage = .5;
+    damage = 1;
 
     constructor(pos, dir) {
         super();

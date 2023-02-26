@@ -3,6 +3,8 @@ class Miko extends Actor {
     vel = new Vector2(0, 0);
     dir = true;
 
+    healthBar = 0;
+
     gravity = .15;
 
     moveSpeed = 2.5;
@@ -34,6 +36,8 @@ class Miko extends Actor {
             game.scene.particles.impact(this.checkHit(game, other).pos);
             game.playSound('damage');
             
+            if (this.skullBoss) this.skullBoss.takeHit(game, other);
+
             if (!this.health) {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
                 game.canvas1.style.filter = 'none';
@@ -54,9 +58,9 @@ class Miko extends Actor {
 
     idlePhase = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
-        if (this.phaseBuffer >= (game.scene.miniBossCleared ? 31 : 127)) {
-            if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
-                if (!game.scene.miniBossCleared) {
+        if (this.phaseBuffer >= (!this.skullBoss ? 31 : 63)) {
+            if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (this.skullBoss ? .5 : .3))) {
+                if (this.skullBoss) {
                     this.phase = 'sniper';
                     this.setAnimation('sniper');
                     // game.playSound("charge");
@@ -193,6 +197,23 @@ class Miko extends Actor {
 
         if (flare.playerControl && this.health && this.animation === 'idle') this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
+        if (this.skullBoss) {
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+            }
+        }
+
+        if (this === game.scene.boss) {
+            if (this.healthBar < this.health) {
+                this.healthBar += .5;
+                if (!(this.frameCount % 4)) game.playSound('pew2');
+            } else {
+                const amt = .05;
+                this.healthBar = (1 - amt) * this.healthBar + amt * this.health;
+                if (Math.abs(this.health - this.healthBar) < amt) this.healthBar = this.health;
+            }
+        }
+
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;

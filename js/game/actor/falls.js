@@ -83,7 +83,7 @@ class Nousabot extends Actor {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
-        cx.drawImage(game.assets.images['sp_nousabot'], 0, game.currentStage === 2 ? 24 : 0, 24, 24, 0, 0, 24, 24);
+        cx.drawImage(game.assets.images['sp_nousabot'], 0, game.currentStage === 4 ? 48 : game.currentStage === 2 ? 24 : 0, 24, 24, 0, 0, 24, 24);
         cx.restore();
     }
 }
@@ -394,7 +394,7 @@ class Nousakumo extends Actor {
         }
         const offset = new Vector2(6, 10);
         cx.drawImage(game.assets.images['sp_nousakumo'],
-            this.isGrounded ? 0 : 32, game.currentStage === 2 ? 32 : 0, 32, 32,
+            this.isGrounded ? 0 : 32, game.currentStage === 4 ? 64 : game.currentStage === 2 ? 32 : 0, 32, 32,
             -offset.x, -offset.y, 32, 32);
         cx.restore();
     }
@@ -426,7 +426,6 @@ class VaporBlock extends Actor {
         game.playSound('hit');
         this.vapor = false;
         this.vaporBuffer = 180;
-        game.score += 10;
     }
 
     update = game => {

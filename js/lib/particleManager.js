@@ -1,9 +1,13 @@
 class ParticleManager {
     pool = [];
 
-    update = (cx, assets, zIndex) => {
+    update = () => {
         this.pool = this.pool.filter(particle => particle.life < particle.lifespan);
-        this.pool.filter(particle => particle.zIndex === zIndex).forEach(particle => particle.update(cx, assets));
+        this.pool.forEach(particle => particle.update());
+    }
+
+    draw = (cx, assets, zIndex) => {
+        this.pool.filter(particle => particle.zIndex === zIndex).forEach(particle => particle.draw(cx, assets));
     }
 
     mini_explosion = pos => {
@@ -57,11 +61,11 @@ class ParticleManager {
         }));
     }
 
-    run = actor => {
-        const scale = [actor.dir ? 1 : -1, 1];
+    run = (actor, dir) => {
+        const scale = [dir ? 1 : -1, 1];
         this.pool.push(new Particle({
             type: `run`,
-            pos: actor.pos.plus(new Vector2(actor.dir ? -8 : actor.size.x + 8, actor.size.y - 7)),
+            pos: actor.pos.plus(new Vector2(dir ? -8 : actor.size.x + 8, actor.size.y - 7)),
             size: new Vector2(24, 16),
             xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
             scale: p => scale,
@@ -132,6 +136,18 @@ class ParticleManager {
             zIndex: zIndex
         }));
     }
+    
+    smoke_pink = (pos, vel, zIndex) => {
+        this.pool.push(new Particle({
+            type: `smoke_pink`,
+            pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 10 - 5), Math.round(pos.y) + Math.round(Math.random() * 10 - 5)),
+            size: new Vector2(8, 8),
+            xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
+            vel: vel,
+            lifespan: 12 + Math.floor(Math.random() * 8),
+            zIndex: zIndex
+        }));
+    }
 
     shine_white = (pos, zIndex) => {
         this.pool.push(new Particle({
@@ -175,14 +191,15 @@ class ParticleManager {
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
         }));
     }
-    sparkle_fire_2 = (pos, zIndex) => {
+    sparkle_fire_2 = (pos, vel, zIndex) => {
+        vel = !vel ? new Vector2(0, 0) : vel;
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         this.pool.push(new Particle({
             type: `sparkle_fire_2`,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 20 - 10), Math.round(pos.y) + Math.round(Math.random() * 20 - 10)),
             size: new Vector2(16, 16),
             xOffset: p => p.size.x * Math.floor(p.life * 6 / p.lifespan),
-            vel: new Vector2(0, 0),
+            vel: vel,
             lifespan: 24,
             zIndex: zIndex,
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
@@ -252,6 +269,20 @@ class ParticleManager {
                 delay: i * 4
             }));
         }
+    }
+    
+    mace = (pos, dir, scaleY) => {
+        const scale = [dir ? 1 : -1, scaleY ? 1 : -1];
+        this.pool.push(new Particle({
+            type: `mace`,
+            pos: pos,
+            size: new Vector2(64, 24),
+            xOffset: p => p.size.x * Math.floor(p.life * 2 / p.lifespan),
+            vel: new Vector2(0, 0),
+            lifespan: 8,
+            zIndex: 1,
+            scale: p => scale,
+        }));
     }
 
     charge = pos => {
@@ -356,18 +387,22 @@ class Particle {
         Object.assign(this, data);
     }
 
-    update = (cx, assets) => {
+    update = () => {
         if (this.delay) this.delay--;
         else {
-            cx.save();
-            cx.translate(this.pos.x, this.pos.y);
-            if (this.rotate) cx.rotate(this.rotate(this));
-            if (this.scale) cx.scale(...this.scale(this));
             this.pos = this.pos.plus(this.vel);
-            const xOffset = this.xOffset ? this.xOffset(this) : 0;
-            cx.drawImage(assets.images[`vfx_${this.type}`], xOffset, 0, this.size.x, this.size.y, -this.size.x / 2, -this.size.y / 2, this.size.x, this.size.y);
-            cx.restore();
             this.life++;
         }
+    }
+
+    draw = (cx, assets) => {
+        if (this.delay) return;
+        cx.save();
+        cx.translate(this.pos.x, this.pos.y);
+        if (this.rotate) cx.rotate(this.rotate(this));
+        if (this.scale) cx.scale(...this.scale(this));
+        const xOffset = this.xOffset ? this.xOffset(this) : 0;
+        cx.drawImage(assets.images[`vfx_${this.type}`], xOffset, 0, this.size.x, this.size.y, -this.size.x / 2, -this.size.y / 2, this.size.x, this.size.y);
+        cx.restore();
     }
 }

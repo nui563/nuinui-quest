@@ -87,6 +87,7 @@ const debugSave = () => {
     localStorage.setItem('nuinui-save-item-petal', true);
     localStorage.setItem('nuinui-save-item-sword', true);
     localStorage.setItem('nuinui-save-item-shield', true);
+    localStorage.setItem('nuinui-save-item-dual', true);
     
     localStorage.setItem('nuinui-save-achievement-1', true);
     localStorage.setItem('nuinui-save-achievement-2', true);
@@ -99,7 +100,7 @@ const debugSave = () => {
     localStorage.setItem('nuinui-save-achievement-8', true);
 
     localStorage.setItem('nuinui-save-achievement-9', true);
-    // localStorage.setItem('nuinui-save-achievement-10', true);
+    localStorage.setItem('nuinui-save-achievement-10', true);
     localStorage.setItem('nuinui-save-achievement-11', true);
     localStorage.setItem('nuinui-save-achievement-12', true);
 
@@ -108,10 +109,10 @@ const debugSave = () => {
     localStorage.setItem('nuinui-save-achievement-15', true);
     localStorage.setItem('nuinui-save-achievement-16', true);
 
-    // localStorage.setItem('nuinui-save-achievement-17', true);
-    // localStorage.setItem('nuinui-save-achievement-18', true);
-    // localStorage.setItem('nuinui-save-achievement-19', true);
-    // localStorage.setItem('nuinui-save-achievement-20', true);
+    localStorage.setItem('nuinui-save-achievement-17', true);
+    localStorage.setItem('nuinui-save-achievement-18', true);
+    localStorage.setItem('nuinui-save-achievement-19', true);
+    localStorage.setItem('nuinui-save-achievement-20', true);
 }
 // debugSave();
 
@@ -157,11 +158,13 @@ window.onload = () => {
     // Navbar
     let mouseMoveTimeout = null;
     document.body.onmousemove = e => {
+        document.body.style.cursor = "default";
         document.getElementById('navbar-container').style.top = 0;
         if(mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
         mouseMoveTimeout = setTimeout(() => {
             if (INFOENABLED || OPTIONSENABLED || SAVEENABLED) return;
             document.getElementById('navbar-container').style.top = '-46px';
+            document.body.style.cursor = "none";
         }, 1000);
     }
 }

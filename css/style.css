@@ -5,7 +5,7 @@ html {
 body {
   height: 100%;
   margin: 0;
-  background-color: #0f0f17;
+  background-color: #0F0F1F;
   display: flex;
   flex-direction: column;
   color: #fff;
@@ -26,7 +26,7 @@ body {
 
 #navbar-container {
   position: absolute;
-  top: 0;
+  top: -46px;
   width: 100%;
   background-color: #224;
   height: 46px;
@@ -54,6 +54,10 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
+}
+
+#fps-container {
+  display: flex;
 }
 
 .save-item {
@@ -261,7 +265,7 @@ canvas {
   position: absolute;
 }
 
-#options-icon, #save-icon, #info-icon, #focus-icon, #fullscreen-icon {
+#options-icon, #save-icon, #info-icon, #focus-icon, #fullscreen-icon, #pause-icon {
   width: 32px;
   height: 32px;
   margin: 7px;

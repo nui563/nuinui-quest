@@ -42,7 +42,7 @@ class Spirit extends Actor {
     size = new Vector2(16, 16);
     vel = new Vector2(0, 0);
 
-    maxHealth = 4;
+    maxHealth = 2;
 
     constructor(pos) {
         super();
@@ -151,13 +151,15 @@ class Fubuzilla extends Actor {
 
     moveSpeed = 2;
 
-    maxHealth = 48;
+    maxHealth = 32;
     // maxHealth = 1;
 
     wiggleSize = 16;
 
     bodyCount = 8;
     bodyParts = [];
+
+    healthBar = 0;
 
     constructor(pos) {
         super(pos);
@@ -222,7 +224,7 @@ class Fubuzilla extends Actor {
         const bodySize = this.bodyParts.length;
         if (bodySize !== this.bodyCount) {
             for (let i = 0; i < this.bodyCount - bodySize; i++) {
-                const bodyPart = new FubuzillaBody(new Vector2(this.pos.x, this.pos.y + this.size.y + bodySize * 16 + i * 16), Math.floor(Math.random() * 3), this);
+                const bodyPart = new FubuzillaBody(new Vector2(this.pos.x, this.pos.y + this.size.y + bodySize * 16 + i * 16), Math.floor(.5 + Math.random() * 2.5), this);
                 this.bodyParts.push(bodyPart);
                 game.scene.actors.push(bodyPart);
             }
@@ -272,12 +274,16 @@ class Fubuzilla extends Actor {
     }
 
     takeHit = (game, other) => {
-        this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
-        this.shakeBuffer = 15;
-        game.scene.particles.ray(this.checkHit(game, other).pos);
-        game.scene.particles.impact(this.checkHit(game, other).pos);
+        if (this.phase === 'newBody') return;
+        if (!this.invicibility) {
+            this.invicibility = 30;
+            this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+            this.shakeBuffer = 15;
+            game.scene.particles.ray(this.checkHit(game, other).pos);
+            game.scene.particles.impact(this.checkHit(game, other).pos);
+        }
         
-        if (!this.health) {
+        if (!this.health && this.phase !== 'death') {
             game.scene.actors = game.scene.actors.filter(a => ![Bullet, Spirit, Robot].some(b => a instanceof b));
             this.phase = 'death';
             game.playSound('death');
@@ -335,7 +341,19 @@ class Fubuzilla extends Actor {
         parts.forEach(a => {
             if (a.health < a.maxHealth * .5 && Math.random() > .9) game.scene.particles.smoke_white(a.pos.plus(new Vector2(Math.random(), Math.random()).mult(a.size)), new Vector2(0, -2), 1);
         });
+        
+        if (this === game.scene.boss) {
+            if (this.healthBar < this.health) {
+                this.healthBar += .5;
+                if (!(this.frameCount % 4)) game.playSound('pew2');
+            } else {
+                const amt = .05;
+                this.healthBar = (1 - amt) * this.healthBar + amt * this.health;
+                if (Math.abs(this.health - this.healthBar) < amt) this.healthBar = this.health;
+            }
+        }
 
+        if (this.invicibility) this.invicibility--;
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
@@ -344,6 +362,7 @@ class Fubuzilla extends Actor {
     }
 
     draw = (game, cx) => {
+        if (this.invicibility % 2) return;
         cx.save();
         cx.translate(Math.round(this.pos.x + Math.cos((((this.frameCount) / 2000) * (180 / Math.PI))) * this.wiggleSize), Math.round(this.pos.y));
         if (!this.dir) {
@@ -374,11 +393,13 @@ class FubuzillaBody extends Actor {
     }
     
     checkHit = (game, collisionBox) => {
+        if (collisionBox.type === 'dual') return null;
         const collision = CollisionBox.intersects(this, collisionBox);
         return collision;
     }
 
     takeHit = (game, other) => {
+        if (this.fubuzilla.phase === 'newBody') return;
         this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
@@ -534,7 +555,7 @@ class Oni extends Actor {
         this.vel.x = Math.cos((this.frameCount / 2048) * (180 / Math.PI)) / 2;
         this.vel.y = Math.sin((this.frameCount / 2048) * (180 / Math.PI)) / 2;
 
-        this.pos = this.pos.lerp(new Vector2(flare.pos.x + 96, this.pos.y), .05);
+        this.pos = this.pos.lerp(new Vector2(flare.pos.x + 96 * (game.currentStage === 4 ? -1 : 1), this.pos.y), .05);
         this.pos = this.pos.plus(this.vel);
 
         this.dir = CollisionBox.center(this).x > CollisionBox.center(flare).x;

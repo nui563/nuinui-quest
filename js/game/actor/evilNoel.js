@@ -14,6 +14,8 @@ class EvilNoel extends Actor {
 
     damage = 2;
 
+    isTrueEnd = false;
+
     constructor(pos) {
         super(pos);
         this.posTarget = this.posTargets[1];
@@ -30,7 +32,33 @@ class EvilNoel extends Actor {
             
             game.score += 100;
             this.invicibility = 30;
+            
+            if (other.type === 'dual' && this.phase !== 'defeated') {
+                this.phase = 'defeated';
+                game.stopBGM();
+                game.playSound('level_start');
+                this.setAnimation('hit');
+                game.scene.bossKillEffect = 60;
+                game.scene.isFocus = 0;
+                this.vel.y = -4;
+                this.isTrueEnd = true;
+            }
         }
+    }
+    
+    defeatedPhase = game => {
+        //velloss
+        this.vel = this.vel.mult(new Vector2(0.9, 1));
+        if (this.pos.y >= 32 * 16) {
+            this.phase = 'weak';
+            this.setAnimation('weak');
+            this.vel = new Vector2(0, 0);
+            this.vel.y = 0;
+            this.pos.y = 32 * 16;
+        }
+    }
+    
+    weakPhase = game => {
     }
 
     attackPhase = game => {
@@ -91,7 +119,13 @@ class EvilNoel extends Actor {
         
         if (this.phase) this[`${this.phase}Phase`](game);
 
-        this.pos = this.pos.lerp(this.posTarget.plus(new Vector2(0, Math.sin((this.frameCount / 1000) * (180 / Math.PI))  * 4)), .05);
+        if (this.phase === 'defeated') {
+            this.vel.y += .125;
+            this.pos.y += this.vel.y;
+        } else if (this.phase === 'weak') {
+        } else {
+            this.pos = this.pos.lerp(this.posTarget.plus(new Vector2(0, Math.sin((this.frameCount / 1000) * (180 / Math.PI))  * 4)), .05);
+        }
         this.pos.y = Math.round((this.pos.y) * 100) / 100;
         this.pos.x = Math.round((this.pos.x) * 100) / 100;
 
@@ -101,8 +135,10 @@ class EvilNoel extends Actor {
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
 
-        for (let i = 0; i < 2; i++) {
-            game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+        if (this.phase !== 'weak') {
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+            }
         }
 
         if (this.invicibility) this.invicibility--;
@@ -112,11 +148,13 @@ class EvilNoel extends Actor {
 
     draw = (game, cx) => {
         
-        cx.save();
-        cx.translate(Math.round(this.pos.x + this.size.x / 2 + Math.sin(this.frameCount / 100) * 32), Math.round(this.pos.y));
-        cx.rotate(this.frameCount / 50 * Math.PI);
-        cx.drawImage(game.assets.images['sp_mace'], -16, -16);
-        cx.restore();
+        if (!this.isTrueEnd) {
+            cx.save();
+            cx.translate(Math.round(this.pos.x + this.size.x / 2 + Math.sin(this.frameCount / 100) * 32), Math.round(this.pos.y));
+            cx.rotate(this.frameCount / 50 * Math.PI);
+            cx.drawImage(game.assets.images['sp_mace'], -16, -16);
+            cx.restore();
+        }
 
         if (!(this.invicibility % 2)) {
             cx.save();
@@ -126,14 +164,17 @@ class EvilNoel extends Actor {
                 cx.scale(-1, 1);
                 cx.translate(-this.size.x / 2, 0);
             }
-            cx.drawImage(game.assets.images[`sp_noel_evil`], -12, -4);
+            const img = ['defeated', 'weak'].includes(this.phase) ? this.animation : 'evil';
+            cx.drawImage(game.assets.images[`sp_noel_${img}`], img === 'evil' ? -12 : -4, img === 'evil' ? -4 : -6);
             cx.restore();
         }
 
-        cx.save();
-        cx.translate(Math.round(this.pos.x + this.size.x / 2 - Math.sin(this.frameCount / 100) * 32), Math.round(this.pos.y));
-        cx.rotate(-this.frameCount / 50 * Math.PI);
-        cx.drawImage(game.assets.images['sp_mace'], -16, -16);
-        cx.restore();
+        if (!this.isTrueEnd) {
+            cx.save();
+            cx.translate(Math.round(this.pos.x + this.size.x / 2 - Math.sin(this.frameCount / 100) * 32), Math.round(this.pos.y));
+            cx.rotate(-this.frameCount / 50 * Math.PI);
+            cx.drawImage(game.assets.images['sp_mace'], -16, -16);
+            cx.restore();
+        }
     }
 }

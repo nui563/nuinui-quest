@@ -13,6 +13,8 @@ class Ayame extends Actor {
 
     angle = null;
 
+    healthBar = 0;
+
     rasetsu = null;
     asura = null;
 
@@ -244,6 +246,17 @@ class Ayame extends Actor {
         if (this.phase === 'charge') {
             for (let i = 0; i < 2; i++) {
                 game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(-this.vel.x, 0), 0);
+            }
+        }
+        
+        if (this === game.scene.boss) {
+            if (this.healthBar < this.health) {
+                this.healthBar += .5;
+                if (!(this.frameCount % 4)) game.playSound('pew2');
+            } else {
+                const amt = .05;
+                this.healthBar = (1 - amt) * this.healthBar + amt * this.health;
+                if (Math.abs(this.health - this.healthBar) < amt) this.healthBar = this.health;
             }
         }
 

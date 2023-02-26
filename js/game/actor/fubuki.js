@@ -11,6 +11,8 @@ class Fubuki extends Actor {
 
     chantLevel = 0;
 
+    healthBar = 0;
+
     constructor(pos, maxHealth) {
         super(pos);
         this.maxHealth = maxHealth;
@@ -187,6 +189,17 @@ class Fubuki extends Actor {
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
 
+        if (this === game.scene.boss) {
+            if (this.healthBar < this.health) {
+                this.healthBar += .5;
+                if (!(this.frameCount % 4)) game.playSound('pew2');
+            } else {
+                const amt = .05;
+                this.healthBar = (1 - amt) * this.healthBar + amt * this.health;
+                if (Math.abs(this.health - this.healthBar) < amt) this.healthBar = this.health;
+            }
+        }
+        
         if (this.invicibility) this.invicibility--;
         this.animationFrame++;
         this.frameCount++;

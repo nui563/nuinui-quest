@@ -64,6 +64,12 @@ class Flare extends Actor {
             speed: 1,
             frames: 1
         },
+        sit: {
+            offset: new Vector2(-8, -6),
+            size: new Vector2(32, 40),
+            speed: 1,
+            frames: 1
+        },
         look: {
             offset: new Vector2(-8, -6),
             size: new Vector2(32, 40),
@@ -130,6 +136,18 @@ class Flare extends Actor {
             speed: .25,
             frames: 3
         },
+        attack: {
+            offset: new Vector2(-42, -5),
+            size: new Vector2(64, 40),
+            speed: 1,
+            frames: 1
+        },
+        aerial: {
+            offset: new Vector2(-42, -5),
+            size: new Vector2(64, 40),
+            speed: 1,
+            frames: 1
+        },
         gun: {
             offset: new Vector2(-9, -6),
             size: new Vector2(40, 40),
@@ -166,6 +184,12 @@ class Flare extends Actor {
             speed: 1,
             frames: 1
         },
+        back: {
+            offset: new Vector2(-24, -6),
+            size: new Vector2(44, 40),
+            speed: 1,
+            frames: 1
+        }
     }
 
     constructor(pos, size) {
@@ -182,6 +206,11 @@ class Flare extends Actor {
         this.updateSkills();
         if (localStorage.getItem('nuinui-save-item-clock')) this.item = true;
         if (localStorage.getItem('nuinui-save-item-jump')) this.doubleJump = true;
+
+        if (this.weapon === 'bow') {
+            this.maxHealth = 1;
+            this.health = 1;
+        }
     }
 
     updateSkills = () => {
@@ -196,7 +225,8 @@ class Flare extends Actor {
         const movement = this.isSliding || keys.left === keys.right ? 0 : this.runSpeed * (keys.right ? 1 : -1);
 
         // DEBUG
-        // if (keys.up) this.pos = new Vector2(290 * 16, 0 * 16);
+        // if (keys.up) this.pos = new Vector2(115 * 16, 56 * 16);
+        // if (keys.up) this.pos = new Vector2(45 * 16, 44 * 16);
 
         const sceneCollistions = [...game.scene.currentSection.collisions];
         if (game.scene.actors.find(a => a instanceof FubuzillaBody && a.type !== 2 )) sceneCollistions.push(...game.scene.actors.filter(a => a instanceof FubuzillaBody && a.type !== 2 ));
@@ -219,7 +249,7 @@ class Flare extends Actor {
             this.slideBuffer = true;
             this.pos.y += 16;
             this.size.y = 16;
-            game.scene.particles.run(this);
+            game.scene.particles.run(this, this.dir);
             game.playSound('dash');
         } else {
             if ((!this.isSliding && !keys.jump) || (this.isSliding && this.slideBuffer && !keys.jump)) {
@@ -261,6 +291,7 @@ class Flare extends Actor {
             if (game.scene.achievement3) game.scene.achievement3 = false;
             if (this.isSliding) {
                 this.isSliding = false;
+                this.vel.x += this.jumpSpeed * (this.dir ? 1 : -1);
                 this.pos.y -= 16;
                 this.size.y = 32;
             }
@@ -284,13 +315,15 @@ class Flare extends Actor {
                 this.landBuffer = false;
             } else if (!this.jetski) {
                 game.playSound('land');
-                game.scene.particles.land(this);
+                game.scene.particles.land(this, 0);
             }
             this.doubleJumpBuffer = false;
         }
 
+        if (this.isSliding && keys.left !== keys.right) this.vel.x = Math.abs(this.vel.x) * (keys.right ? 1 : -1);
+
         // Direction
-        this.dir = this.jetski || this.isSliding || keys.left === keys.right ? this.dir : keys.right;
+        this.dir = this.jetski || keys.left === keys.right ? this.dir : keys.right;
 
         // Velocity
         let iceVel = game.scene.iceWind ? .25 * (game.scene.iceWindDir ? 1 : -1) : 0;
@@ -325,7 +358,7 @@ class Flare extends Actor {
         this.pos.y = Math.round((this.pos.y + this.vel.y) * 100) / 100;
 
         if (this.isGrounded && !this.isSliding && !this.jetski && movement && this.vel.x && !this.vel.y) {
-            if (movement !== this.lastMovement) game.scene.particles.run(this);
+            if (movement !== this.lastMovement) game.scene.particles.run(this, this.dir);
             else if (this.animationFrame % 16 === 15) {
                 game.playSound('step');
                 game.scene.particles.step(this);
@@ -334,12 +367,14 @@ class Flare extends Actor {
         if (this.isJumping && this.vel.y && !this.jetski) game.scene.particles.jump(this);
 
         // Charge type
-        if (!this.jetski && keys.up && !this.chargeTypeBuffer) {
-            this.chargeType = (this.chargeType + 1) % this.chargeTypeList.length;
+        if (!this.jetski && (keys.l !== keys.r) && !this.chargeTypeBuffer) {
+            this.chargeType += keys.l ? -1 : 1;
+            if (this.chargeType < 0) this.chargeType = this.chargeTypeList.length - 1;
+            if (this.chargeType === this.chargeTypeList.length) this.chargeType = 0;
             this.chargeTypeBuffer = true;
             this.chargeTypeBufferAnim = 60;
         }
-        if (!keys.up && this.chargeTypeBuffer) this.chargeTypeBuffer = false;
+        if (!keys.l && !keys.r && this.chargeTypeBuffer) this.chargeTypeBuffer = false;
         if (this.chargeTypeBufferAnim) this.chargeTypeBufferAnim--;
 
         // Charge shot
@@ -350,7 +385,7 @@ class Flare extends Actor {
             if (this.chargeShotBuffer > 30) {
                 if (!(this.frameCount % 4)) game.scene.particles[this.chargeTypeData[this.chargeTypeList[this.chargeType]].particle](CollisionBox.center(this));
             }
-            if (this.chargeShotBuffer > 60) {
+            if (this.chargeShotBuffer > 45) {
                 if (!keys.attack) {
                     keyChargeAttack = true;
                 }
@@ -364,9 +399,20 @@ class Flare extends Actor {
         if (this.attackBuffer && !keys.attack) this.attackBuffer = false;
         if (this.attackCooldown) this.attackCooldown--;
         if (this.attackCooldownAnim) this.attackCooldownAnim--;
-        const isAttacking = this.hasBow && keyAttack && (this.jetski || !this.attackBuffer) && !this.attackCooldown && !this.invicibility && !this.isSliding;
+        const isAttacking = this.hasBow && keyAttack && (this.jetski || !this.attackBuffer) && !this.attackCooldown && !this.isSliding;
         if (isAttacking) {
-            if (keyChargeAttack && this.chargeTypeList[this.chargeType] === 'shield') {
+            if (keyChargeAttack && this.chargeTypeList[this.chargeType] === 'dual') {
+                const dual = new Arrow(
+                    this.pos,
+                    new Vector2(64, 32),
+                    new Vector2(0, 0),
+                    'dual',
+                    this
+                );
+                dual.isPersistent = true;
+                dual.dir = this.dir;
+                game.scene.actors.push(dual);
+            } else if (keyChargeAttack && this.chargeTypeList[this.chargeType] === 'shield') {
                 game.scene.actors = game.scene.actors.filter(a => !(a instanceof IceShield && a.originActor === this));
                 const shieldCount = 6;
                 for (let i = 0; i < shieldCount; i++) {
@@ -411,11 +457,10 @@ class Flare extends Actor {
                         keyChargeAttack ? this.chargeTypeList[this.chargeType] : null,
                         this
                     );
-                    if (this.weapon === 'gun' && !arrow.type) arrow.damage = .75;
                     game.scene.actors.push(arrow);
                 }
             }
-            game.playSound(this.jetski ? "pew" : this.weapon === 'bow' ? "bow_shoot" : 'gun');
+            if (this.chargeTypeList[this.chargeType] !== 'dual' || !keyChargeAttack) game.playSound(this.jetski ? "pew" : this.weapon === 'bow' ? "bow_shoot" : 'gun');
             this.attackBuffer = true;
             this.attackCooldown = keyChargeAttack ? 36 : this.jetski ? 9 : this.weapon === 'gun' ? 9 : 12;
             this.attackCooldownAnim = 12;
@@ -428,12 +473,19 @@ class Flare extends Actor {
         //hit
         const actorCollisions = game.scene.actors.filter(actor => [
             Robot, Nousabot, Nousakumo, Pekora, PekoMiniBoss, Mikobell, Casinochip, Miko, Scythe,
-            Dokuro, Cannon, Pirate, Neko, Rock, Marine, Aqua, Fubuki, Fubuzilla, Miteiru, Oni, Ayame, Sword, Spirit, EvilNoel]
+            Dokuro, Cannon, Pirate, Neko, Rock, Marine, Aqua, Fubuki, Fubuzilla, Miteiru, Oni, Ayame, Sword, Spirit, EvilNoel, Axe, Suisei, Polka, Pendulum, EvilMiko]
             .some(e => actor instanceof e) && actor.checkHit(game, this));
         if (actorCollisions.length) actorCollisions.forEach(collision => this.takeHit(game, collision));
 
         if (this.deathTransitionPhase) {
             if (!game.scene.bossKillEffect) this.deathTransition(game);
+        }
+        
+        if (this.isEvil || this.weapon === 'bow') {
+            if (game.currentStage === 3 && Math.random() > .95) this.shakeBuffer = 2;
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 32 - 16)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+            }
         }
 
         let newAnimation;
@@ -470,16 +522,19 @@ class Flare extends Actor {
     }
 
     takeHit = (game, other) => {
-        if (other instanceof Robot && other.sleep) return;
+        if (this.isSliding || (other instanceof Robot && other.sleep) || (other instanceof EvilNoel && other.isTrueEnd)) return;
         
         if (!this.invicibility && !this.deathTransitionPhase) {
             if (game.scene.achievement2) game.scene.achievement2 = false;
             if (game.scene.achievement5) game.scene.achievement5 = false;
 
-            game.playSound('damage');
+            if (other.originActor instanceof Cannon && game.currentStage === 4) game.playSound('question');
+            else game.playSound('damage');
             const damage = other.damage ? other.damage : 1;
-            this.health = Math.max(0, this.health - damage);
-            this.invicibility = 45;
+            if (!(other.originActor instanceof Cannon && game.currentStage === 4)) {
+                this.health = Math.max(0, this.health - damage);
+                this.invicibility = 45;
+            }
             this.chargeShotBuffer = 0;
             game.scene.shakeBuffer = 8;
             if (other instanceof Scythe || other instanceof Pirate || (other instanceof Aqua && other.playerAggro && !other.vel.x)) {
@@ -504,6 +559,7 @@ class Flare extends Actor {
                 game.scene.bossKillEffect = 60;
                 game.scene.isFocus = 0;
                 game.scene.blackout = false;
+                this.vel.y = -6;
                 game.stopBGM();
             }
             else this.die(game);
@@ -540,7 +596,7 @@ class Flare extends Actor {
     playAnimation = (game, cx) => {
         const {offset, size, speed, frames} = this.animations[this.animation];
 
-        if (!['sleep', 'wakeup'].includes(this.animation)) {
+        if (!['sleep', 'wakeup', 'back'].includes(this.animation)) {
             const velX = this.vel.x;
             const side = Math.round(velX) || [this.weapon, `${this.weapon}_fall`, `${this.weapon}_jump`].includes(this.animation);
             const spd = Math.round(16 / (1 + Math.abs(velX)));
@@ -563,6 +619,8 @@ class Flare extends Actor {
                 cx.restore();
             }
         }
+
+        if (this.animation === 'back') cx.translate(16, 0);
 
         const gunOffset = ['gun', 'gun_fall', 'gun_jump'].includes(this.animation) && this.gunshotBuffer ? 40 : 0;
 
@@ -595,7 +653,7 @@ class Flare extends Actor {
     draw = (game, cx) => {
         if (this.invicibility % 2) return;
         cx.save();
-        if (this.chargeShotBuffer > 60 && Math.floor(this.frameCount / 4) % 2) cx.filter = 'brightness(2)';
+        if (this.chargeShotBuffer > 45 && Math.floor(this.frameCount / 4) % 2) cx.filter = 'brightness(2)';
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (!this.dir) {
             cx.translate(this.size.x / 2, 0);

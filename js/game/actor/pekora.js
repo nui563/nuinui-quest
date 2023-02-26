@@ -3,6 +3,8 @@ class Pekora extends Actor {
     vel = new Vector2(0, 0);
     dir = false;
 
+    healthBar = 0;
+
     gravity = .15;
 
     moveSpeed = 2;
@@ -28,6 +30,8 @@ class Pekora extends Actor {
             game.scene.particles.impact(this.checkHit(game, other).pos);
             game.playSound('damage');
             
+            if (this.skullBoss) this.skullBoss.takeHit(game, other);
+
             if (!this.health) {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
                 game.score += 5000;
@@ -54,7 +58,7 @@ class Pekora extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= (game.scene.name !== 'casino' ? 31 : 127)) {
+        if (this.phaseBuffer >= (game.scene.name !== 'casino' ? 31 : 63)) {
             if (Math.random() < (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .2)) {
                 if (game.scene.name === 'casino' || Math.random() > .75) {
                     this.phase = 'rocket';
@@ -90,8 +94,8 @@ class Pekora extends Actor {
     rocketPhase = game => {
         if (!this.phaseBuffer) {
             game.scene.actors.push(new Rocket(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -8), this.pos.y + 16), new Vector2(1 * (this.dir ? 1 : -1), 0), this));
+            // if (Math.random() > .5) game.playSound('peko');
             game.playSound("pew");
-            if (Math.random() > .5) game.playSound('peko');
         }
         if (this.phaseBuffer === 39) {
             this.lastMove = this.phase;
@@ -198,6 +202,23 @@ class Pekora extends Actor {
 
         if (flare.playerControl && this.health) this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
+        if (this.skullBoss) {
+            for (let i = 0; i < 2; i++) {
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+            }
+        }
+
+        if (this === game.scene.boss) {
+            if (this.healthBar < this.health) {
+                this.healthBar += .5;
+                if (!(this.frameCount % 4)) game.playSound('pew2');
+            } else {
+                const amt = .05;
+                this.healthBar = (1 - amt) * this.healthBar + amt * this.health;
+                if (Math.abs(this.health - this.healthBar) < amt) this.healthBar = this.health;
+            }
+        }
+
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;

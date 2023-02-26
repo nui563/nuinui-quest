@@ -301,3 +301,93 @@ class Scythe extends Actor {
         cx.restore();
     }
 }
+
+class CasinoBoss extends Actor {
+    size = new Vector2(0, 0);
+    vel = new Vector2(0, 0);
+
+    maxHealth = 32;
+    healthBar = 0;
+
+    actors = [];
+
+    constructor() {
+        super();
+        this.pos = new Vector2(20 * 8.5 * 16 + 8, -4 * 16);
+        this.health = this.maxHealth;
+    }
+    
+    checkHit = (game, collisionBox) => {
+        const collision = CollisionBox.intersects(this, collisionBox);
+        return collision;
+    }
+
+    takeHit = (game, other) => {
+        
+        if (!this.invicibility) {
+            this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+            this.shakeBuffer = 15;
+            this.invicibility = 30;
+        }
+
+        if (!this.health) {
+            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+        }
+    }
+
+    update = game => {
+
+        this.actors.forEach(a => {
+            if (!a.health) {
+                a.phase = 'defeated';
+                for (let i = 0; i < 64; i++) game.scene.particles.smoke_white(CollisionBox.center(a).plus(new Vector2(Math.round(Math.random() * 48 - 24), Math.round(Math.random() * 48 - 24))), new Vector2(0, 0), 1);
+                game.scene.actors = game.scene.actors.filter(b => b !== a);
+                this.actors = this.actors.filter(b => b !== a);
+            }
+        })
+
+        if (this === game.scene.boss && this.frameCount > 200 && this.actors.length < 2) {
+            const boss = new (Math.random() > .5 ? Pekora : Miko)(new Vector2(179.5 * 16 + Math.floor(Math.random() * 256 - 128), 16), 4);
+            boss.setAnimation('jump');
+            boss.skullBoss = this;
+            boss.lastPhase = 'move';
+            boss.phase = 'move';
+            boss.phaseBuffer = 0;
+            this.actors.push(boss);
+            game.scene.actors.push(boss);
+        }
+
+        const ytarget = 0;
+        const amt = .1;
+        if (this.pos.y !== ytarget) this.pos.y = (1 - amt) * this.pos.y + amt * ytarget;
+        if (Math.abs(ytarget - this.pos.y) < amt) this.pos.y = ytarget;
+
+        if (this === game.scene.boss) {
+            if (this.healthBar < this.health) {
+                this.healthBar += .5;
+                if (!(this.frameCount % 4)) game.playSound('pew2');
+            } else {
+                const amt = .05;
+                this.healthBar = (1 - amt) * this.healthBar + amt * this.health;
+                if (Math.abs(this.health - this.healthBar) < amt) this.healthBar = this.health;
+            }
+        }
+
+        if (this.invicibility) this.invicibility--;
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.floor(this.pos.x), Math.floor(this.pos.y));
+        cx.globalAlpha = .75;
+        if (this.invicibility % 2) cx.globalAlpha = .5;
+        for (let i = 0; i < 128; i++) {
+            cx.drawImage(game.assets.images['sp_skulls'], 0, i, 320, 1,
+                Math.cos(((game.scene.frameCount + i) / game.height / 4) * (180 / Math.PI)) * 4 - 8,
+                i + Math.cos((game.scene.frameCount / game.height / 4) * (180 / Math.PI)) * 2 - 2,
+                320, 1);
+        }
+        cx.restore();
+    }
+}

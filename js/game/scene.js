@@ -88,11 +88,25 @@ class Scene {
         }
         
         if (this.lockedViewPos) {
-            if (this.lockedViewPos.x) pos.x = this.lockedViewPos.x;
-            if (this.lockedViewPos.y) pos.y = this.lockedViewPos.y;
+            if (this.lockedViewPos.x) {
+                pos.x = .7 * this.view.pos.x + .3 * this.lockedViewPos.x;
+                if (Math.abs(pos.x - this.lockedViewPos.x) < .3) pos.x = this.lockedViewPos.x;
+            }
+            if (this.lockedViewPos.y) {
+                pos.y = .7 * this.view.pos.y + .3 * this.lockedViewPos.y;
+                if (Math.abs(pos.y - this.lockedViewPos.y) < .3) pos.y = this.lockedViewPos.y;
+            }
         }
-        // this.view.pos = this.view.pos ? this.view.pos.lerp(pos, .1) : pos;
-        this.view.pos = pos;
+
+        if (this.view.pos && this.newSectionBuffer) {
+            const newView = this.view.pos.lerp(pos, .3);
+            if (!newView.round().equals(pos)) {
+                this.view.pos = newView;
+            } else this.newSectionBuffer = false;
+        } else this.view.pos = pos;
+        
+        
+        // this.view.pos = pos;
     }
 
     updateSection = game => {
@@ -101,6 +115,7 @@ class Scene {
             const newSection = this.sections.find(section => center.inBox(section));
             if (newSection) {
                 this.currentSection = newSection;
+                this.newSectionBuffer = true;
                 this.sectionFrame = 0;
                 this.events = this.events.filter(event => event.isPersistent);
                 if (this.currentSection.events) {
@@ -128,6 +143,8 @@ class Scene {
     }
 
     update = game => {
+        this.customDraw = [];
+
         // Execute event if possible
         if (this.events.length) {
             this.events.forEach(event => {
@@ -145,7 +162,7 @@ class Scene {
 
         // Update actors
         this.actors = this.actors.filter(a => !a.toFilter);
-        if (this.isFocus && this.frameCount % 4) this.actors.filter(actor => actor instanceof Flare || actor instanceof Ayame || actor instanceof Arrow).forEach(actor => actor.update(game));
+        if (this.isFocus && this.frameCount % 3) this.actors.filter(actor => actor instanceof Flare || actor instanceof Ayame || actor instanceof Arrow).forEach(actor => actor.update(game));
         else if (!this.bossKillEffect || this.frameCount % 2) this.actors.forEach(actor => actor.update(game));
 
         // Update section
@@ -156,6 +173,8 @@ class Scene {
         if (!this.lastViewPos || !this.view.pos.equals(this.lastViewPos)) {
             this.lastViewPos = this.view.pos;
         }
+
+        this.particles.update();
 
         this.drawHUD = true;
 
@@ -171,12 +190,14 @@ class Scene {
 
     drawTiles = (game, ctx, tiles) => {
         const pos = this.view.pos.times(1 / 16).floor();
-        for (let y = pos.y; y < pos.y + 1 + this.view.size.y / 16; y++) {
+        for (let y = pos.y - (!this.towerScroll ? 0 : 1); y < pos.y + 1 + this.view.size.y / 16; y++) {
             for (let x = pos.x; x < pos.x + 1 + this.view.size.x / 16; x++) {
                 let tile = parseInt(tiles[`${x}_${y}`], 16);
                 if (tile) {
+                    if (this.name === 'forest' && tile > 36 && tile < 40 && Math.floor(this.frameCount / 8) % 2) tile += 8;
                     if (tile > 63) tile += 8 * (Math.floor(this.frameCount / (tile === 69 ? 12 : tile > 69 && this.name === 'forest' ? 24 : 6)) % 3);
-                    ctx.drawImage(game.assets.images[`ts_${this.name}`], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16, 16, 16);
+                    const towerScrollOffset = (!this.towerScroll || (tiles !== this.background && x > 22 && x < 37)) ? 0 : Math.floor(this.frameCount / this.towerScroll) % 16;
+                    ctx.drawImage(game.assets.images[`ts_${this.name}`], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16 + towerScrollOffset, 16, 16);
                 }
             }
         }
@@ -192,6 +213,20 @@ class Scene {
     drawBackground = (game, cx) => {
         const img = `bg_${this.name}`;
         cx.drawImage(game.assets.images[img], 0, 0, game.width, game.height, 0, 0, game.width, game.height);
+        if (this.travelEvent) {
+            for (let i = 0; i < game.height; i++) {
+                cx.drawImage(game.assets.images[img], 0, i, game.width, 1, Math.round(4 * Math.sin((this.frameCount + i) * 4 * (Math.PI / 180))), i, game.width, 1);
+            }
+        }
+        if (this.skyTransistion && !game.finished) {
+            cx.save();
+            cx.globalAlpha = this.skyTransistion;
+            for (let i = 0; i < game.height; i++) {
+                const offset = Math.round(2 * (1 + Math.sin((this.frameCount + i) * 4 * (Math.PI / 180))));
+                cx.drawImage(game.assets.images[`${img}2`], 0, i, game.width, 1, -offset, i, game.width + offset * 2, 1);
+            }
+            cx.restore();
+        }
     }
 
     displayHUD = (game, cx) => {
@@ -224,14 +259,19 @@ class Scene {
         const flare = this.actors.find(actor => actor instanceof Flare);
         if (flare) {
             cx.save();
-            const maxHealthWidth = 64;
-            flare.healthBar = flare.healthBar ? (1 - .1) * flare.healthBar + .1 * flare.health : flare.health;
-            const healthWidth = Math.ceil(flare.healthBar * maxHealthWidth / flare.maxHealth);
-            cx.fillStyle = '#000';
-            cx.fillRect(9, 16, 6, maxHealthWidth);
-            cx.fillStyle = '#f06';
-            cx.fillRect(9, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
-            cx.drawImage(game.assets.images['ui_healthbar'], 4, 0);
+            if (flare.maxHealth > 1) {
+                const maxHealthWidth = 64;
+                flare.healthBar = flare.healthBar ? (1 - .1) * flare.healthBar + .1 * flare.health : flare.health;
+                const healthWidth = Math.ceil(flare.healthBar * maxHealthWidth / flare.maxHealth);
+                cx.fillStyle = '#000';
+                cx.fillRect(9, 16, 6, maxHealthWidth);
+                cx.fillStyle = flare instanceof Noel ? '#FCB800' : '#f06';
+                cx.fillRect(9, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
+                cx.fillStyle = '#FFFFFFBF';
+                cx.fillRect(11, 16 + maxHealthWidth - healthWidth, 3, healthWidth);
+                cx.drawImage(game.assets.images['ui_healthbar'], 4, 0);
+                cx.drawImage(game.assets.images['ui_boss_icon'], flare instanceof Noel ? 80 : 0, 0, 8, 8, 8, 6, 8, 8);
+            }
 
             if (flare.hasBow || flare.jetski) cx.drawImage(game.assets.images['ui_slot'], 0, game.height - 32);
 
@@ -253,6 +293,14 @@ class Scene {
                 } else cx.drawImage(game.assets.images['sp_clock'], 26, game.height - 22);
             }
 
+            if (flare.doubleJump) {
+                cx.save();
+                cx.drawImage(game.assets.images['ui_slot3'], 48, game.height - 24);
+                if (flare.doubleJumpBuffer) cx.filter = 'brightness(.25)';
+                cx.drawImage(game.assets.images['sp_jump'], 50, game.height - 22);
+                cx.restore();
+            }
+
             if (flare.chargeTypeBufferAnim && !flare.jetski) {
                 cx.translate(-this.view.pos.x, -this.view.pos.y);
                 cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, Math.round(flare.pos.x + flare.size.x / 2) - 6, Math.round(flare.pos.y) - 20, 12, 12);
@@ -264,64 +312,19 @@ class Scene {
             cx.restore();
         }
 
-        const pekora = this.actors.find(a => a instanceof Pekora);
-        if (pekora) {
-            const maxHealthWidth = 64;
-            pekora.healthBar = pekora.healthBar ? (1 - .1) * pekora.healthBar + .1 * pekora.health : pekora.health;
-            const healthWidth = Math.ceil(pekora.healthBar * maxHealthWidth / pekora.maxHealth);
+        if (this.boss) {
+            const maxHealthWidth = 128;
+            cx.save();
+            cx.translate(game.width / 2, game.height - 16);
             cx.fillStyle = '#000';
-            cx.fillRect(29, 16, 6, maxHealthWidth);
-            cx.fillStyle = '#8FAFFF';
-            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
-            cx.drawImage(game.assets.images['ui_healthbar_pekora'], 24, 0);
-        }
-        
-        const miko = this.actors.find(a => a instanceof Miko);
-        if (miko) {
-            const maxHealthWidth = 64;
-            miko.healthBar = miko.healthBar ? (1 - .1) * miko.healthBar + .1 * miko.health : miko.health;
-            const healthWidth = Math.ceil(miko.healthBar * maxHealthWidth / miko.maxHealth);
-            cx.fillStyle = '#000';
-            cx.fillRect((pekora ? 44 : 24) + 5, 16, 6, maxHealthWidth);
-            cx.fillStyle = '#FC78FC';
-            cx.fillRect((pekora ? 44 : 24) + 5, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
-            cx.drawImage(game.assets.images['ui_healthbar_miko'], pekora ? 44 : 24, 0);
-        }
-        
-        const marine = this.actors.find(a => a instanceof Marine);
-        if (marine) {
-            const maxHealthWidth = 64;
-            marine.healthBar = marine.healthBar ? (1 - .1) * marine.healthBar + .1 * marine.health : marine.health;
-            const healthWidth = Math.ceil(marine.healthBar * maxHealthWidth / marine.maxHealth);
-            cx.fillStyle = '#000';
-            cx.fillRect(29, 16, 6, maxHealthWidth);
-            cx.fillStyle = '#FCB800';
-            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
-            cx.drawImage(game.assets.images['ui_healthbar_marine'], 24, 0);
-        }
-
-        const ayame = this.actors.find(a => a instanceof Ayame);
-        if (ayame) {
-            const maxHealthWidth = 64;
-            ayame.healthBar = ayame.healthBar ? (1 - .1) * ayame.healthBar + .1 * ayame.health : ayame.health;
-            const healthWidth = Math.ceil(ayame.healthBar * maxHealthWidth / ayame.maxHealth);
-            cx.fillStyle = '#000';
-            cx.fillRect(29, 16, 6, maxHealthWidth);
-            cx.fillStyle = '#D82800';
-            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
-            cx.drawImage(game.assets.images['ui_healthbar_ayame'], 24, 0);
-        }
-
-        const fubuki = this.actors.find(a => a instanceof Fubuki);
-        if (fubuki) {
-            const maxHealthWidth = 64;
-            fubuki.healthBar = fubuki.healthBar ? (1 - .1) * fubuki.healthBar + .1 * fubuki.health : fubuki.health;
-            const healthWidth = Math.ceil(fubuki.healthBar * maxHealthWidth / fubuki.maxHealth);
-            cx.fillStyle = '#000';
-            cx.fillRect(29, 16, 6, maxHealthWidth);
-            cx.fillStyle = '#8FAFFF';
-            cx.fillRect(29, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
-            cx.drawImage(game.assets.images['ui_healthbar_fubuki'], 24, 0);
+            cx.fillRect(-maxHealthWidth / 2, 5, maxHealthWidth, 6);
+            cx.fillStyle = '#F00';
+            cx.fillRect(-maxHealthWidth / 2, 5, Math.ceil(this.boss.healthBar * maxHealthWidth / this.boss.maxHealth), 6);
+            cx.fillStyle = '#FF7FBF';
+            cx.fillRect(-maxHealthWidth / 2, 6, Math.ceil(this.boss.healthBar * maxHealthWidth / this.boss.maxHealth), 3);
+            cx.drawImage(game.assets.images['ui_healthbar_vertical'], -80, 0);
+            cx.drawImage(game.assets.images['ui_boss_icon'], this.boss.icon * 8, 0, 8, 8, -76, 4, 8, 8);
+            cx.restore();
         }
     }
 
@@ -339,7 +342,7 @@ class Scene {
         for (let i = 0; i < 4; i++) {
             const cx = game[`ctx${i}`];
             cx.save();
-            if (SCREENSHAKE && this.shakeBuffer) {
+            if (SCREENSHAKE && this.shakeBuffer && i!==3) {
                 cx.translate(Math.floor(Math.random() * 6) - 3, 0);
                 // if (KEYMODE === 'gamepad' && game.inputManager.gamepad !== null) {
                 //     const gamepad = navigator.getGamepads()[game.inputManager.gamepad];
@@ -353,9 +356,9 @@ class Scene {
                 //     }
                 // }
             }
+            const viewPos = this.view.pos.times(-1).round();
             switch (i) {
                 case 0:
-                    // if (this.drawView) {
                     cx.clearRect(0, 0, game.width, game.height);
                     if (this.bossKillEffect) {
                         cx.fillStyle = "#fff";
@@ -363,9 +366,9 @@ class Scene {
                         break;
                     }
                     this.drawBackground(game, cx);
-                    cx.translate(-this.view.pos.x, -this.view.pos.y);
+                    cx.translate(viewPos.x, viewPos.y);
+                    if (this.skyTransistion && !game.finished) cx.drawImage(game.assets.images['sp_moon'], 30 * 16 - 64, 8 * 16);
                     this.drawTiles(game, cx, this.background);
-                    // }
                     break;
                 case 1:
                     cx.clearRect(0, 0, game.width, game.height);
@@ -385,9 +388,9 @@ class Scene {
                         cx.globalAlpha = 1;
                     }
 
-                    cx.translate(-this.view.pos.x, -this.view.pos.y);
+                    cx.translate(viewPos.x, viewPos.y);
 
-                    this.particles.update(cx, game.assets, 0);
+                    this.particles.draw(cx, game.assets, 0);
 
                     this.actors.forEach(actor => {
                         cx.save();
@@ -400,13 +403,12 @@ class Scene {
                     });
                     if (DEBUGMODE) this.actors.forEach(a => a.displayCollisionBox(game, cx));
                     
-                    this.particles.update(cx, game.assets, 1);
+                    this.particles.draw(cx, game.assets, 1);
                     break;
                 case 2:
-                    // if (this.drawView) {
                     cx.clearRect(0, 0, game.width, game.height);
                     if (this.bossKillEffect) break;
-                    cx.translate(-this.view.pos.x, -this.view.pos.y);
+                    cx.translate(viewPos.x, viewPos.y);
                     this.drawTiles(game, cx, this.foreground);
                     if (DEBUGMODE) this.currentSection.collisions.forEach(a => {
                         cx.save();
@@ -420,7 +422,6 @@ class Scene {
                         cx.fillRect(0, 0, a.size.x, a.size.y);
                         cx.restore();
                     });
-                    // }
                     break;
                 case 3:
                     cx.clearRect(0, 0, game.width, game.height);
@@ -466,10 +467,7 @@ class Scene {
                         cx.drawImage(game.assets.images['sp_ice_wind'], 16 - Math.floor(this.frameCount / 2) % 16, 16 - Math.floor(this.frameCount / 2) % 16, 320, 192, 0, 0, 320, 192);
                         cx.restore();
                     }
-
-                    if (game.demoCleared) {
-                        cx.drawImage(game.assets.images['ui_level_thanks'], game.width / 2 - 64, 0);
-                    }
+                    
                     if (this.enableHUD) this.displayHUD(game, cx);
                     if (this.warning) this.displayWarning(game, cx);
                     if (this.isFocus) {
@@ -485,7 +483,7 @@ class Scene {
                         cx.fillRect(focusPos.x, focusPos.y, Math.ceil(this.isFocus * focusWidth / flare.focusTime), 4);
                         cx.restore();
                     }
-                    if (this.blackout && this.currentStage === 2) {
+                    if (this.blackout && game.currentStage === 2) {
                         const count = this.actors.filter(a => a instanceof Torche && a.active).length;
                         for (let y = 0; y < 8; y++) {
                             cx.drawImage(game.assets.images['vfx_smoke_white'], 0, 0, 8, 8, 22, 4 + y * 10, 8, 8);
@@ -504,6 +502,5 @@ class Scene {
         }
 
         this.customDraw.forEach(custom => custom(game));
-        this.customDraw = [];
     }
 }

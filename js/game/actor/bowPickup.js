@@ -35,6 +35,7 @@ class BowPickup extends Actor {
     }
 }
 class RocketPickup extends Actor {
+    isPersistent = true;
     constructor(pos, size) {
         super(pos, size);
     }
@@ -65,6 +66,7 @@ class RocketPickup extends Actor {
     }
 }
 class PetalPickup extends Actor {
+    isPersistent = true;
     constructor(pos, size) {
         super(pos, size);
     }
@@ -125,6 +127,7 @@ class SwordPickup extends Actor {
     }
 }
 class ShieldPickup extends Actor {
+    isPersistent = true;
     constructor(pos, size) {
         super(pos, size);
     }
@@ -151,6 +154,38 @@ class ShieldPickup extends Actor {
         cx.save();
         cx.translate(Math.round(this.pos.x + 12), Math.round(this.pos.y + 12));
         cx.drawImage(game.assets.images['sp_ice_shield'], -this.size.x / 2, -this.size.y / 2);
+        cx.restore();
+    }
+}
+
+class KiritoPickup extends Actor {
+    isPersistent = true;
+    constructor(pos, size) {
+        super(pos, size);
+    }
+
+    update = game => {
+        this.pos.y += Math.cos(Math.floor(this.frameCount * 3) * (Math.PI / 180)) / 4;
+        if (!(this.frameCount % 4)) game.scene.particles.charge(CollisionBox.center(this));
+
+        const flare = game.scene.actors.find(actor => actor instanceof Flare);
+        if (CollisionBox.intersects(this, flare) && !game.scene.bossKillEffect) {
+            flare.chargeTypeList.push('dual');
+            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+            game.scene.particles.sparkle_white(CollisionBox.center(this));
+            game.playSound('object_pickup');
+            
+            localStorage.setItem('nuinui-save-item-dual', true);
+            game.updateItems();
+        }
+
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x + 12), Math.round(this.pos.y + 12));
+        cx.drawImage(game.assets.images['sp_kirito'], -this.size.x / 2, -this.size.y / 2);
         cx.restore();
     }
 }
