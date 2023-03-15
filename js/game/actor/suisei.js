@@ -13,6 +13,9 @@ class Suisei extends Actor {
 
     healthBar = 0;
 
+    animation = 'stand';
+    animationFrame = 0;
+
     constructor(pos, maxHealth, axe) {
         super(pos);
         this.maxHealth = maxHealth;
