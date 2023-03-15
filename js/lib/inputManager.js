@@ -138,7 +138,7 @@ const updateKeycodes = () => {
 let selectedKey = null;
 const cancelKeyChange = key => {
     const elem = document.getElementById(`key-${KEYMODE}-${key}`);
-    elem.innerHTML = KEYBOARDINPUT[key];
+    elem.textContent = KEYBOARDINPUT[key];
     elem.classList.remove('active');
     INPUTMANAGER.keyboard.enable();
     selectedKey = null;
@@ -146,7 +146,7 @@ const cancelKeyChange = key => {
 const changeKeyHandle = e => {
     const elem = document.getElementById(`key-${KEYMODE}-${selectedKey}`);
     KEYBOARDINPUT[selectedKey] = e.code;
-    elem.innerHTML = e.code;
+    elem.textContent = e.code;
     updateKeycodes();
     elem.classList.remove('active');
     INPUTMANAGER.keyboard.enable();
@@ -157,7 +157,7 @@ const changeKeyKeyboard = key => {
     selectedKey = key;
     if (KEYBOARDINPUT[selectedKey]) {
         const elem = document.getElementById(`key-${KEYMODE}-${selectedKey}`);
-        elem.innerHTML = '.';
+        elem.textContent = '.';
         elem.classList.add('active');
         INPUTMANAGER.keyboard.disable();
         document.body.onkeydown = changeKeyHandle;
@@ -167,15 +167,15 @@ const resetKeys = () => {
     if (selectedKey) cancelKeyChange(selectedKey);
     KEYCODES = {...DEFAULTKEYCODES}
     document.getElementById('gamepad-type-A').click();
-    document.getElementById('key-keyboard-left').innerHTML = 'ArrowLeft';
-    document.getElementById('key-keyboard-right').innerHTML = 'ArrowRight';
-    document.getElementById('key-keyboard-up').innerHTML = 'ArrowUp';
-    document.getElementById('key-keyboard-down').innerHTML = 'ArrowDown';
-    document.getElementById('key-keyboard-jump').innerHTML = 'KeyZ';
-    document.getElementById('key-keyboard-attack').innerHTML = 'KeyX';
-    document.getElementById('key-keyboard-item').innerHTML = 'KeyC';
-    document.getElementById('key-keyboard-l').innerHTML = 'KeyA';
-    document.getElementById('key-keyboard-r').innerHTML = 'KeyS';
+    document.getElementById('key-keyboard-left').textContent = 'ArrowLeft';
+    document.getElementById('key-keyboard-right').textContent = 'ArrowRight';
+    document.getElementById('key-keyboard-up').textContent = 'ArrowUp';
+    document.getElementById('key-keyboard-down').textContent = 'ArrowDown';
+    document.getElementById('key-keyboard-jump').textContent = 'KeyZ';
+    document.getElementById('key-keyboard-attack').textContent = 'KeyX';
+    document.getElementById('key-keyboard-item').textContent = 'KeyC';
+    document.getElementById('key-keyboard-l').textContent = 'KeyA';
+    document.getElementById('key-keyboard-r').textContent = 'KeyS';
 }
 
 let OPTIONSENABLED = false;
@@ -183,7 +183,7 @@ const toggleOptions = () => {
     const container = document.getElementById("options-container");
     const toggle = container.style.display === 'none';
     container.style.display = toggle ? 'flex' : 'none';
-    document.getElementById('options-icon').innerHTML = toggle ? '<img src="./img/icon_close.png">' : '<img src="./img/icon_settings.png">';
+    document.getElementById('options-icon').firstElementChild.src = `./img/${toggle ? 'icon_close' : 'icon_settings'}.png`;
     OPTIONSENABLED = !OPTIONSENABLED;
 }
 
