@@ -116,13 +116,13 @@ const debugSave = () => {
 }
 // debugSave();
 
-window.onload = () => {
+window.addEventListener('load', () => {
     INPUTMANAGER = new InputManager();
     // Game
     fetch("save.json").then(res => res.json()).then(res => {
         console.log("game file loaded", res);
         const game = new Game(new Assets(), Object.freeze(res));
-        game.assets.load()
+        game.assets.load();
         game.start();
     });
 
@@ -168,4 +168,4 @@ window.onload = () => {
             document.body.style.cursor = "none";
         }, 1000);
     }
-}
+}, { once: true });
