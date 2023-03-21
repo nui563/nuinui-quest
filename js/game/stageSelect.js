@@ -7,13 +7,17 @@ class StageSelect {
         this.selectedStage = selectedStage;
 
         game.resetCanvas();
-        
+        game.resetState();
+
         // Save
         for (let i = 0; i < 5; i++) document.getElementById(`save-stage-${i+1}`).onclick = e => null;
     }
 
     update = game => {
-        if (!this.frameCount) game.stopBGM();
+        if (!this.frameCount) {
+            game.stopBGM();
+            game.cpuKeys = {};
+        }
 
         if (this.frameCount < 30) this.transitionAlpha = 1 - this.frameCount / 30;
         else if (this.frameCount < 150) this.transitionAlpha = 0;

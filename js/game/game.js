@@ -181,6 +181,10 @@ class Game {
         }
     }
 
+    resetState = () => {
+        this.cpuKeys = {};
+    }
+
     draw = () => {
         this.animation = requestAnimationFrame(this.draw);
         if(!this.drawBuffer && (!this.fpsSkipMode || this.scene.frameCount % 2)) {
