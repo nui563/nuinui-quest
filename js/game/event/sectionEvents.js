@@ -2757,7 +2757,7 @@ const EVENTS = {
                     (game, event) => {
                         const scene = game.scene;
                         switch (event.timelineFrame) {
-                            case 00:
+                            case 0:
                                 if (!game.noelMode) {
                                     event.flare.setAnimation('wakeup');
                                     game.playSound('wakeup');
