@@ -233,21 +233,28 @@ class Scene {
 
         cx.drawImage(game.assets.images['ui_score'], game.width - 57, 2);
         game.scoreDisplay = game.scoreDisplay ? (1 - .1) * game.scoreDisplay + .1 * game.score : game.score;
-        const digits = Array.from(String(Math.ceil(game.scoreDisplay)), num => Number(num));
-        while (digits.length < 8) digits.unshift(0);
+        const digits = ('00000000' + (game.scoreDisplay | 0)).slice(-8).split('');
         digits.forEach((digit, i) => {
             cx.drawImage(game.assets.images['ui_digit'], 5 * digit, 0, 5, 5, game.width - 53 + 6 * i, 5, 5, 5);
         });
 
         if (game.timer) {
-            cx.drawImage(game.assets.images['ui_timer'], game.width - 39, 15);
-
             const time = (new Date().getTime() - game.timer.getTime()) / 1000;
-            let minutes = parseInt(time / 60, 10);
-            let seconds = parseInt(time % 60, 10);
-            minutes = (minutes < 10 ? "0" + minutes : minutes).toString();
-            seconds = (seconds < 10 ? "0" + seconds : seconds).toString();
+            let minutes = ((time / 60) % 60) | 0;
+            let seconds = (time % 60) | 0;
+            minutes = ('00' + minutes).slice(-2);
+            seconds = ('00' + seconds).slice(-2);
 
+            if (time < 3600) {
+                cx.drawImage(game.assets.images['ui_timer'], game.width - 39, 15);
+            } else {
+                cx.drawImage(game.assets.images['ui_timer_wide'], game.width - 57, 15);
+                let hours = (time / 3600) | 0;
+                hours = ('00' + hours).slice(-2);
+                hours.split('').forEach((digit, i) => {
+                    cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 53 + 6 * i, 18, 5, 5);
+                });
+            }
             minutes.split('').forEach((digit, i) => {
                 cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 35 + 6 * i, 18, 5, 5);
             });

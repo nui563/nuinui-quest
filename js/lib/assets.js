@@ -240,6 +240,7 @@ class Assets {
         'ui_digit',
         'ui_score',
         'ui_timer',
+        'ui_timer_wide',
         'ui_text_bubble',
         'ui_title',
         'ui_tuto_1',
