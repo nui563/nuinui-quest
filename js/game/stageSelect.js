@@ -7,13 +7,17 @@ class StageSelect {
         this.selectedStage = selectedStage;
 
         game.resetCanvas();
-        
+        game.resetState();
+
         // Save
         for (let i = 0; i < 5; i++) document.getElementById(`save-stage-${i+1}`).onclick = e => null;
     }
 
     update = game => {
-        if (!this.frameCount) game.stopBGM();
+        if (!this.frameCount) {
+            game.stopBGM();
+            game.cpuKeys = {};
+        }
 
         if (this.frameCount < 30) this.transitionAlpha = 1 - this.frameCount / 30;
         else if (this.frameCount < 150) this.transitionAlpha = 0;
@@ -34,11 +38,8 @@ class StageSelect {
             const cx = game[`ctx${i}`];
             cx.save();
             switch (i) {
-                case 0:
-                    cx.fillStyle = "#000";
-                    cx.fillRect(0, 0, game.width, game.height);
-                    break;
                 case 3:
+                    cx.fillStyle = "#000";
                     cx.clearRect(0, 0, game.width, game.height);
                     cx.translate(game.width / 2 - 112, 0);
                     for (let i = 0; i < 5; i++) {
@@ -58,6 +59,11 @@ class StageSelect {
                     cx.globalAlpha = this.transitionAlpha;
                     cx.fillRect(0, 0, game.width, game.height);
                     break;
+                default:
+                    if (this.frameCount === 0) {
+                        cx.fillStyle = "#000";
+                        cx.fillRect(0, 0, game.width, game.height);
+                    }
             }
             cx.restore();
         }
