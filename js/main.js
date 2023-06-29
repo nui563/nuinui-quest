@@ -13,7 +13,7 @@ const toggleInfo = () => {
     const container = document.getElementById("info-container");
     const toggle = container.style.display === 'none';
     container.style.display = toggle ? 'flex' : 'none';
-    document.getElementById('info-icon').innerHTML = toggle ? '<img src="./img/icon_close.png">' : '<img src="./img/icon_info.png">';
+    document.getElementById('info-icon').firstElementChild.src = `./img/${toggle ? 'icon_close' : 'icon_info'}.png`;
     INFOENABLED = !INFOENABLED;
 }
 
@@ -27,7 +27,7 @@ const toggleSave = () => {
     const container = document.getElementById("save-container");
     const toggle = container.style.display === 'none';
     container.style.display = toggle ? 'flex' : 'none';
-    document.getElementById('save-icon').innerHTML = toggle ? '<img src="./img/icon_close.png">' : '<img src="./img/icon_save.png">';
+    document.getElementById('save-icon').firstElementChild.src = `./img/${toggle ? 'icon_close' : 'icon_save'}.png`;
     SAVEENABLED = !SAVEENABLED;
 }
 
@@ -129,7 +129,7 @@ window.onload = () => {
     document.getElementById("se-volume").onchange = e => SEVOLUME = e.target.value;
     document.getElementById("se-volume-icon").onclick = e => {
         SEMUTED = !SEMUTED;
-        document.getElementById("se-volume-icon").innerHTML = SEMUTED ? '<img src="./img/icon_volume_off.png">' : '<img src="./img/icon_volume_on.png">';
+        document.getElementById("se-volume-icon").firstElementChild.src = `./img/${SEMUTED ? 'icon_volume_off' : 'icon_volume_on'}.png`;
     }
 
     window.onblur = () => {
@@ -148,7 +148,7 @@ window.onload = () => {
     }
     document.getElementById("bgm-volume-icon").onclick = e => {
         BGMMUTED = !BGMMUTED;
-        document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? '<img src="./img/icon_volume_off.png">' : '<img src="./img/icon_volume_on.png">';
+        document.getElementById("bgm-volume-icon").firstElementChild.src = `./img/${BGMMUTED ? 'icon_volume_off' : 'icon_volume_on'}.png`;
     }
 
     if (typeof __TAURI__ !== 'undefined') {

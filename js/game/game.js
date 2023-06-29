@@ -65,7 +65,7 @@ class Game {
         }
 
         if (!SAVEOK) {
-            document.getElementById('game-container').innerHTML = 'The saving system is incompatible with your navigator, please enable cookies/localstorage';
+            document.getElementById('game-container').textContent = 'The saving system is incompatible with your navigator, please enable cookies/localstorage';
         }
 
         document.getElementById('pause-icon').onclick = () => this.togglePause();
@@ -232,7 +232,7 @@ class Game {
         }
         document.getElementById("bgm-volume-icon").onclick = e => {
             BGMMUTED = !BGMMUTED;
-            document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? '<img src="./img/icon_volume_off.png">' : '<img src="./img/icon_volume_on.png">';
+            document.getElementById("bgm-volume-icon").firstElementChild.src = `./img/${BGMMUTED ? 'icon_volume_off' : 'icon_volume_on'}.png`;
             this.bgm.updateVolume();
         }
 
@@ -253,7 +253,7 @@ class Game {
             }
             document.getElementById("bgm-volume-icon").onclick = e => {
                 BGMMUTED = !BGMMUTED;
-                document.getElementById("bgm-volume-icon").innerHTML = BGMMUTED ? '<img src="./img/icon_volume_off.png">' : '<img src="./img/icon_volume_on.png">';
+                document.getElementById("bgm-volume-icon").firstElementChild.src = `./img/${BGMMUTED ? 'icon_volume_off' : 'icon_volume_on'}.png`;
             }
         }
     }
