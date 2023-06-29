@@ -32,7 +32,7 @@ class Game {
         // Assets
         this.assets = assets;
 
-        // JSON data
+        // parsed game file data
         this.data = data;
 
         // Controller
@@ -83,7 +83,7 @@ class Game {
         // if (urlParams.has('stage')) this.currentStage = parseInt(urlParams.get('stage')) - 1;
 
         // Init stage selection
-        this.scene = new Scene(this, JSON.parse(this.data).game.stages[this.currentStage]);
+        this.scene = new Scene(this, this.data.game.stages[this.currentStage]);
 
         if (!localStorage.getItem('nuinui-save-item-fire')) localStorage.setItem('nuinui-save-item-fire', true);
         this.updateItems();

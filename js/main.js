@@ -116,13 +116,14 @@ const debugSave = () => {
 }
 // debugSave();
 
-window.onload = () => {
+window.addEventListener('load', () => {
     INPUTMANAGER = new InputManager();
     // Game
     fetch("save.json").then(res => res.json()).then(res => {
         console.log("game file loaded", res);
-        const game = new Game(new Assets(), JSON.stringify(res));
-        game.assets.load().then(game.start());
+        const game = new Game(new Assets(), Object.freeze(res));
+        game.assets.load();
+        game.start();
     });
 
     // Sound options
@@ -167,4 +168,4 @@ window.onload = () => {
             document.body.style.cursor = "none";
         }, 1000);
     }
-}
+}, { once: true });
