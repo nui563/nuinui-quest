@@ -28,6 +28,7 @@ class Marine extends Actor {
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             game.playSound('damage');
             
             if (!this.health) {

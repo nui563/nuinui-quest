@@ -21,6 +21,7 @@ class Card extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.score += 100;
@@ -98,6 +99,7 @@ class Polka extends Actor {
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             game.playSound('damage');
             
             if (!this.health) {
@@ -204,6 +206,7 @@ class Polka extends Actor {
             this.phase = 'release';
             this.bounceCount = 0;
             game.playSound('jump');
+            this.shakeBuffer = 8;
             const bullet = new Bullet(this.pos.plus(new Vector2(24 * dirVal, 8)), new Vector2(2 * dirVal, 0), this);
             const rng = Math.random();
             if (rng < .2) bullet.petal = true;

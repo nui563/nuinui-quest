@@ -34,6 +34,7 @@ class Miko extends Actor {
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             game.playSound('damage');
             
             if (this.skullBoss) this.skullBoss.takeHit(game, other);
@@ -57,6 +58,7 @@ class Miko extends Actor {
     }
 
     idlePhase = game => {
+        if (this.skullBoss && !this.invicibility) this.invicibility = 4;
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (this.phaseBuffer >= (!this.skullBoss ? 31 : 63)) {
             if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (this.skullBoss ? .5 : .3))) {
@@ -121,8 +123,9 @@ class Miko extends Actor {
 
     sniperPhase = game => {
         if (this.phaseBuffer > 15 && !(this.phaseBuffer % 20)) {
-            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 14), new Vector2(2 * (this.dir ? 1 : -1), 0), this));
+            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 12), new Vector2(2 * (this.dir ? 1 : -1), 0), this));
             game.playSound("pew");
+            this.shakeBuffer = 8;
         }
         if (this.phaseBuffer === 60) {
             this.lastMove = this.phase;
@@ -147,6 +150,7 @@ class Miko extends Actor {
     }
 
     movePhase = game => {
+        if (this.skullBoss && !this.invicibility) this.invicibility = 4;
         if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
         this.vel.x = this.moveDir * this.moveSpeed;
         if (this.phaseBuffer > 3 && this.isGrounded) {

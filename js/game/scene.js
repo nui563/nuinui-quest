@@ -1,6 +1,7 @@
 class Scene {
     frameCount = 0;
     sectionFrame = 0;
+    startTransition = 30;
 
     view = {
         pos: null,
@@ -22,6 +23,8 @@ class Scene {
 
     shakeBuffer = 0;
 
+    altColor = false;
+
     constructor(game, data) {
         this.name = data.name;
         this.sectionEvents = EVENTS[this.name];
@@ -37,8 +40,8 @@ class Scene {
             });
         });
 
-        this.background = data.layers.background;
-        this.foreground = data.layers.foreground;
+        this.background = {...data.layers.background}
+        this.foreground = {...data.layers.foreground}
 
         Object.keys(data.layers.collisions).forEach(key => {
             const [x, y] = key.split("_");
@@ -54,25 +57,10 @@ class Scene {
             this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
         }
 
+        if (game.saveData.getItem('nuinui-save-achievement-28')) this.altColor = true;
+
         this.view.size = new Vector2(game.width, game.height);
         this.setViewPos();
-        
-        game.resetCanvas();
-        
-        // Save
-        for (let i = 0; i < 5; i++) {
-            if (i === game.currentStage) localStorage.setItem(`nuinui-save-stage-${i+1}`, true);
-
-            const elem = document.getElementById(`save-stage-${i+1}`);
-            if (localStorage.getItem(`nuinui-save-stage-${i+1}`)) {
-                elem.onclick = e => {
-                    this.nextScene = new StageSelect(game, game.currentStage, i);
-                    game.checkpoint = null;
-                    game.playSound('wakeup');
-                }
-                elem.classList = 'save-stage unlocked';
-            } else elem.classList = 'save-stage';
-        }
     }
 
     setViewPos = () => {
@@ -88,14 +76,10 @@ class Scene {
         }
         
         if (this.lockedViewPos) {
-            if (this.lockedViewPos.x) {
-                pos.x = .7 * this.view.pos.x + .3 * this.lockedViewPos.x;
-                if (Math.abs(pos.x - this.lockedViewPos.x) < .3) pos.x = this.lockedViewPos.x;
-            }
-            if (this.lockedViewPos.y) {
-                pos.y = .7 * this.view.pos.y + .3 * this.lockedViewPos.y;
-                if (Math.abs(pos.y - this.lockedViewPos.y) < .3) pos.y = this.lockedViewPos.y;
-            }
+            pos.x = .7 * this.view.pos.x + .3 * this.lockedViewPos.x;
+            if (Math.abs(pos.x - this.lockedViewPos.x) < .3) pos.x = this.lockedViewPos.x;
+            pos.y = .7 * this.view.pos.y + .3 * this.lockedViewPos.y;
+            if (Math.abs(pos.y - this.lockedViewPos.y) < .3) pos.y = this.lockedViewPos.y;
         }
 
         if (this.view.pos && this.newSectionBuffer) {
@@ -103,7 +87,11 @@ class Scene {
             if (!newView.round().equals(pos)) {
                 this.view.pos = newView;
             } else this.newSectionBuffer = false;
-        } else this.view.pos = pos;
+        } else if (!this.view.pos) this.view.pos = pos;
+        else {
+            this.view.pos = this.view.pos.lerp(pos, .2);
+            this.view.pos.x = pos.x;
+        }
         
         
         // this.view.pos = pos;
@@ -154,7 +142,7 @@ class Scene {
         }
         
         const flare = this.actors.find(actor => actor instanceof Flare);
-        if(flare && flare.item && game.keys.item && flare.playerControl && !this.isFocus && !flare.focusCooldown && !this.bossKillEffect && !flare.jetski) {
+        if(flare && flare.item && game.keys.c && flare.playerControl && !this.isFocus && !this.isAmeFocus && !flare.focusCooldown && !this.bossKillEffect && !flare.jetski && !flare.moto) {
             this.isFocus = flare.focusTime;
             flare.focusCooldown = flare.focusCooldownTime;
             game.playSound("focus");
@@ -162,7 +150,8 @@ class Scene {
 
         // Update actors
         this.actors = this.actors.filter(a => !a.toFilter);
-        if (this.isFocus && this.frameCount % 3) this.actors.filter(actor => actor instanceof Flare || actor instanceof Ayame || actor instanceof Arrow).forEach(actor => actor.update(game));
+        if (this.isFocus && this.frameCount % 3) this.actors.filter(actor => actor instanceof Flare || actor instanceof Ayame || actor instanceof Ame || actor instanceof Arrow).forEach(actor => actor.update(game));
+        else if (this.isAmeFocus && this.frameCount % 3) this.actors.filter(actor => actor instanceof Ame || actor instanceof Bullet).forEach(actor => actor.update(game));
         else if (!this.bossKillEffect || this.frameCount % 2) this.actors.forEach(actor => actor.update(game));
 
         // Update section
@@ -178,10 +167,13 @@ class Scene {
 
         this.drawHUD = true;
 
+        if (this.thunder) this.thunder--;
         if (this.shakeBuffer) this.shakeBuffer--;
         if (this.bossKillEffect) this.bossKillEffect--;
         if (this.iceWind) this.iceWind--;
         if (this.isFocus) this.isFocus--;
+        if (this.isAmeFocus) this.isAmeFocus--;
+        if (this.startTransition) this.startTransition--;
         this.sectionFrame++;
         this.frameCount++;
 
@@ -192,12 +184,13 @@ class Scene {
         const pos = this.view.pos.times(1 / 16).floor();
         for (let y = pos.y - (!this.towerScroll ? 0 : 1); y < pos.y + 1 + this.view.size.y / 16; y++) {
             for (let x = pos.x; x < pos.x + 1 + this.view.size.x / 16; x++) {
-                let tile = parseInt(tiles[`${x}_${y}`], 16);
-                if (tile) {
+                let tile = tiles[`${x}_${y}`];
+                if (tile !== undefined) {
+                    tile = parseInt(tile, 16);
                     if (this.name === 'forest' && tile > 36 && tile < 40 && Math.floor(this.frameCount / 8) % 2) tile += 8;
                     if (tile > 63) tile += 8 * (Math.floor(this.frameCount / (tile === 69 ? 12 : tile > 69 && this.name === 'forest' ? 24 : 6)) % 3);
                     const towerScrollOffset = (!this.towerScroll || (tiles !== this.background && x > 22 && x < 37)) ? 0 : Math.floor(this.frameCount / this.towerScroll) % 16;
-                    ctx.drawImage(game.assets.images[`ts_${this.name}`], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16 + towerScrollOffset, 16, 16);
+                    ctx.drawImage(game.assets.images[`ts_${this.name}${this.altColor ? '_alt' : ''}`], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16 + towerScrollOffset, 16, 16);
                 }
             }
         }
@@ -211,7 +204,7 @@ class Scene {
     }
 
     drawBackground = (game, cx) => {
-        const img = `bg_${this.name}`;
+        const img = `bg_${this.name}${this.altColor ? '_alt' : ''}`;
         cx.drawImage(game.assets.images[img], 0, 0, game.width, game.height, 0, 0, game.width, game.height);
         if (this.travelEvent) {
             for (let i = 0; i < game.height; i++) {
@@ -226,6 +219,14 @@ class Scene {
                 cx.drawImage(game.assets.images[`${img}2`], 0, i, game.width, 1, -offset, i, game.width + offset * 2, 1);
             }
             cx.restore();
+        }
+        if (this.name === 'heaven') {
+            cx.drawImage(game.assets.images[`${img}2`], 0, Math.round(1 + Math.sin(this.frameCount * 2 * (Math.PI / 180))), game.width, game.height, 0, 0, game.width, game.height);
+        }
+        if (this.towaOffset > 0) {
+            cx.fillStyle = '#000';
+            cx.fillRect(0, 0, game.width, Math.round(this.towaOffset));
+            cx.fillRect(0, game.height, game.width, -Math.round(this.towaOffset));
         }
     }
 
@@ -266,32 +267,34 @@ class Scene {
         const flare = this.actors.find(actor => actor instanceof Flare);
         if (flare) {
             cx.save();
-            if (flare.maxHealth > 1) {
+            if (game.mode !== 'cursed') {
                 const maxHealthWidth = 64;
                 flare.healthBar = flare.healthBar ? (1 - .1) * flare.healthBar + .1 * flare.health : flare.health;
                 const healthWidth = Math.ceil(flare.healthBar * maxHealthWidth / flare.maxHealth);
                 cx.fillStyle = '#000';
                 cx.fillRect(9, 16, 6, maxHealthWidth);
-                cx.fillStyle = flare instanceof Noel ? '#FCB800' : '#f06';
+                cx.fillStyle = '#3F3FBF';
+                cx.fillRect(11, 16, 3, maxHealthWidth);
+                cx.fillStyle = flare instanceof Noel ? '#FFBF3F' : '#FF3F3F';
                 cx.fillRect(9, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
-                cx.fillStyle = '#FFFFFFBF';
+                cx.fillStyle = flare instanceof Noel ? '#FFFFBF' : '#FF9F7F';
                 cx.fillRect(11, 16 + maxHealthWidth - healthWidth, 3, healthWidth);
                 cx.drawImage(game.assets.images['ui_healthbar'], 4, 0);
                 cx.drawImage(game.assets.images['ui_boss_icon'], flare instanceof Noel ? 80 : 0, 0, 8, 8, 8, 6, 8, 8);
             }
 
-            if (flare.hasBow || flare.jetski) cx.drawImage(game.assets.images['ui_slot'], 0, game.height - 32);
+            if (flare.hasBow || flare.jetski || flare.moto) cx.drawImage(game.assets.images['ui_slot'], 0, game.height - 24);
 
-            if (flare.hasBow && !flare.jetski) {
+            if (flare.hasBow && !flare.jetski && !flare.moto) {
                 cx.drawImage(game.assets.images['sp_bow_pickup'], flare.weapon === 'bow' ? 0 : 20, 0, 20, 20, 2, game.height - 22, 20, 20);
                 if (flare.chargeShot) {
                     cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, 12, game.height - 12, 12, 12);
                 }
             }
 
-            if (flare.item && !flare.jetski) {
-                cx.drawImage(game.assets.images['ui_slot2'], 24, game.height - 32);
-                if (flare.focusCooldown && !this.isFocus) {
+            if (flare.item && !flare.jetski && !flare.moto) {
+                cx.drawImage(game.assets.images['ui_slot'], 24, game.height - 24);
+                if (this.isAmeFocus || (flare.focusCooldown && !this.isFocus)) {
                     cx.globalAlpha = .5;
                     cx.drawImage(game.assets.images['sp_clock'], 26, game.height - 22);
                     cx.globalAlpha = 1;
@@ -302,18 +305,18 @@ class Scene {
 
             if (flare.doubleJump) {
                 cx.save();
-                cx.drawImage(game.assets.images['ui_slot3'], 48, game.height - 24);
+                cx.drawImage(game.assets.images['ui_slot'], 48, game.height - 24);
                 if (flare.doubleJumpBuffer) cx.filter = 'brightness(.25)';
                 cx.drawImage(game.assets.images['sp_jump'], 50, game.height - 22);
                 cx.restore();
             }
 
-            if (flare.chargeTypeBufferAnim && !flare.jetski) {
+            if (flare.chargeTypeBufferAnim && !flare.jetski && !flare.moto) {
                 cx.translate(-this.view.pos.x, -this.view.pos.y);
                 cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, Math.round(flare.pos.x + flare.size.x / 2) - 6, Math.round(flare.pos.y) - 20, 12, 12);
             }
 
-            if (flare.jetski) {
+            if (flare.jetski || flare.moto) {
                 cx.drawImage(game.assets.images['sp_jetski_item'], 2, game.height - 22);
             }
             cx.restore();
@@ -325,31 +328,36 @@ class Scene {
             cx.translate(game.width / 2, game.height - 16);
             cx.fillStyle = '#000';
             cx.fillRect(-maxHealthWidth / 2, 5, maxHealthWidth, 6);
-            cx.fillStyle = '#F00';
+            cx.fillStyle = '#3F3FBF';
+            cx.fillRect(-maxHealthWidth / 2, 6, maxHealthWidth, 3);
+            cx.fillStyle = '#FF003F';
             cx.fillRect(-maxHealthWidth / 2, 5, Math.ceil(this.boss.healthBar * maxHealthWidth / this.boss.maxHealth), 6);
             cx.fillStyle = '#FF7FBF';
             cx.fillRect(-maxHealthWidth / 2, 6, Math.ceil(this.boss.healthBar * maxHealthWidth / this.boss.maxHealth), 3);
             cx.drawImage(game.assets.images['ui_healthbar_vertical'], -80, 0);
             cx.drawImage(game.assets.images['ui_boss_icon'], this.boss.icon * 8, 0, 8, 8, -76, 4, 8, 8);
+            if (this.bossText) {
+                cx.fillStyle = '#000';
+                cx.fillRect(-64, -4, this.bossText.width + 1, 7);
+                this.bossText.draw(game, cx, new Vector2(-64, -4));
+            }
             cx.restore();
         }
     }
 
     displayWarning = (game, cx) => {
-        // cx.fillStyle = "#0008";
-        // cx.fillRect(0, 32, game.width, 11);
         for (let i = 0; i < 6; i++) {
             const speed = game.frameCount * 2;
-            cx.drawImage(game.assets.images['ui_warning'], 64 * (i-1) + speed % 64, 64);
-            cx.drawImage(game.assets.images['ui_warning'], 64 * i - speed % 64, game.height - 64 - 12);
+            cx.drawImage(game.assets.images['ui_warning'], 96 * (i-1) + speed % 96, 64);
+            cx.drawImage(game.assets.images['ui_warning'], 96 * i - speed % 96, game.height - 64 - 16);
         }
     }
     
     draw = game => {
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 3; i++) {
             const cx = game[`ctx${i}`];
             cx.save();
-            if (SCREENSHAKE && this.shakeBuffer && i!==3) {
+            if (this.shakeBuffer && i!==3) {
                 cx.translate(Math.floor(Math.random() * 6) - 3, 0);
                 // if (KEYMODE === 'gamepad' && game.inputManager.gamepad !== null) {
                 //     const gamepad = navigator.getGamepads()[game.inputManager.gamepad];
@@ -367,6 +375,25 @@ class Scene {
             switch (i) {
                 case 0:
                     cx.clearRect(0, 0, game.width, game.height);
+                    if (this.boss instanceof Towa) {
+                        let yScale = 1;
+                        if (this.boss.mirrorAnim) {
+                            yScale = (this.boss.mirrorAnim / 10 - 1) * (this.boss.mirror ? 1 : -1);
+                            game.scene.particles.shine_white(this.view.pos.plus(new Vector2(Math.random() * game.width, Math.random() * game.height).round()), 1);
+                            cx.fillStyle = '#000';
+                            cx.globalAlpha = this.boss.mirrorAnim / 20;
+                            cx.fillRect(0, 0, game.width, game.height);
+                        } else if (this.boss.mirror) {
+                            // cx.filter = 'grayscale(.5)';
+                            yScale = -1;
+                        }
+                        if (yScale !== 1) {
+                            cx.translate(0, game.height * .5);
+                            cx.scale(1, yScale);
+                            cx.translate(0, -game.height * .5);
+                        }
+                    }
+
                     if (this.bossKillEffect) {
                         cx.fillStyle = "#fff";
                         cx.fillRect(0, 0, game.width, game.height);
@@ -379,6 +406,54 @@ class Scene {
                     break;
                 case 1:
                     cx.clearRect(0, 0, game.width, game.height);
+                    if (this.boss instanceof Towa) {
+                        let yScale = 1;
+                        if (this.boss.mirrorAnim) {
+                            yScale = (this.boss.mirrorAnim / 10 - 1) * (this.boss.mirror ? 1 : -1);
+                            game.scene.particles.shine_white(this.view.pos.plus(new Vector2(Math.random() * game.width, Math.random() * game.height).round()), 1);
+                            cx.fillStyle = '#000';
+                            cx.globalAlpha = this.boss.mirrorAnim / 20;
+                            cx.fillRect(0, 0, game.width, game.height);
+                        } else if (this.boss.mirror) {
+                            // cx.filter = 'grayscale(.5)';
+                            yScale = -1;
+                        }
+                        if (yScale !== 1) {
+                            cx.translate(0, game.height * .5);
+                            cx.scale(1, yScale);
+                            cx.translate(0, -game.height * .5);
+                        }
+                    }
+                    
+                    if (this.thunder && !(Math.floor(this.frameCount * .5) % 2)) {
+                        cx.fillStyle = "#fff";
+                        cx.fillRect(0, 0, game.width, game.height);
+                        cx.filter = 'brightness(0%)';
+                    }
+                    // if (this.boss instanceof Ame && this.boss.resetRoom) {
+                    //     cx.translate(game.width * .5, game.height * .5);
+                    //     cx.rotate(Math.PI * .25 * (this.boss.phaseBuffer / (4 * 60)));
+                    //     cx.translate(-game.width * .5, -game.height * .5);
+                    // }
+
+                    if (this.isAmeFocus) {
+                        cx.save();
+                        if (this.isAmeFocus < 10) cx.globalAlpha = this.isAmeFocus / 10;
+                        cx.save();
+                        cx.filter = 'hue-rotate(90deg)';
+                        for (let i = 0; i < game.height; i++) {
+                            cx.drawImage(game.assets.images['ui_focus'], 0, i, 336, 1, Math.cos(((this.frameCount + i) / game.height / 4) * (180 / Math.PI)) * 4 - 8, i, 336, 1);
+                        }
+                        cx.restore();
+                        const flare = this.actors.find(actor => actor instanceof Flare);
+                        if (this.isFocus > flare.focusTime - 30) game.scene.particles.shine_white(this.view.pos.plus(new Vector2(Math.random() * game.width, Math.random() * game.height).round()), 1);
+                        if (this.isFocus > flare.focusTime - 10) {
+                            cx.fillStyle = '#fff';
+                            cx.globalAlpha = (this.isFocus - flare.focusTime - 10) / 10;
+                            cx.fillRect(0, 0, game.width, game.height);
+                        }
+                        cx.restore();
+                    }
 
                     if (this.isFocus) {
                         if (this.isFocus < 10) cx.globalAlpha = this.isFocus / 10;
@@ -395,6 +470,8 @@ class Scene {
                         cx.globalAlpha = 1;
                     }
 
+                    if (this.warning) this.displayWarning(game, cx);
+                    
                     cx.translate(viewPos.x, viewPos.y);
 
                     this.particles.draw(cx, game.assets, 0);
@@ -411,12 +488,11 @@ class Scene {
                     if (DEBUGMODE) this.actors.forEach(a => a.displayCollisionBox(game, cx));
                     
                     this.particles.draw(cx, game.assets, 1);
-                    break;
-                case 2:
-                    cx.clearRect(0, 0, game.width, game.height);
+                    
                     if (this.bossKillEffect) break;
-                    cx.translate(viewPos.x, viewPos.y);
+
                     this.drawTiles(game, cx, this.foreground);
+
                     if (DEBUGMODE) this.currentSection.collisions.forEach(a => {
                         cx.save();
                         cx.translate(Math.round(a.pos.x), Math.round(a.pos.y));
@@ -429,18 +505,19 @@ class Scene {
                         cx.fillRect(0, 0, a.size.x, a.size.y);
                         cx.restore();
                     });
+
                     break;
-                case 3:
+                case 2:
                     cx.clearRect(0, 0, game.width, game.height);
                     if (this.bossKillEffect) break;
 
                     if (this.blackout) {
                         cx.save();
-                        cx.fillStyle = '#000c';
+                        cx.fillStyle = '#000000BF';
                         cx.fillRect(0, 0, game.width, game.height);
                         cx.globalCompositeOperation = "destination-out";
 
-                        const largeLight = this.actors.filter(a => a instanceof Flare || a instanceof EvilNoel || a instanceof Aqua || (a instanceof Torche && a.active));
+                        const largeLight = this.actors.filter(a => a instanceof Flare || a instanceof Calli || a instanceof EvilNoel || a instanceof Aqua || (a instanceof Torche && a.active));
                         largeLight.forEach(a => {
                             cx.save();
                             const pos = CollisionBox.center(a).round();
@@ -450,9 +527,9 @@ class Scene {
                             }
                             cx.drawImage(game.assets.images['ui_shadow_mask'], -64, -64);
                             cx.restore();
-                        })
+                        });
 
-                        const smallLight = this.actors.filter(a => a instanceof Arrow && a.type === 'fire');
+                        const smallLight = this.actors.filter(a => (a instanceof Arrow && a.type === 'fire') || (a instanceof Bullet && a.originActor instanceof Calli));
                         smallLight.forEach(a => {
                             cx.save();
                             const pos = CollisionBox.center(a).round();
@@ -462,7 +539,7 @@ class Scene {
                             }
                             cx.drawImage(game.assets.images['ui_shadow_mask_small'], -32, -32);
                             cx.restore();
-                        })
+                        });
                         cx.restore();
                     }
                     if (this.iceWind) {
@@ -474,9 +551,25 @@ class Scene {
                         cx.drawImage(game.assets.images['sp_ice_wind'], 16 - Math.floor(this.frameCount / 2) % 16, 16 - Math.floor(this.frameCount / 2) % 16, 320, 192, 0, 0, 320, 192);
                         cx.restore();
                     }
+                    if (this.rain) {
+                        cx.save();
+                        // if (!this.iceWindDir) {
+                        //     cx.translate(game.width, 0);
+                        //     cx.scale(-1, 1);
+                        // }
+                        cx.drawImage(game.assets.images['sp_rain'], 16 - Math.floor(this.frameCount / 2) % 16, 32 - Math.floor(this.frameCount * 2) % 32, 320, 192, 0, 0, 320, 192);
+                        cx.restore();
+                    }
+                    
+                    if (this.sun === true) {
+                        cx.save();
+                        cx.globalAlpha = .75 + Math.sin(this.frameCount * .02) * .25;
+                        cx.globalCompositeOperation = 'lighter';
+                        cx.drawImage(game.assets.images['bg_sun'], 0, 0, game.width, game.height, 0, 0, game.width, game.height);
+                        cx.restore();
+                    }
                     
                     if (this.enableHUD) this.displayHUD(game, cx);
-                    if (this.warning) this.displayWarning(game, cx);
                     if (this.isFocus) {
                         cx.save();
                         cx.translate(-this.view.pos.x, -this.view.pos.y);
@@ -498,11 +591,23 @@ class Scene {
                             if (y < count) cx.drawImage(game.assets.images['vfx_smoke_white'], 16, 0, 8, 8, 22, 4 + y * 10, 8, 8);
                         }
                     }
-                    if (this.frameCount < 30) {
+                    if (this.travelEvent) {
+                        const event = this.events.find(a => a.travelCount !== undefined);
+                        if (event) {
+                            for (let y = 0; y < event.enemies.length; y++) {
+                                cx.drawImage(game.assets.images['vfx_smoke_white'], 0, 0, 8, 8, 22, 4 + y * 10, 8, 8);
+                                cx.drawImage(game.assets.images['vfx_smoke_black'], 8, 0, 8, 8, 22, 4 + y * 10, 8, 8);
+                                if (y < event.travelCount) cx.drawImage(game.assets.images['vfx_smoke_white'], 16, 0, 8, 8, 22, 4 + y * 10, 8, 8);
+                            }
+                        }
+                    }
+                    if (this.startTransition) {
                         cx.fillStyle = '#000';
-                        cx.globalAlpha = 1 - this.frameCount / 30;
+                        cx.globalAlpha = 1 - (30 - this.startTransition) / 30;
                         cx.fillRect(0, 0, game.width, game.height);
                     }
+                    
+                    this.particles.draw(cx, game.assets, 2);
                     break;
             }
             cx.restore();

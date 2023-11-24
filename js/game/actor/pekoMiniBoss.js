@@ -23,6 +23,8 @@ class PekoMiniBoss extends Actor {
     middleVel = new Vector2(0, 0);
     middlePhase = null;
 
+    peko = null;
+
     constructor(pos, side) {
         super(pos);
 
@@ -105,28 +107,61 @@ class PekoMiniBoss extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= 90) {
-            if (Math.random() > .5) {
+        if (this.phaseBuffer >= 75) {
+            if (Math.random() > .4) {
                 const atk = Math.random();
-                if (atk < .3) {
-                    this.phase = 'attack';
-                    this.laserTarget = this.middleParts[3].pos;
-                } else if (atk > .7) {
-                    this.phase = 'attack2';
-                } else this.phase = 'attack3';
+                if (this.peko && this.pekoBuffer) {
+                    this.phase = 'peko';
+                    this.pekoBuffer = false;
+                } else {
+                    this.pekoBuffer = Math.random() < .75;
+                    if (atk < .3) {
+                        this.phase = 'attack';
+                        this.laserTarget = this.middleParts[3].pos;
+                    } else if (atk > .7) {
+                        this.phase = 'attack2';
+                    } else this.phase = 'attack3';
+                }
             } else {
                 this.phase = 'move';
-                game.playSound("boss_move");
-                this.middleVel = new Vector2(this.moveSpeed * (this.middleParts[3].pos.x < this.pos.x + this.size.x / 2 ? 1 : -1), 0);
             }
         }
     }
 
     movePhase = game => {
+        if (!this.phaseBuffer) {
+            this.shakeBuffer = 15;
+        }
+
+        if (this.phaseBuffer === 15) {
+            game.playSound("boss_move");
+            this.middleVel = new Vector2(this.moveSpeed * (this.middleParts[3].pos.x < this.pos.x + this.size.x / 2 ? 1 : -1), 0);
+        }
+
         const xPos = this.middleParts[3].pos.x;
-        if (this.phaseBuffer && (xPos + 12 < this.pos.x + this.size.x / 4 || xPos + 12 > this.pos.x + (this.size.x / 4) * 3)) {
+        if (this.phaseBuffer > 15 && (xPos + 12 < this.pos.x + this.size.x / 4 || xPos + 12 > this.pos.x + (this.size.x / 4) * 3)) {
             this.phase = 'idle';
             this.middleVel = new Vector2(0, 0);
+        }
+    }
+
+    pekoPhase = game => {
+        if (!this.phaseBuffer) {
+            game.playSound("peko");
+        }
+        if (!(this.phaseBuffer % 20)) {
+            const flare = game.scene.actors.find(actor => actor instanceof Flare);
+            const p1 = CollisionBox.center(flare);
+            const p2 = this.peko;
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+            const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-2);
+            const bullet = new Bullet(this.peko.plus(new Vector2(-8, 16)), vel, this);
+            bullet.pekoArrow = true;
+            game.scene.actors.push(bullet);
+        }
+        if (this.phaseBuffer === 60) {
+            this.lastMove = this.phase;
+            this.phase = 'idle';
         }
     }
 
@@ -213,6 +248,7 @@ class PekoMiniBoss extends Actor {
                     if (!shield.health) game.scene.particles.mini_explosion(this.checkHit(game, other).pos);
                     game.scene.particles.ray(this.checkHit(game, other).pos);
                     game.scene.particles.impact(this.checkHit(game, other).pos);
+                    game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
                 }
             });
             this.shields = this.shields.filter(shield => shield.health);
@@ -224,6 +260,7 @@ class PekoMiniBoss extends Actor {
             this.hitBuffer = 20;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             if (!this.health) {
                 game.score += 1000;
             }
@@ -232,6 +269,13 @@ class PekoMiniBoss extends Actor {
 
     update = game => {
         this[`${this.phase}Phase`](game);
+
+        if (this.peko) {
+            const flare = game.scene.actors.find(actor => actor instanceof Flare);
+            this.pekoDir = flare.pos.x < this.peko.x;
+            if (this.phase !== 'intro' && this.phase !== 'death') this.peko.x += Math.max(-2, Math.min(2, this.peko.lerp(flare.pos, .05).x - this.peko.x));
+            if (this.peko.y > 9 * 16) this.peko.y--;
+        }
 
         ['left', 'right', 'middle'].forEach(side => {
             const parts = this[`${side}Parts`];
@@ -322,6 +366,14 @@ class PekoMiniBoss extends Actor {
 
         if (this.laserTarget) {
             cx.drawImage(game.assets.images['sp_laser_target'], this.phase === 'attack' ? 0 : (Math.floor(this.frameCount / 2) % 2) * 24, 0, 24, 24, this.laserTarget.x - 12, this.laserTarget.y - 12, 24, 24);
+        }
+
+        if (this.peko) {
+            cx.save()
+            cx.translate(this.peko.x, this.peko.y + (this.phase === 'death' ? this.phaseBuffer : 0));
+            if (this.pekoDir) cx.scale(-1, 1);
+            cx.drawImage(game.assets.images['sp_peko_back'], 0, 0, 48, 48, -24, 0, 48, 48);
+            cx.restore();
         }
 
         cx.restore();

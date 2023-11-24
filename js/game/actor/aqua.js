@@ -47,14 +47,15 @@ class Aqua extends Actor {
                     game.playBGM('sneak');
                 }
                 this.phase = 'defeated';
-                game.playSound('death');
+                game.playSound('level_start');
                 game.scene.bossKillEffect = 60;
                 game.scene.isFocus = 0;
                 this.vel.y = -4;
                 const flare = game.scene.actors.find(actor => actor instanceof Flare);
-                localStorage.setItem('nuinui-save-achievement-10', true);
-                game.updateAchievements();
+                game.saveData.setItem('nuinui-save-achievement-10', true);
                 if (!flare.chargeTypeList.includes('dual')) game.scene.actors.push(new KiritoPickup(this.pos.value(), new Vector2(20, 20)));
+            } else {
+                game.scene.particles.digit(this.checkHit(game, other).pos, 0);
             }
         }
 

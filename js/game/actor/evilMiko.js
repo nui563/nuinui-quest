@@ -45,6 +45,7 @@ class EvilMiko extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         game.playSound('damage');
         
         if (!this.health) {
@@ -227,7 +228,8 @@ class EvilMiko extends Actor {
         }
 
         if (this.dragonBreath && this.health) {
-
+            game.scene.actors.filter(a => a instanceof Arrow && !a.kanataBuffer && Math.abs(this.pos.x - a.pos.x) < 48 && Math.sign(a.vel.x) !== Math.sign(this.dir ? 1 : -1)).forEach(a => a.kanataBuffer = 1);
+            
             if (!(this.frameCount % 20)) game.playSound('explosion');
 
             const pos = this.dragonHeadpos.plus(new Vector2(0, -16));

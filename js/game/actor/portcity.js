@@ -20,6 +20,7 @@ class Dokuro extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -112,6 +113,7 @@ class Cannon extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -219,6 +221,7 @@ class Pirate extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -366,7 +369,12 @@ class Neko extends Actor {
     }
 
     takeHit = (game, other) => {
-        if (other instanceof Arrow && other.type === 'fire') this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+        if (other instanceof Arrow && other.type === 'fire') {
+            this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
+        } else {
+            game.scene.particles.digit(this.checkHit(game, other).pos, 0);
+        }
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);

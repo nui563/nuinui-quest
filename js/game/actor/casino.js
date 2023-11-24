@@ -28,6 +28,7 @@ class Mikobell extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -181,6 +182,7 @@ class Casinochip extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -306,7 +308,7 @@ class CasinoBoss extends Actor {
     size = new Vector2(0, 0);
     vel = new Vector2(0, 0);
 
-    maxHealth = 32;
+    maxHealth = 24;
     healthBar = 0;
 
     actors = [];
@@ -344,18 +346,19 @@ class CasinoBoss extends Actor {
                 game.scene.actors = game.scene.actors.filter(b => b !== a);
                 this.actors = this.actors.filter(b => b !== a);
             }
-        })
+        });
 
-        if (this === game.scene.boss && this.frameCount > 200 && this.actors.length < 2) {
-            const boss = new (Math.random() > .5 ? Pekora : Miko)(new Vector2(179.5 * 16 + Math.floor(Math.random() * 256 - 128), 16), 4);
-            boss.setAnimation('jump');
-            boss.skullBoss = this;
-            boss.lastPhase = 'move';
-            boss.phase = 'move';
-            boss.phaseBuffer = 0;
-            this.actors.push(boss);
-            game.scene.actors.push(boss);
-        }
+        // if (this === game.scene.boss && this.frameCount > 200 && this.actors.length < 2) {
+        //     const className = game.scene.actors.find(a => a instanceof Miko) ? Pekora : Miko;
+        //     const boss = new (className)(new Vector2(179.5 * 16 + Math.floor(Math.random() * 256 - 128), 16), 1);
+        //     boss.setAnimation('jump');
+        //     boss.skullBoss = this;
+        //     boss.lastPhase = 'move';
+        //     boss.phase = 'move';
+        //     boss.phaseBuffer = 0;
+        //     this.actors.push(boss);
+        //     game.scene.actors.push(boss);
+        // }
 
         const ytarget = 0;
         const amt = .1;

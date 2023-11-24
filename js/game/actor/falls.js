@@ -20,6 +20,7 @@ class Nousabot extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -54,7 +55,7 @@ class Nousabot extends Actor {
         }
 
         // Attack
-        if ([63, 95, 127].includes(this.frameCount % 128) && CollisionBox.intersects(this, game.scene.view)) {
+        if ([63, 95, 127].includes(this.frameCount % 128) && CollisionBox.intersects(this, game.scene.view) && !flare.moto) {
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
             if (p1.distance(p2) < 192 && p1.y - 32 < p2.y) {
@@ -83,7 +84,7 @@ class Nousabot extends Actor {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
-        cx.drawImage(game.assets.images['sp_nousabot'], 0, game.currentStage === 4 ? 48 : game.currentStage === 2 ? 24 : 0, 24, 24, 0, 0, 24, 24);
+        cx.drawImage(game.assets.images['sp_nousabot'], 0, game.currentStage === 6 ? 72 : game.currentStage === 4 ? 48 : game.currentStage === 2 ? 24 : 0, 24, 24, 0, 0, 24, 24);
         cx.restore();
     }
 }
@@ -115,7 +116,12 @@ class Robot extends Actor {
     }
 
     takeHit = (game, other) => {
-        if (game.currentStage !== 3) this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+        if (game.currentStage !== 3) {
+            this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
+        } else {
+            game.scene.particles.digit(this.checkHit(game, other).pos, 0);
+        }
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
@@ -142,10 +148,10 @@ class Robot extends Actor {
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
 
-            if (p1.distance(p2) < 16 * 10) this.aggro = true;
+            if (p1.distance(p2) < 16 * 10 || game.currentStage === 6) this.aggro = true;
 
             if (this.aggro) {
-                if (Math.abs(p1.y - p2.y) < flare.size.y) {
+                if (Math.abs(p1.y - p2.y) < flare.size.y * (game.currentStage === 6 ? 2 : 1)) {
                     this.phase = 'attack';
                 } else {
                     this.phase = 'move';
@@ -158,7 +164,15 @@ class Robot extends Actor {
 
     attackPhase = game => {
         if (!(this.phaseBuffer % 10) && CollisionBox.intersects(this, game.scene.view)) {
-            game.scene.actors.push(new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 18), new Vector2(3 * (this.dir ? 1 : -1), 0), this));
+            const bullet = new Bullet(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -16), this.pos.y + 18), new Vector2((game.currentStage === 6 ? Math.round(1 + this.phaseBuffer * .05) : 3) * (this.dir ? 1 : -1), game.currentStage === 6 ? -2 : 0), this);
+            if (game.currentStage === 6) {
+                bullet.candy = true;
+                bullet.size = new Vector2(8, 8);
+                bullet.angle = 0;
+                bullet.damage = 2;
+            }
+            game.scene.actors.push(bullet);
+            this.shakeBuffer = 3;
             if (CollisionBox.intersects(this, game.scene.view)) game.playSound("pew");
         }
         if (this.phaseBuffer === 39) this.phase = 'idle';
@@ -180,6 +194,8 @@ class Robot extends Actor {
 
     update = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
+
+        if (!this.frameCount && game.currentStage === 6) this.health = 8;
 
         this[`${this.phase}Phase`](game);
 
@@ -236,7 +252,7 @@ class Robot extends Actor {
         }
         const offset = new Vector2(12, 12);
         if (this.waterOffset)cx.drawImage(game.assets.images['sp_pirate_jetski'], -10, -8);
-        else cx.drawImage(game.assets.images['sp_robot'], this.sleep ? 144 : this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, game.currentStage === 3 ? 96 : game.currentStage === 2 ? 48 : 0, 48, 48, -offset.x, -offset.y, 48, 48);
+        else cx.drawImage(game.assets.images['sp_robot'], this.sleep ? 144 : this.vel.x === 0 ? 0 : this.dir === this.vel.x < 0 ? 48 : 96, game.currentStage === 3 ? 96 : game.currentStage === 2 ? 48 : game.currentStage === 6 ? 144 : 0, 48, 48, -offset.x, -offset.y, 48, 48);
         cx.restore();
     }
 }
@@ -271,6 +287,7 @@ class Nousakumo extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -394,7 +411,7 @@ class Nousakumo extends Actor {
         }
         const offset = new Vector2(6, 10);
         cx.drawImage(game.assets.images['sp_nousakumo'],
-            this.isGrounded ? 0 : 32, game.currentStage === 4 ? 64 : game.currentStage === 2 ? 32 : 0, 32, 32,
+            this.isGrounded ? 0 : 32, game.currentStage === 6 ? 96 : game.currentStage === 4 ? 64 : game.currentStage === 2 ? 32 : 0, 32, 32,
             -offset.x, -offset.y, 32, 32);
         cx.restore();
     }

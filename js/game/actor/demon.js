@@ -28,13 +28,14 @@ class Demon extends Actor {
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             game.playSound('hit');
             
             if (!this.health) {
                 game.score += 5000;
             } else {
                 game.score += 100;
-                this.invicibility = 30;
+                this.invicibility = 12;
             }
         }
     }
@@ -223,7 +224,7 @@ class Demon extends Actor {
             const iceSpike = new Bullet(CollisionBox.center(this).plus(vel.times(16).plus(new Vector2(-8, -8))), vel, this);
             iceSpike.angle = angle;
             game.scene.actors.push(iceSpike);
-            game.playSound("step");
+            game.playSound("wind");
         }
 
         if (!this.health) {
@@ -302,7 +303,7 @@ class Demon extends Actor {
         }
 
         cx.save();
-        if (this.invicibility > 22) cx.filter = `contrast(0) brightness(2)`;
+        if (this.invicibility > 10) cx.filter = `contrast(0) brightness(2)`;
         const xPos = ['charge', 'attack', 'death'].includes(this.phase) || this.screamBuffer ? 96 : ['laser', 'end'].includes(this.phase) ? (1 + Math.floor(this.frameCount * .5) % 4) * 96 : 0;
         cx.drawImage(game.assets.images['sp_demon_head'], xPos, 0, 96, 96, -16, -16, 96, 96);
         cx.restore();
@@ -342,6 +343,7 @@ class DemonHand extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, 0);
         if (!this.demon.targetUnit) this.pos.x += this.size.x * (this.dir ? 1 : -1);
         game.playSound('hit');
     }

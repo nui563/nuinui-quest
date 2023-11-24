@@ -10,6 +10,19 @@ class ParticleManager {
         this.pool.filter(particle => particle.zIndex === zIndex).forEach(particle => particle.draw(cx, assets));
     }
 
+    digit = (pos, value) => {
+        const val = value;
+        this.pool.push(new Particle({
+            type: `digit`,
+            pos: pos,
+            size: new Vector2(5, 5),
+            xOffset: p => 5 * val,
+            vel: new Vector2((Math.random() - .5) * .5, -.5 - Math.random() * .5),
+            lifespan: 24,
+            zIndex: 1
+        }));
+    }
+
     mini_explosion = pos => {
         this.pool.push(new Particle({
             type: `explosion`,
@@ -22,7 +35,7 @@ class ParticleManager {
         }));
     }
 
-    explosion = pos => {
+    explosion = (pos, zIndex=1) => {
         for (let i = 0; i < 16; i++) {
             this.pool.push(new Particle({
                 type: `explosion`,
@@ -31,7 +44,7 @@ class ParticleManager {
                 xOffset: p => p.size.x * Math.floor(p.life * 8 / p.lifespan),
                 vel: new Vector2(0, 0),
                 lifespan: 32,
-                zIndex: 1,
+                zIndex: zIndex,
                 delay: i
             }));
         }
@@ -89,13 +102,13 @@ class ParticleManager {
         }));
     }
     
-    water_trail = actor => {
+    water_trail = (actor, vel=4) => {
         this.pool.push(new Particle({
             type: `water_trail`,
             pos: actor.pos.plus(new Vector2(actor.size.x / 2, actor.size.y - 16)),
             size: new Vector2(16, 32),
             xOffset: p => p.size.x * Math.floor(p.life * 8 / p.lifespan),
-            vel: new Vector2(4, 0),
+            vel: new Vector2(vel, 0),
             lifespan: 24,
             zIndex: 1
         }));
@@ -145,6 +158,18 @@ class ParticleManager {
             xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
             vel: vel,
             lifespan: 12 + Math.floor(Math.random() * 8),
+            zIndex: zIndex
+        }));
+    }
+    
+    bubble = (pos, vel, zIndex) => {
+        this.pool.push(new Particle({
+            type: `bubble`,
+            pos: pos.round(),
+            size: new Vector2(8, 8),
+            xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
+            vel: vel,
+            lifespan: 32 + Math.floor(Math.random() * 16),
             zIndex: zIndex
         }));
     }
@@ -302,6 +327,55 @@ class ParticleManager {
         }));
     }
     
+    charge_black_smoke = (pos, zIndex) => {
+        const dist = Math.random() * 192;
+        const a = Math.cos(dist * 2 * Math.PI);
+        const b = Math.sin(dist * 2 * Math.PI);
+        this.pool.push(new Particle({
+            type: `smoke_black`,
+            pos: pos.plus(new Vector2(a * dist, b * dist)),
+            size: new Vector2(8, 8),
+            xOffset: p => p.size.x * Math.floor(p.life * 4 / p.lifespan),
+            vel: new Vector2(-a, -b).times(2),
+            lifespan: 24 + Math.floor(Math.random() * 8),
+            zIndex: zIndex,
+        }));
+    }
+
+    charge_slow = (pos, zIndex) => {
+        const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
+        const dist = Math.random() * 192;
+        const a = Math.cos(dist * 2 * Math.PI);
+        const b = Math.sin(dist * 2 * Math.PI);
+        this.pool.push(new Particle({
+            type: `sparkle_fire_4`,
+            pos: pos.plus(new Vector2(a * dist, b * dist)),
+            size: new Vector2(16, 16),
+            xOffset: p => p.size.x * Math.floor(p.life * 6 / p.lifespan),
+            vel: new Vector2(-a, -b).times(2),
+            lifespan: 24 + Math.floor(Math.random() * 8),
+            zIndex: zIndex,
+            rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
+        }));
+    }
+
+    charge_time = (pos, zIndex) => {
+        const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
+        const dist = Math.random() * 192;
+        const a = Math.cos(dist * 2 * Math.PI);
+        const b = Math.sin(dist * 2 * Math.PI);
+        this.pool.push(new Particle({
+            type: `sparkle_fire_2`,
+            pos: pos.plus(new Vector2(a * dist, b * dist)),
+            size: new Vector2(16, 16),
+            xOffset: p => p.size.x * Math.floor(p.life * 6 / p.lifespan),
+            vel: new Vector2(-a, -b).times(2),
+            lifespan: 24 + Math.floor(Math.random() * 8),
+            zIndex: zIndex,
+            rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
+        }));
+    }
+    
     charge_fire = pos => {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = 20 + Math.random() * 12;
@@ -398,11 +472,11 @@ class Particle {
     draw = (cx, assets) => {
         if (this.delay) return;
         cx.save();
-        cx.translate(this.pos.x, this.pos.y);
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (this.rotate) cx.rotate(this.rotate(this));
         if (this.scale) cx.scale(...this.scale(this));
         const xOffset = this.xOffset ? this.xOffset(this) : 0;
-        cx.drawImage(assets.images[`vfx_${this.type}`], xOffset, 0, this.size.x, this.size.y, -this.size.x / 2, -this.size.y / 2, this.size.x, this.size.y);
+        cx.drawImage(assets.images[`vfx_${this.type}`], xOffset, 0, this.size.x, this.size.y, -Math.round(this.size.x * .5), -Math.round(this.size.y * .5), this.size.x, this.size.y);
         cx.restore();
     }
 }

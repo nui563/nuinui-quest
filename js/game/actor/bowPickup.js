@@ -15,13 +15,7 @@ class BowPickup extends Actor {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
-
-            localStorage.setItem(`nuinui-save-item-${this.type}`, true);
-            if (this.type === 'gun') {
-                localStorage.setItem('nuinui-save-achievement-1', true);
-                game.updateAchievements();
-            }
-            game.updateItems();
+            game.saveData.setItem(`nuinui-save-item-${this.type}`, true);
         }
 
         this.frameCount++;
@@ -51,8 +45,7 @@ class RocketPickup extends Actor {
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
             
-            localStorage.setItem('nuinui-save-item-rocket', true);
-            game.updateItems();
+            game.saveData.setItem('nuinui-save-item-rocket', true);
         }
 
         this.frameCount++;
@@ -82,8 +75,7 @@ class PetalPickup extends Actor {
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
             
-            localStorage.setItem('nuinui-save-item-petal', true);
-            game.updateItems();
+            game.saveData.setItem('nuinui-save-item-petal', true);
         }
 
         this.frameCount++;
@@ -112,8 +104,7 @@ class SwordPickup extends Actor {
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
             
-            localStorage.setItem('nuinui-save-item-sword', true);
-            game.updateItems();
+            game.saveData.setItem('nuinui-save-item-sword', true);
         }
 
         this.frameCount++;
@@ -143,8 +134,7 @@ class ShieldPickup extends Actor {
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
             
-            localStorage.setItem('nuinui-save-item-shield', true);
-            game.updateItems();
+            game.saveData.setItem('nuinui-save-item-shield', true);
         }
 
         this.frameCount++;
@@ -175,8 +165,7 @@ class KiritoPickup extends Actor {
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
             
-            localStorage.setItem('nuinui-save-item-dual', true);
-            game.updateItems();
+            game.saveData.setItem('nuinui-save-item-dual', true);
         }
 
         this.frameCount++;
@@ -206,8 +195,7 @@ class ClockPickup extends Actor {
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
             
-            localStorage.setItem('nuinui-save-item-clock', true);
-            game.updateItems();
+            game.saveData.setItem('nuinui-save-item-clock', true);
         }
 
         this.frameCount++;
@@ -237,8 +225,7 @@ class JumpPickup extends Actor {
             game.scene.particles.sparkle_white(CollisionBox.center(this));
             game.playSound('object_pickup');
             
-            localStorage.setItem('nuinui-save-item-jump', true);
-            game.updateItems();
+            game.saveData.setItem('nuinui-save-item-jump', true);
         }
 
         this.frameCount++;
@@ -248,6 +235,68 @@ class JumpPickup extends Actor {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         cx.drawImage(game.assets.images['sp_jump'], 0, 0, 20, 20, 0, 0, 20, 20);
+        cx.restore();
+    }
+}
+
+class BootsPickup extends Actor {
+    constructor(pos, size) {
+        super(pos, size);
+    }
+
+    update = game => {
+        this.pos.y += Math.cos(Math.floor(this.frameCount * 3) * (Math.PI / 180)) / 4;
+        if (!(this.frameCount % 24)) game.scene.particles.shine_white(CollisionBox.center(this), 1);
+
+        const flare = game.scene.actors.find(actor => actor instanceof Flare);
+        if (CollisionBox.intersects(this, flare)) {
+            flare.canWallJump = true;
+            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+            game.scene.particles.sparkle_white(CollisionBox.center(this));
+            game.playSound('object_pickup');
+            
+            game.saveData.setItem('nuinui-save-item-boots', true);
+        }
+
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        cx.drawImage(game.assets.images['sp_boots'], 0, 0, 20, 20, 0, 0, 20, 20);
+        cx.restore();
+    }
+}
+
+class KeyPickup extends Actor {
+    size = new Vector2(16, 16);
+
+    constructor(pos, id) {
+        super(pos);
+        this.id = id;
+    }
+
+    update = game => {
+        this.pos.y += Math.cos(Math.floor(this.frameCount * 3) * (Math.PI / 180)) / 4;
+        if (!(this.frameCount % 24)) game.scene.particles.shine_white(CollisionBox.center(this), 1);
+
+        const flare = game.scene.actors.find(actor => actor instanceof Flare);
+        if (CollisionBox.intersects(this, flare)) {
+            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+            game.scene.particles.sparkle_white(CollisionBox.center(this));
+            game.playSound('object_pickup');
+            
+            game.saveData.setItem(`nuinui-save-item-key${this.id}`, true);
+        }
+
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        cx.drawImage(game.assets.images['sp_key'], 16 * this.id, 0, 16, 16, 0, 0, 16, 16);
         cx.restore();
     }
 }

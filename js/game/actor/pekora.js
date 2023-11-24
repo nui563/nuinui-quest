@@ -28,6 +28,7 @@ class Pekora extends Actor {
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             game.playSound('damage');
             
             if (this.skullBoss) this.skullBoss.takeHit(game, other);
@@ -36,6 +37,7 @@ class Pekora extends Actor {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
                 game.score += 5000;
             } else {
+                if (this.health < this.maxHealth * .25) this.isTired = true;
                 game.score += 100;
                 this.invicibility = 30;
             }
@@ -43,7 +45,7 @@ class Pekora extends Actor {
     }
 
     fleePhase = game => {
-        this.setAnimation(!this.isGrounded? 'jump' : 'idle');
+        this.setAnimation(!this.isGrounded? 'jump' : 'think');
         if (this.pos.y === 16 * 22 - this.size.y) {
             game.playSound('land');
             game.scene.particles.land(this);
@@ -53,11 +55,12 @@ class Pekora extends Actor {
 
     defeatedPhase = game => {
         //velloss
-        this.setAnimation(!this.isGrounded? 'hit' : 'idle');
+        this.setAnimation(!this.isGrounded? 'hit' : 'think');
         this.vel = this.vel.mult(new Vector2(0.9, 1));
     }
 
     idlePhase = game => {
+        if (this.skullBoss && !this.invicibility) this.invicibility = 4;
         if (this.phaseBuffer >= (game.scene.name !== 'casino' ? 31 : 63)) {
             if (Math.random() < (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .2)) {
                 if (game.scene.name === 'casino' || Math.random() > .75) {
@@ -96,10 +99,11 @@ class Pekora extends Actor {
             game.scene.actors.push(new Rocket(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -8), this.pos.y + 16), new Vector2(1 * (this.dir ? 1 : -1), 0), this));
             // if (Math.random() > .5) game.playSound('peko');
             game.playSound("pew");
+            this.shakeBuffer = 8;
         }
         if (this.phaseBuffer === 39) {
             this.lastMove = this.phase;
-            this.setAnimation('idle');
+            this.setAnimation(this.isTired ? 'think' : 'idle');
             this.phase = 'idle';
         }
     }
@@ -131,7 +135,7 @@ class Pekora extends Actor {
         if (this.phaseBuffer === 72) {
             this.lastMove = this.phase;
             this.phase = 'idle';
-            this.setAnimation('idle');
+            this.setAnimation(this.isTired ? 'think' : 'idle');
         }
     }
     
@@ -148,11 +152,12 @@ class Pekora extends Actor {
         if (this.phaseBuffer === 64) {
             this.lastMove = this.phase;
             this.phase = 'idle';
-            this.setAnimation('idle');
+            this.setAnimation(this.isTired ? 'think' : 'idle');
         }
     }
 
     movePhase = game => {
+        if (this.skullBoss && !this.invicibility) this.invicibility = 4;
         if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
         this.vel.x = this.moveDir * this.moveSpeed;
         if (this.phaseBuffer > 3 && this.isGrounded) {
@@ -160,7 +165,7 @@ class Pekora extends Actor {
             this.phase = 'idle';
             this.vel = new Vector2(0, 0);
         }
-        this.setAnimation(this.vel.y ? 'jump' : 'idle');
+        this.setAnimation(this.vel.y ? 'jump' : (this.isTired ? 'think' : 'idle'));
     }
     
     setAnimation = animation => {

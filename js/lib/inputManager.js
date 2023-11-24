@@ -1,5 +1,5 @@
 class KeyboardListener {
-    keys = { left: false, right: false, down: false, up: false, jump: false, attack: false, item: false, l: false, r: false }
+    keys = { left: false, right: false, down: false, up: false, a: false, b: false, c: false, l: false, r: false, start: false }
 
     constructor() {
         this.enable();
@@ -31,22 +31,12 @@ class InputManager {
         this.keyboard = new KeyboardListener();
         window.addEventListener('gamepadconnected', event => {
             this.gamepadIndex = event.gamepad.index;
-            const gp = navigator.getGamepads()[this.gamepadIndex];
-            console.log("Gamepad connected at index %d: %s.", gp.index, gp.id);
-
-            toggleKeyMode(document.getElementById('key-mode-opt-gamepad'), 'gamepad');
-            document.getElementById('key-mode-opt-gamepad').disabled = false;
-            console.log('Gamepad mode enabled');
+            toggleKeyMode('gamepad');
         });
         window.addEventListener("gamepaddisconnected", event => {
-            console.log("Gamepad disconnected from index %d: %s", event.gamepad.index, event.gamepad.id);
-
             if (event.gamepad.index === this.gamepadIndex) {
                 this.gamepadIndex = null;
-
-                toggleKeyMode(document.getElementById('key-mode-opt-keyboard'), 'keyboard');
-                document.getElementById('key-mode-opt-gamepad').disabled = true;
-                console.log('Gamepad mode disabled');
+                toggleKeyMode('keyboard');
             }
         });
     }
@@ -63,11 +53,12 @@ class InputManager {
                     right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
                     up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
                     down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
-                    jump: (gamepad.buttons[0] && gamepad.buttons[0].value),
-                    attack: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
-                    item: (gamepad.buttons[3] && gamepad.buttons[3].value),
+                    a: (gamepad.buttons[0] && gamepad.buttons[0].value),
+                    b: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
+                    c: (gamepad.buttons[3] && gamepad.buttons[3].value),
                     l: (gamepad.buttons[4] && gamepad.buttons[4].value) || (gamepad.buttons[6] && gamepad.buttons[6].value),
-                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value)
+                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value),
+                    start: (gamepad.buttons[9] && gamepad.buttons[9].value)
                 }
             case 'b':
                 return {
@@ -75,11 +66,12 @@ class InputManager {
                     right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
                     up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
                     down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
-                    jump: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
-                    attack: (gamepad.buttons[0] && gamepad.buttons[0].value),
-                    item: (gamepad.buttons[3] && gamepad.buttons[3].value),
+                    a: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
+                    b: (gamepad.buttons[0] && gamepad.buttons[0].value),
+                    c: (gamepad.buttons[3] && gamepad.buttons[3].value),
                     l: (gamepad.buttons[4] && gamepad.buttons[4].value) || (gamepad.buttons[6] && gamepad.buttons[6].value),
-                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value)
+                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value),
+                    start: (gamepad.buttons[9] && gamepad.buttons[9].value)
                 }
             case 'c':
                 return {
@@ -87,19 +79,18 @@ class InputManager {
                     right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
                     up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
                     down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
-                    jump: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
-                    attack: (gamepad.buttons[3] && gamepad.buttons[3].value),
-                    item: (gamepad.buttons[0] && gamepad.buttons[0].value),
+                    a: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
+                    b: (gamepad.buttons[3] && gamepad.buttons[3].value),
+                    c: (gamepad.buttons[0] && gamepad.buttons[0].value),
                     l: (gamepad.buttons[4] && gamepad.buttons[4].value) || (gamepad.buttons[6] && gamepad.buttons[6].value),
-                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value)
+                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value),
+                    start: (gamepad.buttons[9] && gamepad.buttons[9].value)
                 }
             default:
                 return {}
         }
     }
 }
-
-let INPUTMANAGER = null;
 
 let KEYMODE = 'keyboard';
 
@@ -108,11 +99,12 @@ const DEFAULTKEYCODES = {
     ArrowRight: "right",
     ArrowUp: "up",
     ArrowDown: "down",
-    KeyZ: "jump",
-    KeyX: "attack",
-    KeyC: "item",
+    KeyZ: "a",
+    KeyX: "b",
+    KeyC: "c",
     KeyA: "l",
-    KeyS: "r"
+    KeyS: "r",
+    Enter: "start"
 }
 let KEYCODES = {...DEFAULTKEYCODES};
 
@@ -124,11 +116,12 @@ const KEYBOARDINPUT = {
     right: "ArrowRight",
     up: "ArrowUp",
     down: "ArrowDown",
-    jump: "KeyZ",
-    attack: "KeyX",
-    item: "KeyC",
+    a: "KeyZ",
+    b: "KeyX",
+    c: "KeyC",
     l: "KeyA",
-    r: "KeyS"
+    r: "KeyS",
+    start: "Enter"
 }
 const updateKeycodes = () => {
     const input = KEYMODE === 'keyboard' ? KEYBOARDINPUT : GAMEPADINPUT;
@@ -136,77 +129,34 @@ const updateKeycodes = () => {
     for (const [key, value] of Object.entries(input)) KEYCODES[value] = key;
 }
 let selectedKey = null;
-const cancelKeyChange = key => {
-    const elem = document.getElementById(`key-${KEYMODE}-${key}`);
-    elem.textContent = KEYBOARDINPUT[key];
-    elem.classList.remove('active');
-    INPUTMANAGER.keyboard.enable();
+const cancelKeyChange = (game, key, opt) => {
+    opt.value = KEYBOARDINPUT[key];
+    game.inputManager.keyboard.enable();
     selectedKey = null;
 }
-const changeKeyHandle = e => {
-    const elem = document.getElementById(`key-${KEYMODE}-${selectedKey}`);
+const changeKeyHandle = (game, e, opt) => {
+    const other = Object.entries(KEYBOARDINPUT).find(([key, value]) => value === e.code);
+    if (other && other[0] !== selectedKey) return;
     KEYBOARDINPUT[selectedKey] = e.code;
-    elem.textContent = e.code;
+    opt.value = e.code;
     updateKeycodes();
-    elem.classList.remove('active');
-    INPUTMANAGER.keyboard.enable();
+    game.inputManager.keyboard.enable();
     selectedKey = null;
 }
-const changeKeyKeyboard = key => {
-    if (selectedKey) cancelKeyChange(selectedKey);
+const changeKeyKeyboard = (game, key) => {
+    const opt = game.menu.options.find(opt => opt.id === key);
+    if (selectedKey) cancelKeyChange(game, selectedKey, opt);
     selectedKey = key;
     if (KEYBOARDINPUT[selectedKey]) {
-        const elem = document.getElementById(`key-${KEYMODE}-${selectedKey}`);
-        elem.textContent = '.';
-        elem.classList.add('active');
-        INPUTMANAGER.keyboard.disable();
-        document.body.onkeydown = changeKeyHandle;
+        opt.value = '...';
+        game.inputManager.keyboard.disable();
+        document.body.onkeydown = e => changeKeyHandle(game, e, opt);
     }
 }
-const resetKeys = () => {
-    if (selectedKey) cancelKeyChange(selectedKey);
+const resetKeys = game => {
+    if (selectedKey) cancelKeyChange(game, selectedKey);
     KEYCODES = {...DEFAULTKEYCODES}
-    document.getElementById('gamepad-type-A').click();
-    document.getElementById('key-keyboard-left').textContent = 'ArrowLeft';
-    document.getElementById('key-keyboard-right').textContent = 'ArrowRight';
-    document.getElementById('key-keyboard-up').textContent = 'ArrowUp';
-    document.getElementById('key-keyboard-down').textContent = 'ArrowDown';
-    document.getElementById('key-keyboard-jump').textContent = 'KeyZ';
-    document.getElementById('key-keyboard-attack').textContent = 'KeyX';
-    document.getElementById('key-keyboard-item').textContent = 'KeyC';
-    document.getElementById('key-keyboard-l').textContent = 'KeyA';
-    document.getElementById('key-keyboard-r').textContent = 'KeyS';
+    game.menu.options.filter(opt => opt.type === 'keyboard').forEach(opt => opt.value = KEYCODES[opt.id]);
+    GAMEPADTYPE = 'a';
 }
-
-let OPTIONSENABLED = false;
-const toggleOptions = () => {
-    const container = document.getElementById("options-container");
-    const toggle = container.style.display === 'none';
-    container.style.display = toggle ? 'flex' : 'none';
-    document.getElementById('options-icon').firstElementChild.src = `./img/${toggle ? 'icon_close' : 'icon_settings'}.png`;
-    OPTIONSENABLED = !OPTIONSENABLED;
-}
-
-const setScreenDisplay = (e, value) => {
-    Array.from(document.getElementsByClassName('screen-opt')).forEach(elem => elem.classList.remove("active"));
-    e.classList.add("active");
-    SCREENDISPLAY = value;
-    window.dispatchEvent(new Event('resize'));
-}
-
-const toggleKeyMode = (e, value) => {
-    Array.from(document.getElementsByClassName('key-mode-opt')).forEach(elem => elem.classList.remove("active"));
-    e.classList.add("active");
-    document.getElementById(`key-${KEYMODE}-container`).style.display = 'none';
-    KEYMODE = value;
-    document.getElementById(`key-${KEYMODE}-container`).style.display = 'flex';
-    if (KEYMODE === 'gamepad') {
-        document.getElementById('focus-warning').style.display = 'none';
-        document.getElementById('game-container').style.boxShadow = '0 0 2px #000';
-    }
-}
-
-const changeGamepadType = e => {
-    GAMEPADTYPE = e.value;
-    document.getElementById('gamepad-type-img').src = `./img/opt_type_${GAMEPADTYPE}.png`;
-}
+const toggleKeyMode = value => KEYMODE = value;

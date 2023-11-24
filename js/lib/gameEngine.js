@@ -40,3 +40,11 @@ CollisionBox.includingCollisionBoxes = (a, b) => b.filter(c => CollisionBox.incl
 CollisionBox.collidesWith = (a, b) => CollisionBox.collidesWithInAxis(a, b, "x") && CollisionBox.collidesWithInAxis(a, b, "y");
 CollisionBox.collidesWithInAxis = (a, b, axis) => !(a.pos[axis] + a.size[axis] < b.pos[axis] || a.pos[axis] > b.pos[axis] + b.size[axis]);
 CollisionBox.collidingCollisionBoxes = (a, b) => b.filter(c => CollisionBox.collidesWith(a, c));
+
+const shortAngleDist = (a0, a1) => {
+    const max = Math.PI * 2;
+    const da = (a1 - a0) % max;
+    return 2 * da % max - da;
+}
+
+const angleLerp = (a0, a1, t) => a0 + shortAngleDist(a0, a1) * t;

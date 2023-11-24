@@ -12,28 +12,35 @@ class EvilNoel extends Actor {
         new Vector2(334 * 16, 28 * 16)
     ];
 
+    healthBar = 0;
+
     damage = 2;
 
     isTrueEnd = false;
-
-    constructor(pos) {
+    
+    constructor(pos, maxHealth) {
         super(pos);
         this.posTarget = this.posTargets[1];
+        this.maxHealth = maxHealth;
+        this.health = this.maxHealth;
     }
     
     checkHit = (game, collisionBox) => CollisionBox.intersects(this, collisionBox);
 
     takeHit = (game, other) => {
         if (!this.invicibility) {
+            const damage = other.damage ? (other.type === 'dual' ? 64 : other.damage) : 1;
+            this.health = Math.max(0, this.health - damage);
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, damage);
             game.playSound('damage');
             
             game.score += 100;
             this.invicibility = 30;
             
-            if (other.type === 'dual' && this.phase !== 'defeated') {
+            if (!this.health && this.phase !== 'defeated') {
                 this.phase = 'defeated';
                 game.stopBGM();
                 game.playSound('level_start');
@@ -138,6 +145,17 @@ class EvilNoel extends Actor {
         if (this.phase !== 'weak') {
             for (let i = 0; i < 2; i++) {
                 game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+            }
+        }
+        
+        if (this === game.scene.boss) {
+            if (this.healthBar < this.health) {
+                this.healthBar += 2;
+                if (!(this.frameCount % 4)) game.playSound('pew2');
+            } else {
+                const amt = .1;
+                this.healthBar = (1 - amt) * this.healthBar + amt * this.health;
+                if (Math.abs(this.health - this.healthBar) < amt) this.healthBar = this.health;
             }
         }
 

@@ -61,6 +61,7 @@ class Spirit extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -281,12 +282,13 @@ class Fubuzilla extends Actor {
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         }
         
         if (!this.health && this.phase !== 'death') {
             game.scene.actors = game.scene.actors.filter(a => ![Bullet, Spirit, Robot].some(b => a instanceof b));
             this.phase = 'death';
-            game.playSound('death');
+            game.playSound('level_start');
         } else {
             game.playSound('damage');
             game.score += 20;
@@ -404,6 +406,7 @@ class FubuzillaBody extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -464,6 +467,7 @@ class Miteiru extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
@@ -530,6 +534,7 @@ class Oni extends Actor {
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
+        game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);

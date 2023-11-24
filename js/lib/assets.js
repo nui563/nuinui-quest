@@ -2,6 +2,12 @@ class Assets {
     images = new Object;
     imageList = [
         [
+            'ui_title',
+            'ts_forest',
+            'bg_forest',
+            'sp_flare_sleep',
+            'sp_elfriend_idle',
+
             'ms_flare',
             'ms_miko',
             // Actors
@@ -10,9 +16,7 @@ class Assets {
             'sp_flare_fall',
             'sp_flare_run',
             'sp_flare_run_attack',
-            'sp_flare_sleep',
             'sp_flare_wakeup',
-            'sp_flare_wink',
             'sp_flare_look',
             'sp_flare_bow',
             'sp_flare_gun',
@@ -28,32 +32,32 @@ class Assets {
             "sp_flare_sit",
             "sp_flare_back",
             "sp_flare_chant",
+            "sp_flare_moto",
+            "sp_noel_moto",
 
             'sp_ponytail',
             'sp_ribbon',
 
-            'sp_elfriend_idle',
-
             'sp_sukonbu',
             'sp_poyoyo',
             'sp_spirit',
+
+            'font_en',
+            'font_jp',
         ],
         [
             // HUD
-            'ui_start_label',
+            'ui_menu_title',
             'ui_forest_label',
             'ui_healthbar',
             'ui_healthbar_vertical',
             'ui_boss_icon',
             'ui_slot',
-            'ui_slot2',
-            'ui_slot3',
             'ui_level_icon',
-            'ui_level_label',
+            'ui_arrow',
             'ui_arrow_down',
             'ui_warning',
             'ui_focus',
-            'ui_level_thanks',
             'ui_charge_type',
             'ui_shadow_mask',
             'ui_shadow_mask_small',
@@ -62,13 +66,19 @@ class Assets {
             'ui_timer',
             'ui_timer_wide',
             'ui_text_bubble',
-            'ui_title',
             'ui_tuto_1',
             'ui_tuto_2',
             'ui_tuto_3',
             'ui_tuto_4',
             'ui_bad_end',
             'ui_end',
+            'ui_flare',
+            'ui_items',
+            'ui_achievements',
+
+            'opt_type_a',
+            'opt_type_b',
+            'opt_type_c'
         ],
         [
             // Stage
@@ -78,23 +88,35 @@ class Assets {
             'bg_shiraken',
             'bg_shikemura',
 
-            'ts_forest',
-            'bg_forest',
+            'ts_forest_alt',
+            'bg_forest_alt',
 
             'ts_casino',
             'bg_casino',
+            'ts_casino_alt',
+            'bg_casino_alt',
 
             'ts_port',
             'bg_port',
             'bg_port_scroll',
             'bg_port_scroll2',
+            'ts_port_alt',
+            'bg_port_alt',
+            'bg_port_scroll_alt',
+            'bg_port_scroll_alt2',
 
             'ts_yamato',
             'bg_yamato',
+            'ts_yamato_alt',
+            'bg_yamato_alt',
 
             'ts_westa',
             'bg_westa',
             'bg_westa2',
+            'ts_westa_alt',
+            'bg_westa_alt',
+            'bg_westa_alt2',
+
             'bg_sword',
             'tmp',
         ],
@@ -124,7 +146,9 @@ class Assets {
             'vfx_transition',
             'vfx_rapid_fire',
             'vfx_water_trail',
-            'vfx_mace'
+            'vfx_mace',
+            'vfx_digit',
+            'vfx_bubble'
         ],
         [
             'sp_pekora_idle',
@@ -133,6 +157,7 @@ class Assets {
             'sp_pekora_jump',
             'sp_pekora_hit',
             'sp_pekora_rocket',
+            'sp_peko_back',
             
             'sp_peko_rocket',
 
@@ -207,7 +232,6 @@ class Assets {
             'sp_card',
             'sp_wand',
             'sp_mace',
-            'sp_vending_machine',
             'sp_vapor_block',
             'sp_nousabot',
             'sp_robot',
@@ -231,6 +255,7 @@ class Assets {
             'sp_nousakumo',
             'sp_35p',
             'sp_bullet',
+            'sp_peko_bullet',
             'sp_heart',
             "sp_carrots",
             "sp_statue",
@@ -281,13 +306,124 @@ class Assets {
             "sp_demon_head",
             "sp_demon_laser",
             "sp_demon_orb",
+
+            "sp_gura_idle",
+            "sp_gura_move",
+            "sp_gura_down",
+            "sp_gura_up",
+            "sp_gura_hit",
+            "sp_gura_trident",
+            "sp_gura_bullet",
+            "sp_gura_tornado",
+            "sp_gura_tail",
+
+            "sp_calli_idle",
+            "sp_calli_hide",
+            "sp_calli_point",
+            "sp_calli_jump",
+            "sp_calli_jump2",
+            "sp_calli_hit",
+            "sp_calli_charge",
+            "sp_calli_scythe",
+            "sp_calli_back",
+            "sp_calli_dash",
+            "sp_cloak",
+            "sp_deadbeat",
+
+            "sp_ina_idle",
+            "sp_ina_halo",
+            "sp_ina_tentacle",
+            "sp_ina_hit",
+            "sp_ina_book",
+
+            "sp_ame_idle",
+            "sp_ame_intro",
+            "sp_ame_look",
+            "sp_ame_item",
+            "sp_ame_pound",
+            "sp_ame_charge",
+            "sp_ame_jump",
+            "sp_ame_hit",
+            "sp_ame_gun",
+            "sp_ame_gun2",
+            "sp_ame_syringe",
+            "sp_ame_laugh",
+            "sp_ame_smug",
+
+            "sp_rain",
+            "sp_ame_spiral",
+
+            "sp_kiara_idle",
+            "sp_kiara_walk",
+            "sp_kiara_charge",
+            "sp_kiara_dash",
+            "sp_kiara_dash2",
+            "sp_kiara_fire",
+            "sp_kiara_jump",
+            "sp_kiara_hit",
+
+            "sp_okayu",
+            "sp_korone",
+            "sp_mio",
+            "sp_bibi",
+            "sp_lock",
+
+            "sp_fairy",
+            "sp_candy",
+            
+            "sp_kanata_idle",
+            "sp_kanata_dash",
+            "sp_kanata_wing",
+            "sp_kanata_halo",
+            "sp_kanata_hand",
+            "sp_kanata_hit",
+
+            "sp_peko_cannon",
+            "sp_key",
+            "sp_boots",
+            "sp_rsa",
+            "sp_shion",
+            "sp_luna",
+            "sp_switch",
+            "sp_watamelon",
+
+            "sp_towa_idle",
+            "sp_towa_charge",
+            "sp_towa_crouch",
+            "sp_towa_sniper",
+            "sp_towa_hair",
+            "sp_towa_hit",
+            "sp_towa_ko",
+
+            'ts_heaven',
+            'bg_heaven',
+            'bg_heaven2',
+            'ts_heaven_alt',
+            'bg_heaven_alt',
+            'bg_heaven_alt2',
+
+            'bg_sun',
+            
+            'bg_holo_hq',
+            'ts_holo_hq',
+            'bg_holo_hq_alt',
+            'ts_holo_hq_alt',
+
+            'bg_gura',
+            "bg_calli",
+            "bg_kiara",
+
+            "ui_speed",
+
+            'credits',
+
+            "sp_thanks"
         ],
     ];
 
     audioList = [
         { id: 'step' },
         { id: 'land' },
-        { id: 'wakeup' },
         { id: 'question' },
         { id: 'level_start' },
         { id: 'object_pickup' },
@@ -302,7 +438,6 @@ class Assets {
         { id: 'pew2' },
         { id: 'boss_move' },
         { id: 'peko' },
-        { id: 'fanfare' },
         { id: 'jump' },
         { id: 'select' },
         { id: 'elevator' },
@@ -311,14 +446,16 @@ class Assets {
         { id: 'noise' },
         { id: 'miko_chant' },
         { id: 'miko_kick' },
-        { id: 'warning' },
         { id: 'dash' },
         { id: 'slash' },
         { id: 'gun' },
         { id: 'death' },
         { id: 'stage_clear' },
         { id: 'explosion' },
-        { id: 'laser' }
+        { id: 'laser' },
+        { id: 'menu_move' },
+        { id: 'wind' },
+        { id: 'start'}
     ]
     
     bgmData = [
@@ -401,6 +538,38 @@ class Assets {
         {
             id: "unlimited",
             loopStart: 24.417
+        },
+        {
+            id: "office",
+            loopStart: 0
+        },
+        {
+            id: "mori",
+            loopStart: 6.467
+        },
+        {
+            id: "kiara",
+            loopStart: 9.667
+        },
+        {
+            id: "gura",
+            loopStart: 13.133
+        },
+        {
+            id: "ina",
+            loopStart: 0.517
+        },
+        {
+            id: "amelia",
+            loopStart: 5.267
+        },
+        {
+            id: "kiseki",
+            loopStart: 25.4
+        },
+        {
+            id: "towa",
+            loopStart: 9.967
         }
     ];
     

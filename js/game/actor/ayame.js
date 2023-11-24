@@ -36,6 +36,7 @@ class Ayame extends Actor {
             this.shakeBuffer = 15;
             game.scene.particles.ray(this.checkHit(game, other).pos);
             game.scene.particles.impact(this.checkHit(game, other).pos);
+            game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             game.playSound('damage');
             
             if (!this.health) {
@@ -44,8 +45,7 @@ class Ayame extends Actor {
                 game.score += 5000;
 
                 if (other instanceof Arrow && other.reflected) {
-                    localStorage.setItem('nuinui-save-achievement-14', true);
-                    game.updateAchievements();
+                    game.saveData.setItem('nuinui-save-achievement-14', true);
                 }
             } else {
                 game.score += 100;
@@ -210,7 +210,7 @@ class Ayame extends Actor {
             while (!CollisionBox.intersectingCollisionBoxes({ pos:new Vector2(this.pos.x + Math.sign(this.vel.x), this.pos.y), size:this.size }, game.scene.currentSection.collisions).length) {
                 this.pos.x = this.pos.x + Math.sign(this.vel.x);
             }
-            this.dir = !this.dir;
+            if (this.health) this.dir = !this.dir;
             this.vel.x = 0;
         }
 

@@ -5,8 +5,8 @@
 <head>
     <title>FLARE NUINUI QUEST</title>
     <meta charset="utf-8">
-    <meta name="keywords" content="Hololive, Flare, nuinui, megaman, game, fangame, platformer">
-    <meta name="description" content="Mega Man style platformer about Shiranui Flare and her journey through a series of encounters with Hololive characters">
+    <meta name="keywords" content="Hololive, Flare, Shiranui, game, nuinui, fangame, platformer, action">
+    <meta name="description" content="Fan-made Hololive action platformer featuring Shiranui Flare and other Hololive talents">
     <meta name="author" content="sulpx">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,12 +18,14 @@
     <script src="js/lib/inputManager.js"></script>
     <script src="js/lib/gameEngine.js"></script>
     <script src="js/lib/particleManager.js"></script>
+    <script src="js/lib/text.js"></script>
 
     <!-- Game -->
     <script src="js/game/event/gameEvent.js"></script>
     <script src="js/game/event/sectionEvents.js"></script>
+
     <script src="js/game/actor/actor.js"></script>
-    <script src="js/game/event/checkpoints.js"></script>
+    <script src="js/game/actor/checkpoints.js"></script>
     <script src="js/game/actor/drop.js"></script>
     <script src="js/game/actor/flare.js"></script>
     <script src="js/game/actor/noel.js"></script>
@@ -39,6 +41,11 @@
     <script src="js/game/actor/evilMiko.js"></script>
     <script src="js/game/actor/evilFlare.js"></script>
     <script src="js/game/actor/demon.js"></script>
+    <script src="js/game/actor/calli.js"></script>
+    <script src="js/game/actor/gura.js"></script>
+    <script src="js/game/actor/ina.js"></script>
+    <script src="js/game/actor/ame.js"></script>
+    <script src="js/game/actor/kiara.js"></script>
     <script src="js/game/actor/falls.js"></script>
     <script src="js/game/actor/casino.js"></script>
     <script src="js/game/actor/portcity.js"></script>
@@ -46,199 +53,22 @@
     <script src="js/game/actor/westa.js"></script>
     <script src="js/game/actor/bowPickup.js"></script>
     <script src="js/game/actor/pekoMiniBoss.js"></script>
+    <script src="js/game/actor/heaven.js"></script>
+    <script src="js/game/actor/kanata.js"></script>
+    <script src="js/game/actor/dragon.js"></script>
+    <script src="js/game/actor/towa.js"></script>
+
+    <script src="js/game/menu/menu.js"></script>
+    <script src="js/game/menu/options.js"></script>
+    <script src="js/game/menu/item.js"></script>
+    <script src="js/game/menu/stageSelect.js"></script>
+    <script src="js/game/menu/achievements.js"></script>
+
+    <script src="js/game/save.js"></script>
     <script src="js/game/scene.js"></script>
-    <script src="js/game/stageSelect.js"></script>
     <script src="js/game/game.js"></script>
 
     <script src="js/main.js"></script>
 </head>
-
-<!-- <body oncontextmenu="return false;"> -->
-<body>
-    <span id="focus-warning" style="display: none;"><span id="focus-icon" class="material-icons"><img src="./img/icon_warning.png"></span>Click to play</span>
-    <div id="navbar-container">
-        <span id="options-icon" class="material-icons" onclick="toggleOptions()"><img src="./img/icon_settings.png"></span>
-        <span id="save-icon" class="material-icons" onclick="toggleSave()"><img src="./img/icon_save.png"></span>
-        <span id="fullscreen-icon" class="material-icons" onclick="toggleFullscreen()"><img src="./img/icon_fullscreen.png"></span>
-        <span id="pause-icon" class="material-icons"><img src="./img/icon_pause.png"></span>
-        <span id="info-icon" class="material-icons" onclick="toggleInfo()"><img src="./img/icon_info.png"></span>
-    </div>
-    <div id="options-container" style="display: none;">
-        <fieldset>
-            <legend>Sound Effects Volume - SE音量</legend>
-            <div id="se-volume-container">
-                <span id="se-volume-icon" class="material-icons"><img src="./img/icon_volume_on.png"></span>
-                <input id="se-volume" type="range" min="0" max="1" step="0.05" value="0.5">
-            </div>
-        </fieldset>
-        <fieldset>
-            <legend>BGM Volume - BGM音量</legend>
-            <div id="bgm-volume-container">
-                <span id="bgm-volume-icon" class="material-icons"><img src="./img/icon_volume_on.png"></span>
-                <input id="bgm-volume" type="range" min="0" max="1" step="0.05" value="0.75">
-            </div>
-        </fieldset>
-        <fieldset>
-            <legend>FPS</legend>
-            <div id="fps-container">
-                <label><input id="fps-checkbox" type='checkbox' onclick='toggleFPS(this);'>30 FPS (select in case of slowdown)</label>
-            </div>
-        </fieldset>
-        <fieldset style="display:none">
-            <legend>Zoom - ズーム</legend>
-            <div id="screen-display-container">
-                <button class="screen-opt active" onclick="setScreenDisplay(this, null)">Auto - 自動</button>
-                <button class="screen-opt" onclick="setScreenDisplay(this, 1)">x1</button>
-                <button class="screen-opt" onclick="setScreenDisplay(this, 2)">x2</button>
-                <button class="screen-opt" onclick="setScreenDisplay(this, 3)">x3</button>
-                <button class="screen-opt" onclick="setScreenDisplay(this, 4)">x4</button>
-            </div>
-        </fieldset>
-        <fieldset>
-            <legend>Control Settings - キーコンフィグ</legend>
-            <div id="key-config-container">
-                <div id="key-mode-container">
-                    <button class="key-mode-opt active" id="key-mode-opt-keyboard" onclick="toggleKeyMode(this, 'keyboard')"><span class="material-icons"><img src="./img/icon_keyboard.png"></span></button>
-                    <button disabled class="key-mode-opt" id="key-mode-opt-gamepad" onclick="toggleKeyMode(this, 'gamepad')"><span class="material-icons"><img src="./img/icon_gamepad.png"></span></button>
-                </div>
-            
-                <div id="key-keyboard-container">
-                    <div id="key-config-left">
-                        <label for="key-keyboard-left">Left</label>
-                        <label for="key-keyboard-left">左←</label>
-                        <button class="key-config" id="key-keyboard-left" onclick="changeKeyKeyboard('left')">ArrowLeft</button>
-                    </div>
-                    <div id="key-config-right">
-                        <label for="key-keyboard-right">Right</label>
-                        <label for="key-keyboard-right">右→</label>
-                        <button class="key-config" id="key-keyboard-right" onclick="changeKeyKeyboard('right')">ArrowRight</button>
-                    </div>
-                    <div id="key-config-up">
-                        <label for="key-keyboard-up">Up</label>
-                        <label for="key-keyboard-up">上↑</label>
-                        <button class="key-config" id="key-keyboard-up" onclick="changeKeyKeyboard('up')">ArrowUp</button>
-                    </div>
-                    <div id="key-config-down">
-                        <label for="key-keyboard-down">Down</label>
-                        <label for="key-keyboard-down">下↓</label>
-                        <button class="key-config" id="key-keyboard-down" onclick="changeKeyKeyboard('down')">ArrowDown</button>
-                    </div>
-                    <div id="key-config-jump">
-                        <label for="key-keyboard-jump">Jump</label>
-                        <label for="key-keyboard-jump">ジャンプ</label>
-                        <button class="key-config" id="key-keyboard-jump" onclick="changeKeyKeyboard('jump')">KeyZ</button>
-                    </div>
-                    <div id="key-config-attack">
-                        <label for="key-keyboard-attack">Shoot</label>
-                        <label for="key-keyboard-attack">射撃</label>
-                        <button class="key-config" id="key-keyboard-attack" onclick="changeKeyKeyboard('attack')">KeyX</button>
-                    </div>
-                    <div id="key-config-item">
-                        <label for="key-keyboard-item">Item</label>
-                        <label for="key-keyboard-item">アイテム</label>
-                        <button class="key-config" id="key-keyboard-item" onclick="changeKeyKeyboard('item')">KeyC</button>
-                    </div>
-                    <div id="key-config-l">
-                        <label for="key-keyboard-l">Skill ←</label>
-                        <label for="key-keyboard-l">スキル←</label>
-                        <button class="key-config" id="key-keyboard-l" onclick="changeKeyKeyboard('l')">KeyA</button>
-                    </div>
-                    <div id="key-config-r">
-                        <label for="key-keyboard-r">Skill →</label>
-                        <label for="key-keyboard-r">スキル→</label>
-                        <button class="key-config" id="key-keyboard-r" onclick="changeKeyKeyboard('r')">KeyS</button>
-                    </div>
-                </div>
-
-                <div id="key-gamepad-container" style="display: none;">
-                    <div id="key-gamepad-radio">
-                        <div>
-                            <input type="radio" id="gamepad-type-A" name="gamepad-type" value="a" onclick="changeGamepadType(this)" checked>
-                            <label for="gamepad-type-A">Type A</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="gamepad-type-B" name="gamepad-type" value="b" onclick="changeGamepadType(this)">
-                            <label for="gamepad-type-B">Type B</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="gamepad-type-C" name="gamepad-type" value="c" onclick="changeGamepadType(this)">
-                            <label for="gamepad-type-C">Type C</label>
-                        </div>
-                    </div>
-                    <img id="gamepad-type-img" width="220" height="64" alt="gamepad-type" src="./img/opt_type_a.png">
-                </div>
-                
-                <button id="key-reset" class="screen-opt" onclick="resetKeys()">Reset - リセット</button>
-            </div>
-        </fieldset>
-    </div>
-    <div id="save-container" style="display: none;">
-        <fieldset id="stage-container">
-            <legend>Stages - ステージ</legend>
-            <div class="save-stage" id="save-stage-1"></div>
-            <div class="save-stage" id="save-stage-2"></div>
-            <div class="save-stage" id="save-stage-3"></div>
-            <div class="save-stage" id="save-stage-4"></div>
-            <div class="save-stage" id="save-stage-5"></div>
-        </fieldset>
-        <fieldset id="item-container">
-            <legend>Items - アイテム</legend>
-            <div class="save-item selectable-item" id="save-item-1"></div>
-            <div class="save-item selectable-item" id="save-item-2"></div>
-            <div class="save-item selectable-item" id="save-item-3"></div>
-            <div class="save-item selectable-item" id="save-item-4"></div>
-            <div id="skill-container">
-                <div class="save-item" id="save-item-5"></div>
-                <div class="save-item" id="save-item-6"></div>
-                <div class="save-item" id="save-item-7"></div>
-                <div class="save-item" id="save-item-8"></div>
-                <div class="save-item" id="save-item-9"></div>
-                <div class="save-item" id="save-item-10"></div>
-            </div>
-        </fieldset>
-        <fieldset id="achievement-container">
-            <legend>Achievements - 実績</legend>
-            <span>
-                <div class="save-achievement" id="save-achievement-1" title="Find the not-so-secret weapon&#13;&#10;秘密ではない武器を探す"></div>
-                <div class="save-achievement" id="save-achievement-2" title="Defeat the first boss (no hit)&#13;&#10;最初のボスを倒す(ノーヒット)"></div>
-                <div class="save-achievement" id="save-achievement-3" title="Defeat Pekora (no jump)&#13;&#10;兎田ペコラを倒す(ジャンプなし)"></div>
-                <div class="save-achievement" id="save-achievement-4" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
-            </span>
-            <span>
-                <div class="save-achievement" id="save-achievement-5" title="Clear the scythe room (no hit)&#13;&#10;大鎌の部屋をクリアする（ノーヒット）"></div>
-                <div class="save-achievement" id="save-achievement-6" title="Daisensou!!&#13;&#10;大戦争！！"></div>
-                <div class="save-achievement" id="save-achievement-7" title="Defeat Miko (no charge shot)&#13;&#10;さくらみこを倒す(チャージショットなし)"></div>
-                <div class="save-achievement" id="save-achievement-8" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
-            </span>
-            <span>
-                <div class="save-achievement" id="save-achievement-9" title="Find the secret room&#13;&#10;秘密の部屋を探す"></div>
-                <div class="save-achievement" id="save-achievement-10" title="Defeat Aqua&#13;&#10;湊あくあを倒す"></div>
-                <div class="save-achievement" id="save-achievement-11" title="Clear the jetski phase (no hit from rocks)&#13;&#10;ジェットスキー部分をクリアする（岩石ヒットなし）"></div>
-                <div class="save-achievement" id="save-achievement-12" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
-            </span>
-            <span>
-                <div class="save-achievement" id="save-achievement-13" title="Find Poyoyo&#13;&#10;ぽよ余を探す"></div>
-                <div class="save-achievement" id="save-achievement-14" title="Defeat Ayame with her own A.T. Field&#13;&#10;自分のA.T.フィールドで百鬼あやめを倒す"></div>
-                <div class="save-achievement" id="save-achievement-15" title="Survive 1 minute in the last room&#13;&#10;最後の部屋で1分間生き残る"></div>
-                <div class="save-achievement" id="save-achievement-16" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
-            </span>
-            <span>
-                <div class="save-achievement" id="save-achievement-17" title="Unlock Noel as a playable character&#13;&#10;白銀ノエルをアンロック"></div>
-                <div class="save-achievement" id="save-achievement-18" title="BAD ENDING"></div>
-                <div class="save-achievement" id="save-achievement-19" title="GOOD ENDING"></div>
-                <div class="save-achievement" id="save-achievement-20" title="Clear stage (in under 5 minutes)&#13;&#10;ステージをクリアする（5分以内）"></div>
-            </span>
-        </fieldset>
-        <button id="save-delete" onclick="deleteSaveData()">Delete Save Data - セーブデータの消去</button>
-    </div>
-    <div id="info-container" style="display: none;">
-        <div style="width:300px;font-size:24px;border-bottom: 1px solid #fff;margin-bottom: 4px;justify-content: start;">credits</div>
-        <div style="color: #99c;margin:8px 0">Created by <a href="https://twitter.com/sulpx" target="_blank">sulpx</a></div>
-        <div style="color: #99c;margin:8px 0">Music <a href="https://twitter.com/NeonCryptidd" target="_blank">NeonCryptid</a></div>
-        <div style="width:300px;font-size:24px;border-bottom: 1px solid #fff;margin-bottom: 4px;justify-content: start;">special thanks</div>
-        <div style="color: #99c;margin:8px 0">Musical Inspiration <a href="https://soundcloud.com/commandycan/spanishpiraterobotfrenzy" target="_blank">commandycan</a></div>
-        <div style="color: #99c;margin:8px 0">Sora game<a href="https://bugzyfloaty.itch.io/sora-game" target="_blank">Bugzy Floaty Mon</a></div>
-    </div>
-</body>
 
 </html>
