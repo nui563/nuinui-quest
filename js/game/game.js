@@ -64,6 +64,15 @@ class Game {
             this[`ctx${i}`].imageSmoothingEnabled = false;
         }
 
+        {
+            let hideCursor = null;
+            container.addEventListener('pointermove', ({ currentTarget: { style } }) => {
+              if (hideCursor) clearTimeout(hideCursor);
+              else style.cursor = 'auto';
+              hideCursor = setTimeout(() => { style.cursor = 'none'; hideCursor = null; }, 2e3);
+            });
+        }
+
         this.resize();
         window.addEventListener('resize', this.resize);
         if (!window.__TAURI__) document.onfullscreenchange = () => this.fullscreen = document.fullscreenElement;
