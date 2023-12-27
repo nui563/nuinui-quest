@@ -110,3 +110,5 @@ class TextElem {
         cx.restore();
     }
 }
+
+export { TextElem };

@@ -1,3 +1,7 @@
+import { Menu } from './menu.js';
+import { TextElem } from '../../lib/text.js';
+import { Vector2 } from '../../lib/gameEngine.js';
+
 class StageSelect extends Menu {
     frameCount = 0;
     
@@ -16,12 +20,12 @@ class StageSelect extends Menu {
         // this.stages.push({index:7, label:new TextElem(Array.from('test'), 'center')});
     }
 
-    confirm = game => {
+    confirm(game) {
         game.setStage(this.stages[this.stageIndex].index);
         game.ctx3.clearRect(0, 0, game.width, game.height);
     }
 
-    update = game => {
+    update(game) {
         if (this.auto) {
             if (this.frameCount === 60) {
                 game.playSound('select');
@@ -74,7 +78,7 @@ class StageSelect extends Menu {
         this.frameCount++;
     }
 
-    drawBackground = (game, cx) => {
+    drawBackground(game, cx) {
         cx.save();
         cx.globalAlpha = .5;
         cx.fillStyle = '#000';
@@ -86,7 +90,7 @@ class StageSelect extends Menu {
         cx.fillRect(0, game.height * .5 + 40 - 2, game.width, 1);
     }
 
-    drawOptions = (game, cx) => {
+    drawOptions(game, cx) {
         cx.save();
 
         const offset = this.stages.length === 7 ? 44 : 48;
@@ -108,3 +112,5 @@ class StageSelect extends Menu {
         cx.restore();
     }
 }
+
+export { StageSelect };

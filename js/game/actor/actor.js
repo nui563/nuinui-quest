@@ -1,3 +1,36 @@
+import { Vector2, CollisionBox, angleLerp } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+import { Heart } from './drop.js';
+import { ATField } from './yamato.js';
+import { Demon, ShirakenHelper } from './demon.js';
+import { Fubuzilla, Miteiru, Oni, Spirit } from './yamato.js';
+import { Robot, Nousabot, Nousakumo } from './falls.js';
+import { Pekora } from './pekora.js';
+import { PekoMiniBoss } from './pekoMiniBoss.js';
+import { Mikobell, Casinochip, Scythe } from './casino.js';
+import { Miko } from './miko.js';
+import { Dokuro, Cannon, Pirate, Neko, Rock } from './portcity.js';
+import { Marine } from './marine.js';
+import { Aqua } from './aqua.js';
+import { Fubuki } from './fubuki.js';
+import { Ayame, Sword } from './ayame.js';
+import { EvilNoel } from './evilNoel.js';
+import { Axe, Pendulum } from './westa.js';
+import { Suisei } from './suisei.js';
+import { Card, Polka } from './polka.js';
+import { EvilMiko } from './evilMiko.js';
+import { Gura } from './gura.js';
+import { Calli, CalliScythe } from './calli.js';
+import { Ina, Tentacle } from './ina.js';
+import { Ame } from './ame.js';
+import { Kiara } from './kiara.js';
+import { Fairy } from './heaven.js';
+import { Kanata } from './kanata.js';
+import { Dragon, DragonHand } from './dragon.js';
+import { Bibi, BibiFire, Towa } from './towa.js';
+import { EvilFlare } from './evilFlare.js';
+import { Noel } from './noel.js';
+
 class Actor {
     frameCount = 0;
 
@@ -8,23 +41,23 @@ class Actor {
 
     update = game => this.frameCount++;
 
-    draw = (game, cx) => {
-        if (DEBUGMODE) this.displayCollisionBox(game, cx);
+    draw(game, cx) {
+        if (globalThis.DEBUGMODE) this.displayCollisionBox(game, cx);
     }
 
-    checkHit = (game, collisionBox) => {
+    checkHit(game, collisionBox) {
         return CollisionBox.intersects(this, collisionBox);
     }
 
     takeHit = game => {}
     
-    dropHeart = (game, rate) => {
+    dropHeart(game, rate) {
         if (Math.random() > rate && !(game.currentStage === 2 && game.scene.bossStarted && game.scene.actors.find(a => a instanceof Heart))) {
             game.scene.actors.push(new Heart(CollisionBox.center(this).plus(new Vector2(-4, -4))));
         }
     }
 
-    displayAnimation = (cx, animation, asset) => {
+    displayAnimation(cx, animation, asset) {
         cx.save();
         cx.translate(this.pos.x, this.pos.y);
         if (!this.dir) {
@@ -39,7 +72,7 @@ class Actor {
         cx.restore();
     }
 
-    displayCollisionBox = (game, cx) => {
+    displayCollisionBox(game, cx) {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         cx.fillStyle = "#00f8";
@@ -93,7 +126,7 @@ class Projectile extends Actor {
         this.originActor = originActor;
     }
     
-    update = game => {
+    update(game) {
         this.pos = this.pos.plus(this.vel);
         // if (this.frameCount % 2) game.scene.particles.smoke2(CollisionBox.center(this), new Vector2(-Math.sign(this.vel.x), -(Math.sign(this.vel.y) + 1)), 0);
 
@@ -530,7 +563,7 @@ class Rocket extends Projectile {
     health = 2;
     damage = 2;
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         game.scene.particles.ray(this.checkHit(game, other).pos);
         game.scene.particles.impact(this.checkHit(game, other).pos);
@@ -552,15 +585,15 @@ class Rocket extends Projectile {
         }
     }
 
-    update = game => {
+    update(game) {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         const p1 = CollisionBox.center(flare);
         const p2 = CollisionBox.center(this);
         this.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
-        const vel = new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(-1);
-        if (Math.random() > .5) vel.y -= .5;
+        const velocity = new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(-1);
+        if (Math.random() > .5) velocity.y -= .5;
 
-        this.pos = this.pos.plus(vel);
+        this.pos = this.pos.plus(velocity);
         game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(this.vel.x > 0 ? -4 : 4, 0)), new Vector2(0, 0), 0);
 
         let collision = false;
@@ -590,7 +623,7 @@ class Rocket extends Projectile {
         this.frameCount++;
     }
 
-    draw = (game, cx) => {
+    draw(game, cx) {
         cx.save();
         cx.translate(Math.round(this.pos.x + 4), Math.round(this.pos.y + 4));
         cx.rotate(this.angle - Math.PI)
@@ -730,3 +763,17 @@ class MovingBlock extends Actor {
         this.frameCount++;
     }
 }
+
+export {
+    Actor,
+    Elfriend,
+    Projectile,
+    Arrow,
+    Bullet,
+    IceShield,
+    Rocket,
+    Aircon,
+    Watamelon,
+    Torche,
+    MovingBlock,
+};

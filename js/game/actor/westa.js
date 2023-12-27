@@ -1,3 +1,8 @@
+import { Actor } from './actor.js';
+import { Suisei } from './suisei.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Comet extends Actor {
     size = new Vector2(16, 16);
     damage = 1;
@@ -311,3 +316,5 @@ class Block extends Actor {
         cx.restore();
     }
 }
+
+export { Comet, Axe, Pendulum, Block };

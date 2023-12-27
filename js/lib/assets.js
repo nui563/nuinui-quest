@@ -621,3 +621,5 @@ class Assets {
         }
     }
 }
+
+export { Assets };

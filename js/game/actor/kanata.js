@@ -1,3 +1,7 @@
+import { Actor, Arrow } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Kanata extends Actor {
     size = new Vector2(16, 32);
     vel = new Vector2(0, 0);
@@ -277,3 +281,5 @@ class Kanata extends Actor {
         }
     }
 }
+
+export { Kanata };

@@ -1,3 +1,7 @@
+import { Menu } from './menu.js';
+import { TextElem } from '../../lib/text.js';
+import { Vector2 } from '../../lib/gameEngine.js';
+
 class Achievements extends Menu {
     index = 0;
 
@@ -69,7 +73,7 @@ class Achievements extends Menu {
         });
     }
 
-    update = game => {
+    update(game) {
         if (this.closeMenuBuffer && !game.keys.b) {
             this.closeMenuFrame--;
             if (!this.closeMenuFrame) {
@@ -102,7 +106,7 @@ class Achievements extends Menu {
         this.frameCount++;
     }
     
-    drawBackground = (game, cx) => {
+    drawBackground(game, cx) {
         cx.save();
         cx.globalAlpha = .5;
         cx.fillStyle = '#000';
@@ -114,7 +118,7 @@ class Achievements extends Menu {
         cx.fillRect(game.width * .5 + 128 - 2, 0, 1, game.height);
     }
 
-    drawOptions = (game, cx) => {
+    drawOptions(game, cx) {
         cx.save();
 
         this.titleText.draw(game, cx, new Vector2(game.width * .5, 8));
@@ -153,3 +157,5 @@ class Achievements extends Menu {
         cx.restore();
     }
 }
+
+export { Achievements };

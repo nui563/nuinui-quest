@@ -1,3 +1,7 @@
+import { Actor, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Card extends Actor {
     size = new Vector2(32, 32);
     vel = new Vector2(0, 0);
@@ -362,3 +366,5 @@ class Polka extends Actor {
         cx.restore();
     }
 }
+
+export { Card, Polka };

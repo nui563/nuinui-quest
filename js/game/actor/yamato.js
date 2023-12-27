@@ -1,3 +1,9 @@
+import { Actor, Arrow, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+import { Robot } from './falls.js';
+import { Casinochip } from './casino.js';
+
 class ATField extends Actor {
 
     constructor(pos, dir) {
@@ -594,3 +600,5 @@ class Oni extends Actor {
         cx.restore();
     }
 }
+
+export { ATField, Spirit, Fubuzilla, FubuzillaBody, Miteiru, Oni };

@@ -1,3 +1,18 @@
+import { ParticleManager } from '../lib/particleManager.js';
+import EVENTS from './event/sectionEvents.js';
+import { Vector2, CollisionBox } from '../lib/gameEngine.js';
+import { GameEvent } from './event/gameEvent.js';
+import { Towa } from './actor/towa.js';
+import { Flare } from './actor/flare.js';
+import { Noel } from './actor/noel.js';
+import { Checkpoint } from './actor/checkpoints.js';
+import { Ayame } from './actor/ayame.js';
+import { Ame } from './actor/ame.js';
+import { Calli } from './actor/calli.js';
+import { EvilNoel } from './actor/evilNoel.js';
+import { Aqua } from './actor/aqua.js';
+import { Arrow, Bullet, Torche } from './actor/actor.js';
+
 class Scene {
     frameCount = 0;
     sectionFrame = 0;
@@ -63,7 +78,7 @@ class Scene {
         this.setViewPos();
     }
 
-    setViewPos = () => {
+    setViewPos() {
         let pos;
         if (!this.view.target) {
             pos = this.currentSection.pos;
@@ -97,7 +112,7 @@ class Scene {
         // this.view.pos = pos;
     }
 
-    updateSection = game => {
+    updateSection(game) {
         const center = CollisionBox.center(this.view.target);
         if (!center.inBox(this.currentSection)) {
             const newSection = this.sections.find(section => center.inBox(section));
@@ -130,7 +145,7 @@ class Scene {
         }
     }
 
-    update = game => {
+    update(game) {
         this.customDraw = [];
 
         // Execute event if possible
@@ -180,7 +195,7 @@ class Scene {
         if (this.nextScene) game.scene = this.nextScene;
     }
 
-    drawTiles = (game, ctx, tiles) => {
+    drawTiles(game, ctx, tiles) {
         const pos = this.view.pos.times(1 / 16).floor();
         for (let y = pos.y - (!this.towerScroll ? 0 : 1); y < pos.y + 1 + this.view.size.y / 16; y++) {
             for (let x = pos.x; x < pos.x + 1 + this.view.size.x / 16; x++) {
@@ -196,14 +211,14 @@ class Scene {
         }
     }
 
-    drawCollisions = (game, ctx) => {
+    drawCollisions(game, ctx) {
         ctx.fillStyle = '#0000ff7f';
         this.collisions.forEach(({pos, size}) => {
             ctx.fillRect(pos.x, pos.y, size.x, size.y);
         });
     }
 
-    drawBackground = (game, cx) => {
+    drawBackground(game, cx) {
         const img = `bg_${this.name}${this.altColor ? '_alt' : ''}`;
         cx.drawImage(game.assets.images[img], 0, 0, game.width, game.height, 0, 0, game.width, game.height);
         if (this.travelEvent) {
@@ -230,7 +245,7 @@ class Scene {
         }
     }
 
-    displayHUD = (game, cx) => {
+    displayHUD(game, cx) {
 
         cx.drawImage(game.assets.images['ui_score'], game.width - 57, 2);
         game.scoreDisplay = game.scoreDisplay ? (1 - .1) * game.scoreDisplay + .1 * game.score : game.score;
@@ -345,7 +360,7 @@ class Scene {
         }
     }
 
-    displayWarning = (game, cx) => {
+    displayWarning(game, cx) {
         for (let i = 0; i < 6; i++) {
             const speed = game.frameCount * 2;
             cx.drawImage(game.assets.images['ui_warning'], 96 * (i-1) + speed % 96, 64);
@@ -353,7 +368,7 @@ class Scene {
         }
     }
     
-    draw = game => {
+    draw(game) {
         for (let i = 0; i < 3; i++) {
             const cx = game[`ctx${i}`];
             cx.save();
@@ -485,7 +500,7 @@ class Scene {
                         actor.draw(game, cx);
                         cx.restore();
                     });
-                    if (DEBUGMODE) this.actors.forEach(a => a.displayCollisionBox(game, cx));
+                    if (globalThis.DEBUGMODE) this.actors.forEach(a => a.displayCollisionBox(game, cx));
                     
                     this.particles.draw(cx, game.assets, 1);
                     
@@ -493,7 +508,7 @@ class Scene {
 
                     this.drawTiles(game, cx, this.foreground);
 
-                    if (DEBUGMODE) this.currentSection.collisions.forEach(a => {
+                    if (globalThis.DEBUGMODE) this.currentSection.collisions.forEach(a => {
                         cx.save();
                         cx.translate(Math.round(a.pos.x), Math.round(a.pos.y));
                         cx.fillStyle = "#00f8";
@@ -616,3 +631,5 @@ class Scene {
         this.customDraw.forEach(custom => custom(game));
     }
 }
+
+export { Scene };

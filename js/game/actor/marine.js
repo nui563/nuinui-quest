@@ -1,3 +1,8 @@
+import { Actor, Bullet } from './actor.js';
+import { Dokuro } from './portcity.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Marine extends Actor {
     size = new Vector2(16, 40);
     vel = new Vector2(0, 0);
@@ -243,3 +248,5 @@ class Marine extends Actor {
         cx.restore();
     }
 }
+
+export { Marine };

@@ -1,3 +1,7 @@
+import { Actor, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Fairy extends Actor {
     size = new Vector2(16, 16);
     vel = new Vector2(0, 0);
@@ -144,3 +148,5 @@ class Fairy extends Actor {
         cx.restore();
     }
 }
+
+export { Fairy };

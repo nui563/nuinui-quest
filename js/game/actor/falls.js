@@ -1,3 +1,7 @@
+import { Actor, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Nousabot extends Actor {
     size = new Vector2(24, 24);
     vel = new Vector2(0, 0);
@@ -491,3 +495,5 @@ class VaporBlock extends Actor {
         cx.restore();
     }
 }
+
+export { Nousabot, Robot, Nousakumo, VaporBlock };

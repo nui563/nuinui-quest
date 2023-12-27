@@ -23,3 +23,5 @@ class GameEvent {
         this.frameCount++;
     }
 }
+
+export { GameEvent };

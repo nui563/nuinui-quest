@@ -1,3 +1,8 @@
+import { Actor, Bullet, Projectile } from './actor.js';
+import { Demon } from './demon.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Dragon extends Actor {
     size = new Vector2(64, 48);
     phaseBuffer = 0;
@@ -368,3 +373,5 @@ class DragonHand extends Actor {
         cx.restore();
     }
 }
+
+export { Dragon, DragonHand };

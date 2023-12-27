@@ -48,3 +48,5 @@ const shortAngleDist = (a0, a1) => {
 }
 
 const angleLerp = (a0, a1, t) => a0 + shortAngleDist(a0, a1) * t;
+
+export { Vector2, CollisionBox, angleLerp };

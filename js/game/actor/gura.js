@@ -1,3 +1,7 @@
+import { Actor, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Gura extends Actor {
     size = new Vector2(16, 32);
     vel = new Vector2(0, 0);
@@ -312,3 +316,5 @@ class Gura extends Actor {
         }
     }
 }
+
+export { Gura };

@@ -1,3 +1,8 @@
+import { Actor, Arrow, Bullet } from './actor.js';
+import { Block } from './westa.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class EvilMiko extends Actor {
     size = new Vector2(16, 32);
     vel = new Vector2(0, 0);
@@ -232,10 +237,10 @@ class EvilMiko extends Actor {
             
             if (!(this.frameCount % 20)) game.playSound('explosion');
 
-            const pos = this.dragonHeadpos.plus(new Vector2(0, -16));
+            const position = this.dragonHeadpos.plus(new Vector2(0, -16));
             const angle = Math.random() * Math.PI * 2;
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-8 * (this.health < this.maxHealth * .5 ? 2 : 1));
-            game.scene.particles.shine_vel_white(pos, vel, 0);
+            game.scene.particles.shine_vel_white(position, vel, 0);
 
             const dist = CollisionBox.center(this).distance(CollisionBox.center(flare)) * (this.health < this.maxHealth * .25 ? .5 : 1);
             flare.vel.x += (1/dist) * 50 * (CollisionBox.center(this).x < CollisionBox.center(flare).x ? 1 : -1);
@@ -313,3 +318,5 @@ class EvilMiko extends Actor {
         }
     }
 }
+
+export { EvilMiko };
