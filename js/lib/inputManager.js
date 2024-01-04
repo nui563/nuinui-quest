@@ -16,8 +16,8 @@ class KeyboardListener {
     }
 
     handler = e => {
-        if (e.code in KEYCODES) {
-            this.keys[KEYCODES[e.code]] = e.type === "keydown";
+        if (e.code in currentInputSettings.KEYCODES) {
+            this.keys[currentInputSettings.KEYCODES[e.code]] = e.type === "keydown";
             e.preventDefault();
         }
     }
@@ -46,7 +46,7 @@ class InputManager {
     getGamepadKeys = () => {
         if (this.gamepadIndex === null || this.gamepadIndex > navigator.getGamepads().length || !navigator.getGamepads()[this.gamepadIndex]) return {}
         const gamepad = navigator.getGamepads()[this.gamepadIndex];
-        switch (GAMEPADTYPE) {
+        switch (currentInputSettings.GAMEPADTYPE) {
             case 'a':
                 return {
                     left: (gamepad.axes[0] && gamepad.axes[0] < -0.5) || (gamepad.buttons[14] && gamepad.buttons[14].value),
@@ -92,8 +92,6 @@ class InputManager {
     }
 }
 
-let KEYMODE = 'keyboard';
-
 const DEFAULTKEYCODES = {
     ArrowLeft: "left",
     ArrowRight: "right",
@@ -106,10 +104,8 @@ const DEFAULTKEYCODES = {
     KeyS: "r",
     Enter: "start"
 }
-let KEYCODES = {...DEFAULTKEYCODES};
 
 const GAMEPADDEFAULTTYPE = 'a';
-let GAMEPADTYPE = GAMEPADDEFAULTTYPE;
 
 const KEYBOARDINPUT = {
     left: "ArrowLeft",
@@ -122,41 +118,56 @@ const KEYBOARDINPUT = {
     l: "KeyA",
     r: "KeyS",
     start: "Enter"
-}
+};
+const GAMEPADINPUT = undefined; // stub
+
+const currentInputSettings = {
+    KEYMODE: 'keyboard',
+    KEYCODES: {...DEFAULTKEYCODES},
+    GAMEPADTYPE: GAMEPADDEFAULTTYPE,
+    selectedKey: null,
+};
+
 const updateKeycodes = () => {
-    const input = KEYMODE === 'keyboard' ? KEYBOARDINPUT : GAMEPADINPUT;
-    KEYCODES = new Object();
-    for (const [key, value] of Object.entries(input)) KEYCODES[value] = key;
+    const input = currentInputSettings.KEYMODE === 'keyboard' ? KEYBOARDINPUT : GAMEPADINPUT;
+    currentInputSettings.KEYCODES = Object.fromEntries(Object.entries(input).map(([key, value]) => [value, key]));
 }
-let selectedKey = null;
+
 const cancelKeyChange = (game, key, opt) => {
     opt.value = KEYBOARDINPUT[key];
     game.inputManager.keyboard.enable();
-    selectedKey = null;
+    currentInputSettings.selectedKey = null;
 }
 const changeKeyHandle = (game, e, opt) => {
     const other = Object.entries(KEYBOARDINPUT).find(([key, value]) => value === e.code);
-    if (other && other[0] !== selectedKey) return;
-    KEYBOARDINPUT[selectedKey] = e.code;
+    if (other && other[0] !== currentInputSettings.selectedKey) return;
+    KEYBOARDINPUT[currentInputSettings.selectedKey] = e.code;
     opt.value = e.code;
     updateKeycodes();
     game.inputManager.keyboard.enable();
-    selectedKey = null;
+    currentInputSettings.selectedKey = null;
 }
 const changeKeyKeyboard = (game, key) => {
     const opt = game.menu.options.find(opt => opt.id === key);
-    if (selectedKey) cancelKeyChange(game, selectedKey, opt);
-    selectedKey = key;
-    if (KEYBOARDINPUT[selectedKey]) {
+    if (currentInputSettings.selectedKey) cancelKeyChange(game, currentInputSettings.selectedKey, opt);
+    currentInputSettings.selectedKey = key;
+    if (KEYBOARDINPUT[currentInputSettings.selectedKey]) {
         opt.value = '...';
         game.inputManager.keyboard.disable();
         document.body.onkeydown = e => changeKeyHandle(game, e, opt);
     }
 }
 const resetKeys = game => {
-    if (selectedKey) cancelKeyChange(game, selectedKey);
-    KEYCODES = {...DEFAULTKEYCODES}
-    game.menu.options.filter(opt => opt.type === 'keyboard').forEach(opt => opt.value = KEYCODES[opt.id]);
-    GAMEPADTYPE = 'a';
+    if (currentInputSettings.selectedKey) cancelKeyChange(game, currentInputSettings.selectedKey);
+    currentInputSettings.KEYCODES = {...DEFAULTKEYCODES}
+    game.menu.options.filter(opt => opt.type === 'keyboard').forEach(opt => opt.value = currentInputSettings.KEYCODES[opt.id]);
+    currentInputSettings.GAMEPADTYPE = 'a';
 }
-const toggleKeyMode = value => KEYMODE = value;
+const toggleKeyMode = value => currentInputSettings.KEYMODE = value;
+
+export {
+    InputManager,
+    KEYBOARDINPUT,
+    currentInputSettings,
+    changeKeyKeyboard,
+};

@@ -1,4 +1,43 @@
-const EVENTS = {
+import { Flare } from '../actor/flare.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { TextElem } from '../../lib/text.js';
+import { Arrow, Bullet, Rocket, Elfriend, Torche, Aircon, IceShield, Watamelon } from '../actor/actor.js';
+import { Options } from '../menu/options.js';
+import { SaveMenu, Credits } from '../menu/menu.js';
+import { StageSelect } from '../menu/stageSelect.js';
+import { Item } from '../menu/item.js';
+import { Pekora } from '../actor/pekora.js';
+import { PekoMiniBoss } from '../actor/pekoMiniBoss.js';
+import { Heart } from '../actor/drop.js';
+import { BowPickup, KeyPickup, RocketPickup, ClockPickup, PetalPickup, SwordPickup, JumpPickup, ShieldPickup, BootsPickup } from '../actor/bowPickup.js';
+import { CasinoBoss } from '../actor/casino.js';
+import { Calli, CalliScythe } from '../actor/calli.js';
+import { Miko } from '../actor/miko.js';
+import { Aqua } from '../actor/aqua.js';
+import { Marine } from '../actor/marine.js';
+import { Cannon, Rock, Dokuro, Pirate } from '../actor/portcity.js';
+import { Nousabot, Robot, Nousakumo } from '../actor/falls.js';
+import { Ayame, Sword } from '../actor/ayame.js';
+import { Fubuki } from '../actor/fubuki.js';
+import { Fubuzilla } from '../actor/yamato.js';
+import { EvilNoel } from '../actor/evilNoel.js';
+import { Comet, Axe, Block } from '../actor/westa.js';
+import { Suisei } from '../actor/suisei.js';
+import { Polka, Card } from '../actor/polka.js';
+import { EvilMiko } from '../actor/evilMiko.js';
+import { EvilFlare } from '../actor/evilFlare.js';
+import { Kiara } from '../actor/kiara.js';
+import { Gura } from '../actor/gura.js';
+import { Ina, Tentacle } from '../actor/ina.js';
+import { Ame } from '../actor/ame.js';
+import { Kanata } from '../actor/kanata.js';
+import { Checkpoint } from '../actor/checkpoints.js';
+import { Demon, ShirakenHelper } from '../actor/demon.js';
+import { Dragon, DragonHand } from '../actor/dragon.js';
+import { Bibi, BibiFire, Towa } from '../actor/towa.js';
+import { Noel } from '../actor/noel.js';
+
+export default {
     "forest": {
         "0_0": [
             {
@@ -12,7 +51,7 @@ const EVENTS = {
                         if (event.aBuffer && !game.keys.a) event.aBuffer = false;
                         if (event.frameCount === 0) {
                             event.aBuffer = true;
-                            event.continueOpt = Object.keys(localStorage).find(key => ['nuinui-save-0', 'nuinui-save-1', 'nuinui-save-2'].includes(key));
+                            event.continueOpt = Object.keys(globalThis.localStorage).find(key => ['nuinui-save-0', 'nuinui-save-1', 'nuinui-save-2'].includes(key));
 
                             if (game.mode === 'noel') {
                                 event.flare = new Noel(game, new Vector2(160, 48), new Vector2(16, 32));
@@ -6504,4 +6543,4 @@ const EVENTS = {
             }
         ]
     }
-}
+};

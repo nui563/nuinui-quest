@@ -1,3 +1,7 @@
+import { Actor, Rocket, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class PekoMiniBoss extends Actor {
     dir = true;
 
@@ -64,7 +68,7 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    introPhase = game => {
+    introPhase(game) {
         if (this.leftPhase === 'start') {
             if (this.leftParts.some(part => part.pos.y > this.size.y)) {
                 this.leftPhase = 'move';
@@ -100,13 +104,13 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    deathPhase = game => {
+    deathPhase(game) {
         const parts = [...this.leftParts, ...this.rightParts, ...this.middleParts];
         const randomPart = parts[Math.floor(Math.random() * parts.length)];
         if (Math.random() > .75) game.scene.particles.explosion(CollisionBox.center(randomPart));
     }
 
-    idlePhase = game => {
+    idlePhase(game) {
         if (this.phaseBuffer >= 75) {
             if (Math.random() > .4) {
                 const atk = Math.random();
@@ -128,7 +132,7 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    movePhase = game => {
+    movePhase(game) {
         if (!this.phaseBuffer) {
             this.shakeBuffer = 15;
         }
@@ -145,7 +149,7 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    pekoPhase = game => {
+    pekoPhase(game) {
         if (!this.phaseBuffer) {
             game.playSound("peko");
         }
@@ -165,7 +169,7 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    attackPhase = game => {
+    attackPhase(game) {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         const core = this.middleParts[3];
         if (!(this.phaseBuffer % 4)) game.scene.particles.charge(CollisionBox.center(core));
@@ -178,7 +182,7 @@ class PekoMiniBoss extends Actor {
         } else if (!(this.phaseBuffer % 60)) game.playSound("charge");
     }
 
-    releasePhase = game => {
+    releasePhase(game) {
         if (this.phaseBuffer > 10 && !(this.phaseBuffer % 10) && this.laserTarget) {
             const core = this.middleParts[3];
             const p1 = this.laserTarget;
@@ -195,7 +199,7 @@ class PekoMiniBoss extends Actor {
         }
     }
     
-    attack2Phase = game => {
+    attack2Phase(game) {
         if (!(this.phaseBuffer % 10)) {
             const core = this.middleParts[3];
             const angle = this.phaseBuffer * 5 * (Math.PI / 180);
@@ -210,7 +214,7 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    attack3Phase = game => {
+    attack3Phase(game) {
         if (!this.phaseBuffer) {
             const core = this.middleParts[3];
             const p1 = game.scene.actors.find(actor => actor instanceof Flare);
@@ -227,7 +231,7 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    checkHit = (game, collisionBox) => {
+    checkHit(game, collisionBox) {
         const shields = CollisionBox.intersectingCollisionBoxes(collisionBox, this.shields);
         if (shields.length) {
             shields[0].other.hit = true;
@@ -237,7 +241,7 @@ class PekoMiniBoss extends Actor {
         return collision;
     }
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         if (this.shields.some(shield => shield.hit)) {
             this.shields.forEach(shield => {
                 if (shield.hit) {
@@ -267,7 +271,7 @@ class PekoMiniBoss extends Actor {
         }
     }
 
-    update = game => {
+    update(game) {
         this[`${this.phase}Phase`](game);
 
         if (this.peko) {
@@ -341,7 +345,7 @@ class PekoMiniBoss extends Actor {
         this.frameCount++;
     }
     
-    draw = (game, cx) => {
+    draw(game, cx) {
         cx.save();
         const parts = [...this.leftParts, ...this.rightParts, ...this.middleParts];
 
@@ -379,3 +383,5 @@ class PekoMiniBoss extends Actor {
         cx.restore();
     }
 }
+
+export { PekoMiniBoss };

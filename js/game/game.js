@@ -1,3 +1,7 @@
+import { SaveData } from './save.js';
+import { InputManager, currentInputSettings } from '../lib/inputManager.js';
+import { Scene } from './scene.js';
+
 class Game {
     frameCount = 0;
 
@@ -87,7 +91,7 @@ class Game {
         this.bgmVolume = bgmOpt === null ? this.bgmVolume : Number(bgmOpt);
 
         // DEBUG
-        if (DEBUGMODE) {
+        if (globalThis.DEBUGMODE) {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('stage')) this.currentStage = parseInt(urlParams.get('stage')) - 1;
         }
@@ -127,7 +131,7 @@ class Game {
     update = () => {
         if (this.drawBuffer) this.drawBuffer = false;
         this.soundFrame = {};
-        this.keys = this.inputManager[KEYMODE === 'keyboard' ? 'getKeyboardKeys' : 'getGamepadKeys']();
+        this.keys = this.inputManager[currentInputSettings.KEYMODE === 'keyboard' ? 'getKeyboardKeys' : 'getGamepadKeys']();
 
         if (this.menu) this.menu.update(this);
         else if (this.scene) this.scene.update(this);
@@ -240,3 +244,5 @@ class Game {
         document.getElementById('game-container').style.transform = 'scale(' + scale + ')';
     }
 }
+
+export { Game };

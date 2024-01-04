@@ -1,3 +1,9 @@
+import { Actor, Arrow } from './actor.js';
+import { Comet } from './westa.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+import { Noel } from './noel.js';
+
 class Checkpoint extends Actor {
     size = new Vector2(16, 24);
 
@@ -64,3 +70,5 @@ class Checkpoint extends Actor {
         if (this.bgm) game.playBGM(this.bgm);
     }
 }
+
+export { Checkpoint };

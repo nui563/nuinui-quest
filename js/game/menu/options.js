@@ -1,41 +1,46 @@
+import { Menu, SaveMenu } from './menu.js';
+import { currentInputSettings, changeKeyKeyboard, KEYBOARDINPUT } from '../../lib/inputManager.js';
+import { TextElem } from '../../lib/text.js';
+import { Vector2 } from '../../lib/gameEngine.js';
+
 class Options extends Menu {
     optionIndex = 0;
 
     options = [
         {
             id:'sfx',
-            func2: (game, value) => {
-                game.seVolume = Math.max(0, Math.min(1, Math.round((game.seVolume + value) * 10) / 10));
-                game.saveData.setOpt('se', game.seVolume);
+            func2: (g, value) => {
+                g.seVolume = Math.max(0, Math.min(1, Math.round((g.seVolume + value) * 10) / 10));
+                g.saveData.setOpt('se', g.seVolume);
             }
         },
         {
             id:'bgm',
-            func2: (game, value) => {
-                game.bgmVolume = Math.max(0, Math.min(1, Math.round((game.bgmVolume + value) * 10) / 10));
-                game.saveData.setOpt('bgm', game.bgmVolume);
-                if (game.bgm) game.bgm.updateVolume();
+            func2: (g, value) => {
+                g.bgmVolume = Math.max(0, Math.min(1, Math.round((g.bgmVolume + value) * 10) / 10));
+                g.saveData.setOpt('bgm', g.bgmVolume);
+                if (g.bgm) g.bgm.updateVolume();
             }
         },
         {
             id:'fullscreen',
             values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
-            func: (game, value) => {
+            func: (g, value) => {
                 if (window.__TAURI__) {
                     window.__TAURI__.window.appWindow.isFullscreen().then(res => {
                         window.__TAURI__.window.appWindow.setFullscreen(!res);
-                        game.fullscreen = !res;
+                        g.fullscreen = !res;
                     });
                 } else {
                     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
                     else if (document.exitFullscreen) document.exitFullscreen();
                 }
             },
-            func2: (game, value) => {
+            func2: (g, value) => {
                 if (window.__TAURI__) {
                     window.__TAURI__.window.appWindow.isFullscreen().then(res => {
                         window.__TAURI__.window.appWindow.setFullscreen(!res);
-                        game.fullscreen = !res;
+                        g.fullscreen = !res;
                     });
                 } else {
                     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
@@ -46,32 +51,32 @@ class Options extends Menu {
         {
             id:'integer scaling',
             values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
-            func: (game, value) => {
-                game.scale = !game.scale;
-                game.resize();
+            func: (g, value) => {
+                g.scale = !g.scale;
+                g.resize();
             },
-            func2: (game, value) => {
-                game.scale = !game.scale;
-                game.resize();
+            func2: (g, value) => {
+                g.scale = !g.scale;
+                g.resize();
             }
         },
         {
             id:'delete save data',
-            func: (game, value) => game.menu = new SaveMenu(game, game.menu, 'delete')
+            func: (g, value) => g.menu = new SaveMenu(g, g.menu, 'delete')
         },
         {
             id:'type',
             type: 'gamepad',
             values: ['a', 'b', 'c'].map(a => [a, new TextElem(Array.from(a), 'left')]),
-            func2: (game, value) => {
+            func2: (g, value) => {
                 if (value > 0) {
-                    if (GAMEPADTYPE === 'a') GAMEPADTYPE = 'b';
-                    else if (GAMEPADTYPE === 'b') GAMEPADTYPE = 'c';
-                    else if (GAMEPADTYPE === 'c') GAMEPADTYPE = 'a';
+                    if (currentInputSettings.GAMEPADTYPE === 'a') currentInputSettings.GAMEPADTYPE = 'b';
+                    else if (currentInputSettings.GAMEPADTYPE === 'b') currentInputSettings.GAMEPADTYPE = 'c';
+                    else if (currentInputSettings.GAMEPADTYPE === 'c') currentInputSettings.GAMEPADTYPE = 'a';
                 } else {
-                    if (GAMEPADTYPE === 'a') GAMEPADTYPE = 'c';
-                    else if (GAMEPADTYPE === 'b') GAMEPADTYPE = 'a';
-                    else if (GAMEPADTYPE === 'c') GAMEPADTYPE = 'b';
+                    if (currentInputSettings.GAMEPADTYPE === 'a') currentInputSettings.GAMEPADTYPE = 'c';
+                    else if (currentInputSettings.GAMEPADTYPE === 'b') currentInputSettings.GAMEPADTYPE = 'a';
+                    else if (currentInputSettings.GAMEPADTYPE === 'c') currentInputSettings.GAMEPADTYPE = 'b';
                 }
             }
         }
@@ -88,11 +93,11 @@ class Options extends Menu {
         this.options.forEach(option => option.text = new TextElem(Array.from(option.id), 'left'));
     }
 
-    menuInit = game => {
+    menuInit(game) {
 
     }
 
-    update = game => {
+    update(game) {
         if (this.closeMenuBuffer && !game.keys.b) {
             this.closeMenuFrame--;
             if (!this.closeMenuFrame) {
@@ -103,9 +108,9 @@ class Options extends Menu {
                 game.menu = this.previousMenu;
                 game.ctx3.clearRect(0, 0, game.width, game.height);
             }
-        } else if (game.keys.b && !selectedKey) this.closeMenuBuffer = true;
+        } else if (game.keys.b && !currentInputSettings.selectedKey) this.closeMenuBuffer = true;
         else {
-            const options = this.options.filter(opt => !opt.type || opt.type === KEYMODE);
+            const options = this.options.filter(opt => !opt.type || opt.type === currentInputSettings.KEYMODE);
             if (this.optionIndex >= options.length) this.optionIndex = 0;
 
             if (this.downBuffer && !game.keys.down) this.downBuffer = false;
@@ -150,7 +155,7 @@ class Options extends Menu {
         this.frameCount++;
     }
     
-    drawOptions = (game, cx) => {
+    drawOptions(game, cx) {
         cx.save();
 
         this.titleText.draw(game, cx, new Vector2(game.width * .5, 8));
@@ -158,7 +163,7 @@ class Options extends Menu {
         cx.translate(game.width * .5 - 96, 24);
 
         cx.save();
-        this.options.filter(opt => !opt.type || opt.type === KEYMODE).forEach((opt, i) => {
+        this.options.filter(opt => !opt.type || opt.type === currentInputSettings.KEYMODE).forEach((opt, i) => {
             opt.text.draw(game, cx, new Vector2(16, 0));
 
             cx.save();
@@ -201,8 +206,8 @@ class Options extends Menu {
                     if (opt.value) new TextElem(Array.from(opt.value.toLowerCase()), 'left').draw(game, cx, new Vector2(96, 0));
                     break;
                 case 'type':
-                    new TextElem(Array.from(GAMEPADTYPE), 'left').draw(game, cx, new Vector2(96, 0));
-                    cx.drawImage(game.assets.images[`opt_type_${GAMEPADTYPE}`], 0, 0, 110, 32, 24, 16, 110, 32);
+                    new TextElem(Array.from(currentInputSettings.GAMEPADTYPE), 'left').draw(game, cx, new Vector2(96, 0));
+                    cx.drawImage(game.assets.images[`opt_type_${currentInputSettings.GAMEPADTYPE}`], 0, 0, 110, 32, 24, 16, 110, 32);
                 default:
                     break;
             }
@@ -215,3 +220,5 @@ class Options extends Menu {
         cx.restore();
     }
 }
+
+export { Options };

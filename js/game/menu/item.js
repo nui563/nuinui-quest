@@ -1,3 +1,13 @@
+import { Menu, SaveMenu } from './menu.js';
+import { StageSelect } from './stageSelect.js';
+import { Achievements } from './achievements.js';
+import { Options } from './options.js';
+import { Noel } from '../actor/noel.js';
+import { currentInputSettings } from '../../lib/inputManager.js';
+import { TextElem } from '../../lib/text.js';
+import { Flare } from '../actor/flare.js';
+import { Vector2 } from '../../lib/gameEngine.js';
+
 class Item extends Menu {
     optionIndex = 0;
 
@@ -8,39 +18,39 @@ class Item extends Menu {
     options = [
         {
             id:'stage select',
-            func: (game, value) => game.menu = new StageSelect(game, false, game.menu)
+            func: (g, value) => g.menu = new StageSelect(g, false, g.menu)
         },
         {
             id:'achievements',
-            func: (game, value) => game.menu = new Achievements(game, game.menu)
+            func: (g, value) => g.menu = new Achievements(g, g.menu)
         },
         {
             id:'game mode',
             values: ['flare', 'noel', 'cursed'].map(a => new TextElem(Array.from(a), 'left')),
-            func: (game, value) => {
-                game.menu.gamemodeIndex++;
-                game.menu.applyMode(game);
+            func: (g, value) => {
+                g.menu.gamemodeIndex++;
+                g.menu.applyMode(g);
             },
-            func2: (game, value) => {
-                game.menu.gamemodeIndex += value > 0 ? 1 : -1;
-                game.menu.applyMode(game);
+            func2: (g, value) => {
+                g.menu.gamemodeIndex += value > 0 ? 1 : -1;
+                g.menu.applyMode(g);
             }
         },
         {
             id:'options',
-            func: (game, value) => game.menu = new Options(game, game.menu)
+            func: (g, value) => g.menu = new Options(g, g.menu)
         },
         {
             id:'save',
-            func: (game, value) => game.menu = new SaveMenu(game, game.menu, 'save')
+            func: (g, value) => g.menu = new SaveMenu(g, g.menu, 'save')
         },
         {
             id:'load',
-            func: (game, value) => game.menu = new SaveMenu(game, game.menu, 'load')
+            func: (g, value) => g.menu = new SaveMenu(g, g.menu, 'load')
         },
         {
             id:'return to title',
-            func: (game, value) => location.reload()
+            func: (g, value) => location.reload()
         }
     ];
 
@@ -62,7 +72,7 @@ class Item extends Menu {
         // game.biquadFilter = this.biquadFilter;
     }
 
-    menuInit = game => {
+    menuInit(game) {
         this.skills = [];
         this.skillsTitle = new TextElem(Array.from('skills'), 'right');
         ['fire', 'rocket', 'petal', 'sword', 'shield', 'dual'].forEach(skill => this.skills.push(game.saveData.getItem(`nuinui-save-item-${skill}`)));
@@ -89,7 +99,7 @@ class Item extends Menu {
         this.gamemodeIndex = game.mode === 'cursed' ? 2 : game.mode === 'noel' ? 1 : 0;
     }
 
-    applyMode = game => {
+    applyMode(game) {
         if (this.gamemodeIndex < 0) this.gamemodeIndex = this.gamemodes.length - 1;
         if (this.gamemodeIndex === this.gamemodes.length) this.gamemodeIndex = 0;
         game.mode = this.gamemodes[this.gamemodeIndex];
@@ -115,7 +125,7 @@ class Item extends Menu {
         if (game.scene.achievement24 && game.mode !== 'noel') game.scene.achievement24 = false;
     }
 
-    update = game => {
+    update(game) {
         if (this.closeMenuBuffer && !game.keys.b) {
             this.closeMenuFrame--;
             if (!this.closeMenuFrame) {
@@ -126,7 +136,7 @@ class Item extends Menu {
             }
         } else if (game.keys.b) this.closeMenuBuffer = true;
         else {
-            const options = this.options.filter(opt => !opt.type || opt.type === KEYMODE);
+            const options = this.options.filter(opt => !opt.type || opt.type === currentInputSettings.KEYMODE);
             if (this.optionIndex >= options.length) this.optionIndex = 0;
 
             if (this.downBuffer && !game.keys.down) this.downBuffer = false;
@@ -172,11 +182,11 @@ class Item extends Menu {
         this.frameCount++;
     }
     
-    drawOptions = (game, cx) => {
+    drawOptions(game, cx) {
         cx.save();
 
         cx.translate(game.width * .5 - 96, 12);
-        this.options.filter(opt => !opt.type || opt.type === KEYMODE).forEach((opt, i) => {
+        this.options.filter(opt => !opt.type || opt.type === currentInputSettings.KEYMODE).forEach((opt, i) => {
             opt.text.draw(game, cx, new Vector2(16, 0));
 
             cx.save();
@@ -266,3 +276,5 @@ class Item extends Menu {
         cx.restore();
     }
 }
+
+export { Item };

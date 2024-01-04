@@ -1,3 +1,7 @@
+import { Actor, Rocket, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Pekora extends Actor {
     size = new Vector2(16, 32);
     vel = new Vector2(0, 0);
@@ -252,3 +256,5 @@ class Pekora extends Actor {
         cx.restore();
     }
 }
+
+export { Pekora };

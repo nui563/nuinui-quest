@@ -1,3 +1,7 @@
+import { Actor, Arrow, Projectile, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Demon extends Actor {
     size = new Vector2(64, 48);
     phaseBuffer = 0;
@@ -476,3 +480,5 @@ class ShirakenHelper extends Actor {
         cx.restore();
     }
 }
+
+export { Demon, DemonHand, ShirakenHelper };

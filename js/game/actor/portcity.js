@@ -1,3 +1,7 @@
+import { Actor, Arrow, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Dokuro extends Actor {
     size = new Vector2(16, 16);
     vel = new Vector2(0, 0);
@@ -10,12 +14,12 @@ class Dokuro extends Actor {
         this.health = this.maxHealth;
     }
     
-    checkHit = (game, collisionBox) => {
+    checkHit(game, collisionBox) {
         const collision = CollisionBox.intersects(this, collisionBox);
         return collision;
     }
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
@@ -38,7 +42,7 @@ class Dokuro extends Actor {
         }
     }
 
-    update = game => {
+    update(game) {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         // if (this.vel.y) this.vel.y += this.gravity;
         this.vel.x = Math.cos((this.frameCount / 2048) * (180 / Math.PI));
@@ -74,7 +78,7 @@ class Dokuro extends Actor {
         this.frameCount++;
     }
 
-    draw = (game, cx) => {
+    draw(game, cx) {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (!this.dir) {
@@ -103,12 +107,12 @@ class Cannon extends Actor {
         this.health = this.maxHealth;
     }
     
-    checkHit = (game, collisionBox) => {
+    checkHit(game, collisionBox) {
         const collision = CollisionBox.intersects(this, collisionBox);
         return collision;
     }
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
         this.shakeBuffer = 15;
         game.scene.particles.ray(this.checkHit(game, other).pos);
@@ -131,7 +135,7 @@ class Cannon extends Actor {
         }
     }
 
-    update = game => {
+    update(game) {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
 
         // Attack
@@ -167,7 +171,7 @@ class Cannon extends Actor {
         this.frameCount++;
     }
 
-    draw = (game, cx) => {
+    draw(game, cx) {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (this.waterOffset) cx.translate(0, Math.round(Math.cos(Math.floor(this.frameCount / 16) * (180 / Math.PI))));
@@ -201,7 +205,7 @@ class Pirate extends Actor {
         this.health = this.maxHealth;
     }
     
-    checkHit = (game, collisionBox) => {
+    checkHit(game, collisionBox) {
         if (this.spinCollision) {
             const collision = CollisionBox.intersects(this.spinCollision, collisionBox);
             return collision;
@@ -210,7 +214,7 @@ class Pirate extends Actor {
         return collision;
     }
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         if (this.spinCollision) {
             game.playSound("no_damage");
             game.scene.particles.sparkle_white(CollisionBox.center(this.checkHit(game, other)));
@@ -239,7 +243,7 @@ class Pirate extends Actor {
         }
     }
 
-    idlePhase = game => {
+    idlePhase(game) {
         if (this.phaseBuffer >= 63) {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(this);
@@ -259,7 +263,7 @@ class Pirate extends Actor {
         }
     }
 
-    attackPhase = game => {
+    attackPhase(game) {
         if (!this.phaseBuffer) {
             if (CollisionBox.intersects(this, game.scene.view)) game.playSound("boss_move");
         }
@@ -273,7 +277,7 @@ class Pirate extends Actor {
         }
     }
 
-    movePhase = game => {
+    movePhase(game) {
         game.scene.particles.smoke_white(new Vector2(this.pos.x + this.size.x / 2, this.pos.y + this.size.y), new Vector2(0, 0), 0);
         const x = this.phaseBuffer / 40;
         this.vel.x = (x === 0 ? 0 : x === 1 ? 1 : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2) * this.moveDir * this.moveSpeed;
@@ -283,7 +287,7 @@ class Pirate extends Actor {
         }
     }
 
-    update = game => {
+    update(game) {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         
         this[`${this.phase}Phase`](game);
@@ -331,7 +335,7 @@ class Pirate extends Actor {
         this.frameCount++;
     }
 
-    draw = (game, cx) => {
+    draw(game, cx) {
         const skinOffset = game.currentStage === 4;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
@@ -363,12 +367,12 @@ class Neko extends Actor {
         this.health = this.maxHealth;
     }
     
-    checkHit = (game, collisionBox) => {
+    checkHit(game, collisionBox) {
         const collision = CollisionBox.intersects(this, collisionBox);
         return collision;
     }
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         if (other instanceof Arrow && other.type === 'fire') {
             this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
@@ -391,7 +395,7 @@ class Neko extends Actor {
         }
     }
 
-    update = game => {
+    update(game) {
         if (!game.scene.blackout) {
             this.toFilter = true;
             return;
@@ -409,7 +413,7 @@ class Neko extends Actor {
         this.frameCount++;
     }
 
-    draw = (game, cx) => {
+    draw(game, cx) {
         if (game.scene.miniBossCleared || !game.scene.blackout) return;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
@@ -438,13 +442,13 @@ class Rock extends Actor {
         this.dir = dir;
     }
     
-    checkHit = (game, collisionBox) => {
+    checkHit(game, collisionBox) {
         const collision = CollisionBox.intersects(this, collisionBox);
         if (game.scene.achievement11 && collisionBox instanceof Flare && collision) game.scene.achievement11 = false;
         return collision;
     }
 
-    draw = (game, cx) => {
+    draw(game, cx) {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
         if (!this.dir) {
@@ -456,3 +460,5 @@ class Rock extends Actor {
         cx.restore();
     }
 }
+
+export { Dokuro, Cannon, Pirate, Neko, Rock };

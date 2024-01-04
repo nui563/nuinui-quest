@@ -1,3 +1,7 @@
+import { Actor } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Heart extends Actor {
     size = new Vector2(8, 8);
     vel = new Vector2(0, 0);
@@ -55,3 +59,5 @@ class Heart extends Actor {
         cx.restore();
     }
 }
+
+export { Heart };

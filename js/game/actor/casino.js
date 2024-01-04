@@ -1,3 +1,7 @@
+import { Actor, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Mikobell extends Actor {
     size = new Vector2(20, 38);
     vel = new Vector2(0, 0);
@@ -394,3 +398,5 @@ class CasinoBoss extends Actor {
         cx.restore();
     }
 }
+
+export { Mikobell, Casinochip, Scythe, CasinoBoss };

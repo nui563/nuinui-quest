@@ -1,16 +1,18 @@
+import { Vector2 } from './gameEngine.js';
+
 class ParticleManager {
     pool = [];
 
-    update = () => {
+    update() {
         this.pool = this.pool.filter(particle => particle.life < particle.lifespan);
         this.pool.forEach(particle => particle.update());
     }
 
-    draw = (cx, assets, zIndex) => {
+    draw(cx, assets, zIndex) {
         this.pool.filter(particle => particle.zIndex === zIndex).forEach(particle => particle.draw(cx, assets));
     }
 
-    digit = (pos, value) => {
+    digit(pos, value) {
         const val = value;
         this.pool.push(new Particle({
             type: `digit`,
@@ -23,7 +25,7 @@ class ParticleManager {
         }));
     }
 
-    mini_explosion = pos => {
+    mini_explosion(pos) {
         this.pool.push(new Particle({
             type: `explosion`,
             pos: pos,
@@ -35,7 +37,7 @@ class ParticleManager {
         }));
     }
 
-    explosion = (pos, zIndex=1) => {
+    explosion(pos, zIndex=1) {
         for (let i = 0; i < 16; i++) {
             this.pool.push(new Particle({
                 type: `explosion`,
@@ -50,7 +52,7 @@ class ParticleManager {
         }
     }
 
-    jump = actor => {
+    jump(actor) {
         this.pool.push(new Particle({
             type: `jump`,
             pos: actor.pos.plus(new Vector2(actor.size.x / 2, actor.size.y - 12)),
@@ -62,7 +64,7 @@ class ParticleManager {
         }));
     }
 
-    land = (actor, zIndex) => {
+    land(actor, zIndex) {
         this.pool.push(new Particle({
             type: `land`,
             pos: actor.pos.plus(new Vector2(actor.size.x / 2, actor.size.y - 3)),
@@ -74,7 +76,7 @@ class ParticleManager {
         }));
     }
 
-    run = (actor, dir) => {
+    run(actor, dir) {
         const scale = [dir ? 1 : -1, 1];
         this.pool.push(new Particle({
             type: `run`,
@@ -88,7 +90,7 @@ class ParticleManager {
         }));
     }
 
-    step = actor => {
+    step(actor) {
         const scale = [actor.dir ? 1 : -1, 1];
         this.pool.push(new Particle({
             type: `step`,
@@ -102,7 +104,7 @@ class ParticleManager {
         }));
     }
     
-    water_trail = (actor, vel=4) => {
+    water_trail(actor, vel=4) {
         this.pool.push(new Particle({
             type: `water_trail`,
             pos: actor.pos.plus(new Vector2(actor.size.x / 2, actor.size.y - 16)),
@@ -114,7 +116,7 @@ class ParticleManager {
         }));
     }
 
-    smoke_white = (pos, vel, zIndex) => {
+    smoke_white(pos, vel, zIndex) {
         this.pool.push(new Particle({
             type: `smoke_white`,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 10 - 5), Math.round(pos.y) + Math.round(Math.random() * 10 - 5)),
@@ -126,7 +128,7 @@ class ParticleManager {
         }));
     }
 
-    smoke_black = (pos, vel, zIndex) => {
+    smoke_black(pos, vel, zIndex) {
         this.pool.push(new Particle({
             type: `smoke_black`,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 10 - 5), Math.round(pos.y) + Math.round(Math.random() * 10 - 5)),
@@ -138,7 +140,7 @@ class ParticleManager {
         }));
     }
 
-    smoke_spirit = (pos, vel, zIndex) => {
+    smoke_spirit(pos, vel, zIndex) {
         this.pool.push(new Particle({
             type: `smoke_spirit`,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 10 - 5), Math.round(pos.y) + Math.round(Math.random() * 10 - 5)),
@@ -150,7 +152,7 @@ class ParticleManager {
         }));
     }
     
-    smoke_pink = (pos, vel, zIndex) => {
+    smoke_pink(pos, vel, zIndex) {
         this.pool.push(new Particle({
             type: `smoke_pink`,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 10 - 5), Math.round(pos.y) + Math.round(Math.random() * 10 - 5)),
@@ -162,7 +164,7 @@ class ParticleManager {
         }));
     }
     
-    bubble = (pos, vel, zIndex) => {
+    bubble(pos, vel, zIndex) {
         this.pool.push(new Particle({
             type: `bubble`,
             pos: pos.round(),
@@ -174,7 +176,7 @@ class ParticleManager {
         }));
     }
 
-    shine_white = (pos, zIndex) => {
+    shine_white(pos, zIndex) {
         this.pool.push(new Particle({
             type: `shine_${Math.random() > .5 ? '' : '2_'}white`,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 20 - 10), Math.round(pos.y) + Math.round(Math.random() * 20 - 10)),
@@ -187,7 +189,7 @@ class ParticleManager {
         }));
     }
 
-    sparkle_white = pos => {
+    sparkle_white(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         this.pool.push(new Particle({
             type: `sparkle_white`,
@@ -201,7 +203,7 @@ class ParticleManager {
         }));
     }
 
-    sparkle_fire = (pos, vel) => {
+    sparkle_fire(pos, vel) {
         vel = !vel ? new Vector2(0, 0) : vel;
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         this.pool.push(new Particle({
@@ -215,7 +217,7 @@ class ParticleManager {
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
         }));
     }
-    sparkle_fire_2 = (pos, vel, zIndex) => {
+    sparkle_fire_2(pos, vel, zIndex) {
         vel = !vel ? new Vector2(0, 0) : vel;
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         this.pool.push(new Particle({
@@ -229,7 +231,7 @@ class ParticleManager {
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
         }));
     }
-    sparkle_fire_3 = pos => {
+    sparkle_fire_3(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         this.pool.push(new Particle({
             type: `sparkle_fire_3`,
@@ -242,7 +244,7 @@ class ParticleManager {
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
         }));
     }
-    sparkle_fire_4 = pos => {
+    sparkle_fire_4(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         this.pool.push(new Particle({
             type: `sparkle_fire_4`,
@@ -256,7 +258,7 @@ class ParticleManager {
         }));
     }
     
-    shine_vel_white = (pos, vel, zIndex) => {
+    shine_vel_white(pos, vel, zIndex) {
         this.pool.push(new Particle({
             type: `shine_${Math.random() > .5 ? '' : '2_'}white`,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 20 - 10), Math.round(pos.y) + Math.round(Math.random() * 20 - 10)),
@@ -269,7 +271,7 @@ class ParticleManager {
         }));
     }
 
-    impact = pos => {
+    impact(pos) {
         this.pool.push(new Particle({
             type: `impact`,
             pos: pos,
@@ -281,7 +283,7 @@ class ParticleManager {
         }));
     }
     
-    ray = pos => {
+    ray(pos) {
         for (let i = 0; i < 2; i++) {
             this.pool.push(new Particle({
                 type: `ray_${Math.ceil(Math.random() * 4)}`,
@@ -295,7 +297,7 @@ class ParticleManager {
         }
     }
     
-    mace = (pos, dir, scaleY) => {
+    mace(pos, dir, scaleY) {
         const scale = [dir ? 1 : -1, scaleY ? 1 : -1];
         this.pool.push(new Particle({
             type: `mace`,
@@ -309,7 +311,7 @@ class ParticleManager {
         }));
     }
 
-    charge = pos => {
+    charge(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = 20 + Math.random() * 12;
         const a = Math.cos(Math.random() * 2 * Math.PI);
@@ -326,7 +328,7 @@ class ParticleManager {
         }));
     }
     
-    charge_black_smoke = (pos, zIndex) => {
+    charge_black_smoke(pos, zIndex) {
         const dist = Math.random() * 192;
         const a = Math.cos(dist * 2 * Math.PI);
         const b = Math.sin(dist * 2 * Math.PI);
@@ -341,7 +343,7 @@ class ParticleManager {
         }));
     }
 
-    charge_slow = (pos, zIndex) => {
+    charge_slow(pos, zIndex) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = Math.random() * 192;
         const a = Math.cos(dist * 2 * Math.PI);
@@ -358,7 +360,7 @@ class ParticleManager {
         }));
     }
 
-    charge_time = (pos, zIndex) => {
+    charge_time(pos, zIndex) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = Math.random() * 192;
         const a = Math.cos(dist * 2 * Math.PI);
@@ -375,7 +377,7 @@ class ParticleManager {
         }));
     }
     
-    charge_fire = pos => {
+    charge_fire(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = 20 + Math.random() * 12;
         const a = Math.cos(Math.random() * 2 * Math.PI);
@@ -391,7 +393,7 @@ class ParticleManager {
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
         }));
     }
-    charge_fire_2 = pos => {
+    charge_fire_2(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = 20 + Math.random() * 12;
         const a = Math.cos(Math.random() * 2 * Math.PI);
@@ -407,7 +409,7 @@ class ParticleManager {
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
         }));
     }
-    charge_fire_3 = pos => {
+    charge_fire_3(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = 20 + Math.random() * 12;
         const a = Math.cos(Math.random() * 2 * Math.PI);
@@ -423,7 +425,7 @@ class ParticleManager {
             rotate: p => Math.floor(p.life) * (Math.PI / 180) * dir,
         }));
     }
-    charge_fire_4 = pos => {
+    charge_fire_4(pos) {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         const dist = 20 + Math.random() * 12;
         const a = Math.cos(Math.random() * 2 * Math.PI);
@@ -460,7 +462,7 @@ class Particle {
         Object.assign(this, data);
     }
 
-    update = () => {
+    update() {
         if (this.delay) this.delay--;
         else {
             this.pos = this.pos.plus(this.vel);
@@ -468,7 +470,7 @@ class Particle {
         }
     }
 
-    draw = (cx, assets) => {
+    draw(cx, assets) {
         if (this.delay) return;
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
@@ -479,3 +481,5 @@ class Particle {
         cx.restore();
     }
 }
+
+export { ParticleManager };

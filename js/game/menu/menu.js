@@ -1,3 +1,6 @@
+import { TextElem } from '../../lib/text.js';
+import { Vector2 } from '../../lib/gameEngine.js';
+
 class Menu {
     frameCount = 0;
 
@@ -8,7 +11,7 @@ class Menu {
         this.nextSceneFrame = this.endFrameSpeed;
     }
 
-    drawBackground = (game, cx) => {
+    drawBackground(game, cx) {
         cx.save();
         cx.globalAlpha = .5;
         cx.fillStyle = '#000';
@@ -20,7 +23,7 @@ class Menu {
         cx.fillRect(game.width * .5 + 96 - 2, 0, 1, game.height);
     }
 
-    draw = game => {
+    draw(game) {
         const cx = game.ctx3;
         cx.save();
         cx.clearRect(0, 0, game.width, game.height);
@@ -46,10 +49,10 @@ class SaveMenu extends Menu {
         this.noData = new TextElem(Array.from('no data'), 'left');
     }
 
-    menuInit = game => {
+    menuInit(game) {
         this.saveDataArray = [];
         for (let i = 0; i < game.saveCount; i++) {
-            const saveData = localStorage.getItem(`nuinui-save-${i}`);
+            const saveData = globalThis.localStorage.getItem(`nuinui-save-${i}`);
             if (!saveData) this.saveDataArray.push(null);
             else {
                 const parsed = JSON.parse(saveData);
@@ -64,7 +67,7 @@ class SaveMenu extends Menu {
         }
     }
 
-    update = game => {
+    update(game) {
         if (this.closeMenuBuffer && !game.keys.b) {
             this.closeMenuFrame--;
             if (!this.closeMenuFrame) {
@@ -105,7 +108,7 @@ class SaveMenu extends Menu {
                     game.saveData.setItem('nuinui-save-current-stage', game.currentStage);
                     game.saveData.save(this.index);
                     this.menuInit(game);
-                } else if (localStorage.getItem(`nuinui-save-${this.index}`)) {
+                } else if (globalThis.localStorage.getItem(`nuinui-save-${this.index}`)) {
                     game.saveData.load(this.index);
                     this.previousMenu = null;
                     game.mode = 'flare';
@@ -118,7 +121,7 @@ class SaveMenu extends Menu {
         this.frameCount++;
     }
     
-    drawOptions = (game, cx) => {
+    drawOptions(game, cx) {
         cx.save();
 
         this.titleText.draw(game, cx, new Vector2(game.width * .5, 8));
@@ -170,7 +173,7 @@ class Credits extends Menu {
         this.titleText = new TextElem(Array.from('credits'), 'center');
     }
 
-    update = game => {
+    update(game) {
         if (this.closeMenuBuffer && !game.keys.b) {
             this.closeMenuFrame--;
             if (!this.closeMenuFrame) {
@@ -182,7 +185,7 @@ class Credits extends Menu {
         this.frameCount++;
     }
     
-    drawOptions = (game, cx) => {
+    drawOptions(game, cx) {
         cx.save();
 
         this.titleText.draw(game, cx, new Vector2(game.width * .5, 24));
@@ -195,3 +198,5 @@ class Credits extends Menu {
         cx.restore();
     }
 }
+
+export { Menu, SaveMenu, Credits };

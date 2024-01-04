@@ -1,3 +1,35 @@
+import { Actor, IceShield, Arrow } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { FubuzillaBody, Fubuzilla, Miteiru, Oni, Spirit } from './yamato.js';
+import { Robot, Nousabot, Nousakumo } from './falls.js';
+import { Pekora } from './pekora.js';
+import { PekoMiniBoss } from './pekoMiniBoss.js';
+import { Mikobell, Casinochip, Scythe } from './casino.js';
+import { Miko } from './miko.js';
+import { Dokuro, Cannon, Pirate, Neko, Rock } from './portcity.js';
+import { Marine } from './marine.js';
+import { Aqua } from './aqua.js';
+import { Fubuki } from './fubuki.js';
+import { Ayame, Sword } from './ayame.js';
+import { EvilNoel } from './evilNoel.js';
+import { Axe, Pendulum } from './westa.js';
+import { Suisei } from './suisei.js';
+import { Polka } from './polka.js';
+import { EvilMiko } from './evilMiko.js';
+import { Gura } from './gura.js';
+import { Calli, CalliScythe } from './calli.js';
+import { Ina, Tentacle } from './ina.js';
+import { Ame } from './ame.js';
+import { Kiara } from './kiara.js';
+import { Fairy } from './heaven.js';
+import { Kanata } from './kanata.js';
+import { DragonHand } from './dragon.js';
+import { Bibi, BibiFire, Towa } from './towa.js';
+
+import { Item } from '../menu/item.js';
+import { Scene } from '../scene.js';
+import { StageSelect } from '../menu/stageSelect.js';
+
 class Flare extends Actor {
     vel = new Vector2(0, 0);
     runSpeed = .35;
@@ -213,14 +245,14 @@ class Flare extends Actor {
         if (game.saveData.getItem('nuinui-save-item-boots')) this.canWallJump = true;
     }
 
-    openMenu = game => {
+    openMenu(game) {
         if (this.playerControl && game.keys.start) {
             game.playSound('select');
             game.menu = new Item(game);
         }
     }
 
-    update = game => {
+    update(game) {
         const keys = this.playerControl ? game.keys : game.cpuKeys;
         const movement = this.moto || this.isSliding || keys.left === keys.right ? 0 : this.runSpeed * (keys.right ? 1 : -1);
 
@@ -562,7 +594,7 @@ class Flare extends Actor {
         this.frameCount++;
     }
 
-    die = game => {
+    die(game) {
         game.canvas1.style.filter = 'none';
         game.canvas2.style.filter = 'none';
         game.stopBGM();
@@ -571,7 +603,7 @@ class Flare extends Actor {
         game.scoreDisplay = 0;
     }
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         if (this.isSliding || (other instanceof Robot && other.sleep) || (other instanceof EvilNoel && other.isTrueEnd)) return;
         
         if (!this.playerControl || other.invicibility) return;
@@ -624,7 +656,7 @@ class Flare extends Actor {
         }
     }
 
-    deathTransition = game => {
+    deathTransition(game) {
         game.saveData.setItem('nuinui-save-stage-5', true);
         game.menu = new StageSelect(game, true);
 
@@ -644,14 +676,14 @@ class Flare extends Actor {
         game.score += timerScore;
     }
 
-    setAnimation = animation => {
+    setAnimation(animation) {
         if (!(animation === 'run_attack' && this.animation === 'run') &&
             !(animation === 'run' && this.animation === 'run_attack')) this.animationFrame = 0;
         this.animation = animation;
         this.runAttackBuffer = (this.animation === 'run' && this.runAttackBuffer) || this.animation === 'run_attack';
     }
 
-    playAnimation = (game, cx) => {
+    playAnimation(game, cx) {
         const {offset, size, speed, frames} = this.animations[this.animation];
 
         if (!['sleep', 'wakeup', 'back'].includes(this.animation)) {
@@ -708,7 +740,7 @@ class Flare extends Actor {
         }
     }
 
-    draw = (game, cx) => {
+    draw(game, cx) {
         if (this.invicibility % 2) return;
         cx.save();
         if (this.chargeShotBuffer > 45 && Math.floor(this.frameCount / 4) % 2) cx.filter = 'brightness(2)';
@@ -732,3 +764,5 @@ class Flare extends Actor {
         cx.restore();
     }
 }
+
+export { Flare };

@@ -1,3 +1,34 @@
+import { Arrow } from './actor.js';
+import { Flare } from './flare.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+
+import { FubuzillaBody, Fubuzilla, Miteiru, Oni, Spirit } from './yamato.js';
+import { Robot, Nousabot, Nousakumo } from './falls.js';
+import { Pekora } from './pekora.js';
+import { PekoMiniBoss } from './pekoMiniBoss.js';
+import { Mikobell, Casinochip, Scythe } from './casino.js';
+import { Miko } from './miko.js';
+import { Dokuro, Cannon, Pirate, Neko, Rock } from './portcity.js';
+import { Marine } from './marine.js';
+import { Aqua } from './aqua.js';
+import { Fubuki } from './fubuki.js';
+import { Ayame, Sword } from './ayame.js';
+import { EvilNoel } from './evilNoel.js';
+import { Axe, Pendulum } from './westa.js';
+import { Suisei } from './suisei.js';
+import { Polka } from './polka.js';
+import { EvilMiko } from './evilMiko.js';
+import { EvilFlare } from './evilFlare.js';
+import { Gura } from './gura.js';
+import { Calli, CalliScythe } from './calli.js';
+import { Ina, Tentacle } from './ina.js';
+import { Ame } from './ame.js';
+import { Kiara } from './kiara.js';
+import { Fairy } from './heaven.js';
+import { Kanata } from './kanata.js';
+import { DragonHand } from './dragon.js';
+import { Bibi, BibiFire, Towa } from './towa.js';
+
 class Noel extends Flare {
     maxHealth = 16;
 
@@ -19,7 +50,7 @@ class Noel extends Flare {
         if (game.saveData.getItem('nuinui-save-item-boots')) this.canWallJump = true;
     }
 
-    update = game => {
+    update(game) {
         const keys = this.playerControl ? game.keys : game.cpuKeys;
         const movement = this.moto || this.isSliding || (this.attackCooldown && this.isGrounded) || this.slideJump || keys.left === keys.right ? 0 : this.runSpeed * (keys.right ? 1 : -1);
 
@@ -333,7 +364,7 @@ class Noel extends Flare {
         this.frameCount++;
     }
 
-    takeHit = (game, other) => {
+    takeHit(game, other) {
         if (this.isSliding || (other instanceof Robot && other.sleep) || (other instanceof EvilNoel && other.isTrueEnd)) return;
         
         if (!this.playerControl) return;
@@ -371,22 +402,22 @@ class Noel extends Flare {
         if (!this.health) this.die(game);
     }
 
-    setAnimation = animation => {
+    setAnimation(animation) {
         this.animationFrame = 0;
         this.lastAnimation = this.animation;
         this.animation = animation;
     }
 
-    playAnimation = (game, cx, data) => {
+    playAnimation(_game, cx, data) {
         const {offset, size, speed, frames} = this.animations[data.animation];
         const anim = data.animation === 'run' && this.runAttackBuffer ? 'run_attack' : data.animation;
         const animFrame = Math.floor(data.animationFrame * speed) % frames;
-        if (!game.assets.images[`sp_noel_${anim}`]) return;
-        cx.drawImage(game.assets.images[`sp_noel_${anim}`], (animFrame + ((anim === 'attack' || anim === 'aerial') && this.noelAttackAnim ? 1 : 0)) * size.x, 0, size.x, size.y,
+        if (!_game.assets.images[`sp_noel_${anim}`]) return;
+        cx.drawImage(_game.assets.images[`sp_noel_${anim}`], (animFrame + ((anim === 'attack' || anim === 'aerial') && this.noelAttackAnim ? 1 : 0)) * size.x, 0, size.x, size.y,
             offset.x, offset.y, size.x, size.y);
     }
 
-    draw = (game, cx) => {
+    draw(_game, cx) {
         [...this.lastPoses, this].forEach((noelData, i) => {
             const isNoel = noelData === this;
             if (!isNoel || !(this.invicibility % 2)) {
@@ -406,9 +437,11 @@ class Noel extends Flare {
                     cx.translate(0, Math.floor(this.frameCount / 4) % 2);
                     if (!this.isGrounded) cx.rotate(this.vel.y * .05);
                 }
-                this.playAnimation(game, cx, noelData);
+                this.playAnimation(_game, cx, noelData);
                 cx.restore();
             }
         });
     }
 }
+
+export { Noel };

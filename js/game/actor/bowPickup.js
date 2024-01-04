@@ -1,3 +1,7 @@
+import { Actor } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class BowPickup extends Actor {
     constructor(pos, size, type) {
         super(pos, size);
@@ -300,3 +304,16 @@ class KeyPickup extends Actor {
         cx.restore();
     }
 }
+
+export {
+    BowPickup,
+    RocketPickup,
+    PetalPickup,
+    SwordPickup,
+    ShieldPickup,
+    KiritoPickup,
+    ClockPickup,
+    JumpPickup,
+    BootsPickup,
+    KeyPickup,
+};

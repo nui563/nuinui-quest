@@ -1,3 +1,7 @@
+import { Actor, Bullet } from './actor.js';
+import { Vector2, CollisionBox } from '../../lib/gameEngine.js';
+import { Flare } from './flare.js';
+
 class Ina extends Actor {
     size = new Vector2(16, 32);
     vel = new Vector2(0, 0);
@@ -284,3 +288,5 @@ class Tentacle extends Actor {
         cx.restore();
     }
 }
+
+export { Ina, Tentacle };
