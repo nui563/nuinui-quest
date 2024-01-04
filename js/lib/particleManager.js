@@ -191,7 +191,6 @@ class ParticleManager {
         const dir = (Math.random() > .5 ? 1 : -1) * Math.round(Math.random() * 3);
         this.pool.push(new Particle({
             type: `sparkle_white`,
-            pos: pos,
             pos: new Vector2(Math.round(pos.x) + Math.round(Math.random() * 20 - 10), Math.round(pos.y) + Math.round(Math.random() * 20 - 10)),
             size: new Vector2(16, 16),
             xOffset: p => p.size.x * Math.floor(p.life * 6 / p.lifespan),
