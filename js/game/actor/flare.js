@@ -33,25 +33,31 @@ class Flare extends Actor {
     chargeTypeData = {
         fire: {
             xVel: 5,
-            particle: 'charge_fire'
+            particle: 'charge_fire',
+            offset: 0
         },
         rocket: {
             xVel: 2,
-            particle: 'charge_fire_2'
+            particle: 'charge_fire_2',
+            offset: 1
         },
         petal: {
             xVel: 3,
-            particle: 'charge_fire_3'
+            particle: 'charge_fire_3',
+            offset: 2
         },
         sword: {
             xVel: 2.5,
-            particle: 'charge_fire_4'
+            particle: 'charge_fire_4',
+            offset: 3
         },
         shield: {
-            particle: 'charge'
+            particle: 'charge',
+            offset: 4
         },
         dual: {
-            particle: 'charge'
+            particle: 'charge',
+            offset: 5
         }
     }
 

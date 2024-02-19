@@ -288,7 +288,8 @@ class Scene {
             if (flare.hasBow && !flare.jetski && !flare.moto) {
                 cx.drawImage(game.assets.images['sp_bow_pickup'], flare.weapon === 'bow' ? 0 : 20, 0, 20, 20, 2, game.height - 22, 20, 20);
                 if (flare.chargeShot) {
-                    cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, 12, game.height - 12, 12, 12);
+                    const chargeOffset = flare.chargeTypeData[flare.chargeTypeList[flare.chargeType]].offset;
+                    cx.drawImage(game.assets.images['ui_charge_type'], chargeOffset * 12, 0, 12, 12, 12, game.height - 12, 12, 12);
                 }
             }
 
@@ -313,7 +314,8 @@ class Scene {
 
             if (flare.chargeTypeBufferAnim && !flare.jetski && !flare.moto) {
                 cx.translate(-this.view.pos.x, -this.view.pos.y);
-                cx.drawImage(game.assets.images['ui_charge_type'], flare.chargeType * 12, 0, 12, 12, Math.round(flare.pos.x + flare.size.x / 2) - 6, Math.round(flare.pos.y) - 20, 12, 12);
+                const chargeOffset = flare.chargeTypeData[flare.chargeTypeList[flare.chargeType]].offset;
+                cx.drawImage(game.assets.images['ui_charge_type'], chargeOffset * 12, 0, 12, 12, Math.round(flare.pos.x + flare.size.x / 2) - 6, Math.round(flare.pos.y) - 20, 12, 12);
             }
 
             if (flare.jetski || flare.moto) {
