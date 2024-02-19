@@ -59,7 +59,7 @@ class Mikobell extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= 31 && Math.random() > .98) {
+        if (this.phaseBuffer >= 31 && random() > .98) {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
@@ -72,7 +72,7 @@ class Mikobell extends Actor {
                 } else {
                     this.phase = 'move';
                     if (CollisionBox.intersects(this, game.scene.view)) game.playSound("jump");
-                    this.moveDir = Math.random() > .5 ? 1 : -1;
+                    this.moveDir = random() > .5 ? 1 : -1;
                     this.vel.y = -4;
                 }
             }
@@ -130,7 +130,7 @@ class Mikobell extends Actor {
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
         if (this.health < this.maxHealth / 2) {
-            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+            if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
@@ -166,7 +166,7 @@ class Casinochip extends Actor {
 
     constructor(pos, moveDir) {
         super();
-        this.color = Math.random() < .5;
+        this.color = random() < .5;
         this.pos = new Vector2(pos.x * 16, pos.y * 16 - 32);
         this.moveDir = moveDir;
         this.health = this.maxHealth;
@@ -287,8 +287,8 @@ class Scythe extends Actor {
         
         for (let i = 0; i < 2; i++) {
             const dist = .5;
-            const a = Math.cos(Math.random() * 2 * Math.PI);
-            const b = Math.sin(Math.random() * 2 * Math.PI);
+            const a = Math.cos(random() * 2 * Math.PI);
+            const b = Math.sin(random() * 2 * Math.PI);
             // game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
         }
         
@@ -342,7 +342,7 @@ class CasinoBoss extends Actor {
         this.actors.forEach(a => {
             if (!a.health) {
                 a.phase = 'defeated';
-                for (let i = 0; i < 64; i++) game.scene.particles.smoke_white(CollisionBox.center(a).plus(new Vector2(Math.round(Math.random() * 48 - 24), Math.round(Math.random() * 48 - 24))), new Vector2(0, 0), 1);
+                for (let i = 0; i < 64; i++) game.scene.particles.smoke_white(CollisionBox.center(a).plus(new Vector2(Math.round(random() * 48 - 24), Math.round(random() * 48 - 24))), new Vector2(0, 0), 1);
                 game.scene.actors = game.scene.actors.filter(b => b !== a);
                 this.actors = this.actors.filter(b => b !== a);
             }
@@ -350,7 +350,7 @@ class CasinoBoss extends Actor {
 
         // if (this === game.scene.boss && this.frameCount > 200 && this.actors.length < 2) {
         //     const className = game.scene.actors.find(a => a instanceof Miko) ? Pekora : Miko;
-        //     const boss = new (className)(new Vector2(179.5 * 16 + Math.floor(Math.random() * 256 - 128), 16), 1);
+        //     const boss = new (className)(new Vector2(179.5 * 16 + Math.floor(random() * 256 - 128), 16), 1);
         //     boss.setAnimation('jump');
         //     boss.skullBoss = this;
         //     boss.lastPhase = 'move';

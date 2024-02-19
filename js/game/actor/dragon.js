@@ -97,7 +97,7 @@ class Dragon extends Actor {
     chargePhase = game => {
         this.shakeBuffer = 2;
         if (!(this.phaseBuffer % 4)) game.scene.particles.charge(this.pos.plus(new Vector2(this.size.x * .5, 64)));
-        game.scene.particles.smoke_white(this.pos.plus(new Vector2(this.size.x * .5, 64)), new Vector2(Math.random() * 8 - 4, -1), 1);
+        game.scene.particles.smoke_white(this.pos.plus(new Vector2(this.size.x * .5, 64)), new Vector2(random() * 8 - 4, -1), 1);
         if (!(this.phaseBuffer % 60)) game.playSound('charge2');
 
         if (!this.phaseBuffer) {
@@ -128,7 +128,7 @@ class Dragon extends Actor {
 
     laserPhase = game => {
         for (let i = 0; i < 3; i++) {
-            game.scene.particles.smoke_white(new Vector2(this.pos.x + Math.random() * this.size.x, (12 * 6 + 10) * 16), new Vector2(Math.random() - .5, -Math.random() * 2), 1);
+            game.scene.particles.smoke_white(new Vector2(this.pos.x + random() * this.size.x, (12 * 6 + 10) * 16), new Vector2(random() - .5, -random() * 2), 1);
         }
 
         if (!(this.phaseBuffer % 6)) game.playSound('laser');
@@ -173,7 +173,7 @@ class Dragon extends Actor {
         if (this.phaseBuffer === 60) {
             const units = game.scene.actors.filter(actor => actor instanceof Flare);
             if (units.length) {
-                this.targetUnit = units[Math.floor(Math.random() * units.length)];
+                this.targetUnit = units[Math.floor(random() * units.length)];
                 this.hands.forEach(hand => hand.targetPos = CollisionBox.center(this.targetUnit).plus(new Vector2(-12 + 8 * (hand.dir ? 1 : -1), -24)));
             }
         }
@@ -347,7 +347,7 @@ class DragonHand extends Actor {
         if (this.demon.phase === 'end') this.shakeBuffer = 2;
 
         for (let i = 0; i < 2; i++) {
-            game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8 + 16 * (this.dir ? 1 : -1), Math.random() * 32 - 16)), new Vector2(Math.random() - .5 + .5 * (this.dir ? 1 : -1), Math.random() * -2), 0);
+            game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8 + 16 * (this.dir ? 1 : -1), random() * 32 - 16)), new Vector2(random() - .5 + .5 * (this.dir ? 1 : -1), random() * -2), 0);
         }
 
         this.frameCount++;

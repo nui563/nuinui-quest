@@ -153,7 +153,7 @@ class Ame extends Actor {
         if (this.phaseBuffer && !(this.phaseBuffer % 20)) {
             const p1 = CollisionBox.center(flare);
             const p2 = CollisionBox.center(this);
-            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * 0.125 - 0.0625;
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-3);
             const bullet = new Bullet(this.pos.plus(new Vector2(8, 16)), vel, this);
             bullet.syringe = true;
@@ -166,13 +166,13 @@ class Ame extends Actor {
             this.lastMove = this.phase;
             this.phase = 'move';
             this.moveDir = this.dir ? 1 : -1;
-            this.moveSpeed = 2 + 2 * Math.random();
-            this.vel.y = -1 - Math.random();
+            this.moveSpeed = 2 + 2 * random();
+            this.vel.y = -1 - random();
         }
     }
 
     movePhase = game => {
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         
         this.vel.x = this.moveDir * this.moveSpeed;
 
@@ -197,7 +197,7 @@ class Ame extends Actor {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
 
         if (this.phaseBuffer >= 48) {
-            if (this.lastMove === 'move' && Math.random() < .75) {
+            if (this.lastMove === 'move' && random() < .75) {
                 switch (this.attackCount) {
                     case 0:
                         this.phase = game.scene.isFocus ? 'pound' : 'clock';
@@ -219,8 +219,8 @@ class Ame extends Actor {
                 this.phase = 'move';
                 game.playSound("jump");
                 this.moveDir = this.dir ? 1 : -1;
-                this.moveSpeed = 2 + Math.random();
-                this.vel.y = -4 - Math.random();
+                this.moveSpeed = 2 + random();
+                this.vel.y = -4 - random();
             }
         }
     }

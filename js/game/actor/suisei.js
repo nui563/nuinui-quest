@@ -60,13 +60,13 @@ class Suisei extends Actor {
             this.phase = 'charge';
         } else {
             if (this.phaseBuffer > 60 && this.axe.isGrounded && !(this.phaseBuffer % 15)) {
-                const p1 = new Vector2(6.25 * 20 * 16 + Math.floor(Math.random() * 10) * 16, 4 * 12 * 16 - 32);
+                const p1 = new Vector2(6.25 * 20 * 16 + Math.floor(random() * 10) * 16, 4 * 12 * 16 - 32);
                 const vel = new Vector2(0, 3);
                 game.scene.actors.push(new Comet(p1, vel));
             }
         }
         // if (this.phaseBuffer >= 31) {
-        //     if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
+        //     if (this.pos.distance(flare.pos) < 16 * 12 && random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
         //         if (!game.scene.actors.find(a => a instanceof IceShield && a.originActor === this)) {
         //             this.phase = 'shield';
         //             this.setAnimation('charge');
@@ -81,8 +81,8 @@ class Suisei extends Actor {
         //         this.phase = 'move';
         //         game.playSound("jump");
         //         if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
-        //         else this.moveDir = Math.random() > .5 ? 1 : -1;
-        //         this.moveAttack = Math.random() > .25;
+        //         else this.moveDir = random() > .5 ? 1 : -1;
+        //         this.moveAttack = random() > .25;
         //         this.vel.y = this.moveAttack ? -5 : -4;
         //     }
         // }
@@ -103,7 +103,7 @@ class Suisei extends Actor {
         if (!(this.phaseBuffer % 60)) game.playSound("charge");
 
         if (this.phaseBuffer === 300) {
-            if (this.health < this.maxHealth / 2 && Math.random() < .5 || this.health < this.maxHealth / 4) this.phase = 'rain';
+            if (this.health < this.maxHealth / 2 && random() < .5 || this.health < this.maxHealth / 4) this.phase = 'rain';
             else {
                 this.axe.isRotation = false;
                 this.phase = 'idle';
@@ -124,7 +124,7 @@ class Suisei extends Actor {
 
     rainPhase = game => {
         if (!(this.phaseBuffer % 10)) {
-            game.scene.actors.push(new Comet(new Vector2((6 * 20 + 8) * 16 + Math.floor(Math.random() * 4) * 16, 4 * 12 * 16 - 32), new Vector2(0, 4)));
+            game.scene.actors.push(new Comet(new Vector2((6 * 20 + 8) * 16 + Math.floor(random() * 4) * 16, 4 * 12 * 16 - 32), new Vector2(0, 4)));
         }
         this.axe.shakeBuffer = 4;
         if (this.phaseBuffer === 300) {

@@ -19,7 +19,7 @@ class Comet extends Actor {
         const actorCollisions = game.scene.actors.filter(actor => !(actor instanceof Comet) && !(actor instanceof Suisei) && actor.checkHit(game, this));
         if (actorCollisions.length) {
             if (actorCollisions.length === 1 && actorCollisions[0] instanceof Axe) {
-                this.vel.x = (2 + Math.random() * 4) * (CollisionBox.center(this).x < CollisionBox.center(actorCollisions[0]).x ? -1 : 1);
+                this.vel.x = (2 + random() * 4) * (CollisionBox.center(this).x < CollisionBox.center(actorCollisions[0]).x ? -1 : 1);
             } else {
                 collision = true;
                 actorCollisions.forEach(collision => {
@@ -124,7 +124,7 @@ class Axe extends Actor {
 
         if (!this.gravityBuffer && this.isGrounded && !['intro', 'charge'].includes(this.suisei.phase)) {
             this.pos.x += .25 * (CollisionBox.center(this).x < CollisionBox.center(this.suisei).x ? 1 : -1);
-            if (!(this.frameCount % 2)) game.scene.particles.smoke_white(new Vector2(this.pos.x + this.size.x / 4 + Math.random() * this.size.x / 2, this.pos.y + this.size.y), new Vector2(0, 0), 1);
+            if (!(this.frameCount % 2)) game.scene.particles.smoke_white(new Vector2(this.pos.x + this.size.x / 4 + random() * this.size.x / 2, this.pos.y + this.size.y), new Vector2(0, 0), 1);
         }
 
         if (this.gravityBuffer) {
@@ -249,10 +249,10 @@ class Block extends Actor {
     size = new Vector2(8, 8);
     damage = 1;
 
-    skin = Math.floor(Math.random() * 4);
-    angle = Math.random() * Math.PI * 2;
-    dir = Math.random() > .5;
-    speed = Math.random() * 3;
+    skin = Math.floor(random() * 4);
+    angle = random() * Math.PI * 2;
+    dir = random() > .5;
+    speed = random() * 3;
 
     constructor(pos, miko, index) {
         super(pos);
@@ -278,7 +278,7 @@ class Block extends Actor {
             this.miko.blocks = this.miko.blocks.filter(a => a !== this);
         }
 
-        game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 8 - 4, Math.random() * 8 - 4)), new Vector2(Math.random() - .5, Math.random() * -1), 0);
+        game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(random() * 8 - 4, random() * 8 - 4)), new Vector2(random() - .5, random() * -1), 0);
 
         this.frameCount++;
     }

@@ -317,7 +317,7 @@ class Noel extends Flare {
 
         if (this.vel.y > 0) this.jumpPower = 0;
 
-        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(Math.random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - Math.random() * .5), 1);
+        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - random() * .5), 1);
 
         this.lastMovement = movement;
         if (this.noelAttack) this.noelAttack--;

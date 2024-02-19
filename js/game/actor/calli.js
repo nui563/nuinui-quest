@@ -93,7 +93,7 @@ class Calli extends Actor {
         }
 
         if (this.phaseBuffer === 60) {
-            if (Math.random() < .5) {
+            if (random() < .5) {
                 this.lastMove = this.phase;
                 this.phase = 'attack4';
             } else {
@@ -136,7 +136,7 @@ class Calli extends Actor {
             
             if (this.skullBoss) {
                 for (let i = 0; i < 8; i++) {
-                    game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(Math.random() * 8 - 4, Math.random() * 16 - 8).round()), new Vector2(0, 0), 1);
+                    game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(random() * 8 - 4, random() * 16 - 8).round()), new Vector2(0, 0), 1);
                 }
             }
 
@@ -177,7 +177,7 @@ class Calli extends Actor {
     }
 
     movePhase = game => {
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         
         this.vel.x = this.moveDir * this.moveSpeed;
 
@@ -199,7 +199,7 @@ class Calli extends Actor {
 
         if (this.phaseBuffer < 60) {
             for (let i = 0; i < Math.floor(this.phaseBuffer / 2); i++) {
-                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(Math.random() * 64 - 32, Math.random() * 64 - 32).round()), new Vector2(0, 0), 1);
+                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(random() * 64 - 32, random() * 64 - 32).round()), new Vector2(0, 0), 1);
             }
         }
 
@@ -211,8 +211,8 @@ class Calli extends Actor {
             this.moveDir = 0;
 
             this.lastMove = this.phase;
-            if (Math.random() > .25) this.blackScreenBuffer = false;
-            if (Math.random() > .5) this.attackBuffer = true;
+            if (random() > .25) this.blackScreenBuffer = false;
+            if (random() > .5) this.attackBuffer = true;
 
             this.phase = 'move';
 
@@ -225,11 +225,11 @@ class Calli extends Actor {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
 
         if (this.phaseBuffer >= (this.skullBoss ? 63 : 31)) {
-            if (this.skullBoss && Math.random() < .75) {
+            if (this.skullBoss && random() < .75) {
                 this.phase = 'attack2';
                 this.setAnimation('hide');
             }
-            else if (!this.skullBoss && this.lastMove === 'move' && Math.random() < .75) {
+            else if (!this.skullBoss && this.lastMove === 'move' && random() < .75) {
                 switch (this.attackCount) {
                     case 0:
                         this.phase = 'attack2';

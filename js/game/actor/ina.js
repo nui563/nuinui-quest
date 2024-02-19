@@ -77,16 +77,16 @@ class Ina extends Actor {
     
     idlePhase = game => {
         if (!(this.frameCount % (this.health > this.maxHealth * .5 ? 120 : 90))) {
-            if (Math.random() > .5) this.posTarget = new Vector2(this.pos.x, Math.round((18 + Math.random() * 3) * 16));
+            if (random() > .5) this.posTarget = new Vector2(this.pos.x, Math.round((18 + random() * 3) * 16));
 
-            if (Math.random() < .5) {
+            if (random() < .5) {
                 const tentacle = game.scene.actors.find(a => a instanceof Tentacle && !a.attack && !a.isDisabled && !a.posTarget);
                 if (tentacle) {
                     tentacle.posBuffer = tentacle.pos.value();
                     tentacle.attack = true;
                     tentacle.attackFrame = 0;
                 }
-            } else if (Math.random() < .5) {
+            } else if (random() < .5) {
                 this.phase = 'attack3';
                 this.bucketPos = this.pos;
             }
@@ -140,7 +140,7 @@ class Ina extends Actor {
         }
 
         if (this.health && this.health < this.maxHealth * .75 && !(this.frameCount % (10 * 60))) {
-            this.scrollSpeed = this.scrollSpeed === 1 ? (Math.random() > .5 ? 2 : 0) : 1;
+            this.scrollSpeed = this.scrollSpeed === 1 ? (random() > .5 ? 2 : 0) : 1;
             game.scene.shakeBuffer = 15;
             game.playSound('charge2');
             game.scene.thunder = 60;
@@ -167,7 +167,7 @@ class Ina extends Actor {
         if (this.phase === 'attack3') {
             cx.save();
             cx.translate(Math.round(this.bucketPos.x), Math.round(this.bucketPos.y));
-            if (this.phaseBuffer > 120 && this.phaseBuffer < 240) cx.translate(Math.round(Math.random() * 2 - 1), Math.round(Math.round(Math.random() * 2 - 1)));
+            if (this.phaseBuffer > 120 && this.phaseBuffer < 240) cx.translate(Math.round(random() * 2 - 1), Math.round(Math.round(random() * 2 - 1)));
             cx.drawImage(game.assets.images['sp_ina_book'], this.phaseBuffer > 120 && this.phaseBuffer < 240 ? 32 : 0, 0, 32, 32, -16, -16, 32, 32);
             cx.restore();
         }
@@ -197,7 +197,7 @@ class Tentacle extends Actor {
     constructor(pos) {
         super(pos);
         this.health = this.maxHealth;
-        this.randomOffset = Math.random() * 2 - 1;
+        this.randomOffset = random() * 2 - 1;
     }
     
     checkHit = (game, collisionBox) => {

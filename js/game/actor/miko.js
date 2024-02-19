@@ -61,7 +61,7 @@ class Miko extends Actor {
         if (this.skullBoss && !this.invicibility) this.invicibility = 4;
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (this.phaseBuffer >= (!this.skullBoss ? 31 : 63)) {
-            if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (this.skullBoss ? .5 : .3))) {
+            if (this.pos.distance(flare.pos) < 16 * 12 && random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (this.skullBoss ? .5 : .3))) {
                 if (this.skullBoss) {
                     this.phase = 'sniper';
                     this.setAnimation('sniper');
@@ -74,7 +74,7 @@ class Miko extends Actor {
                         game.canvas2.style.filter = 'brightness(0%)';
                         this.nightMode = true;
                     }
-                    if (Math.random() > (this.lastMove === 'chant' ? .8 : .6)) {
+                    if (random() > (this.lastMove === 'chant' ? .8 : .6)) {
                         this.phase = 'chant';
                         this.setAnimation('chant');
                     } else {
@@ -83,14 +83,14 @@ class Miko extends Actor {
                 }
             } else {
                 this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
-                if (Math.random() > .6 && this.lastMove !== 'sniper') {
+                if (random() > .6 && this.lastMove !== 'sniper') {
                     this.phase = 'sniper';
                     this.setAnimation('sniper');
                 } else {
                     this.phase = 'move';
                     game.playSound("jump");
                     if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
-                    else this.moveDir = Math.random() > .5 ? 1 : -1;
+                    else this.moveDir = random() > .5 ? 1 : -1;
                     this.vel.y = -4;
                 }
             }
@@ -151,7 +151,7 @@ class Miko extends Actor {
 
     movePhase = game => {
         if (this.skullBoss && !this.invicibility) this.invicibility = 4;
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         this.vel.x = this.moveDir * this.moveSpeed;
         if (this.phaseBuffer > 3 && this.isGrounded) {
             this.lastMove = this.phase;
@@ -203,7 +203,7 @@ class Miko extends Actor {
         
         if (this.skullBoss) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(random() * 32 - 16, random() * 20 - 10)), new Vector2(random() * 2 - 1, random() * -1), 0);
             }
         }
 

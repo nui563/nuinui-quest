@@ -52,7 +52,7 @@ class Fubuki extends Actor {
     idlePhase = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (this.phaseBuffer >= 31) {
-            if (this.pos.distance(flare.pos) < 16 * 12 && Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
+            if (this.pos.distance(flare.pos) < 16 * 12 && random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : (!game.scene.miniBossCleared ? .5 : .3))) {
                 if (!game.scene.actors.find(a => a instanceof IceShield && a.originActor === this)) {
                     this.phase = 'shield';
                     this.setAnimation('charge');
@@ -67,8 +67,8 @@ class Fubuki extends Actor {
                 this.phase = 'move';
                 game.playSound("jump");
                 if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
-                else this.moveDir = Math.random() > .5 ? 1 : -1;
-                this.moveAttack = Math.random() > .25;
+                else this.moveDir = random() > .5 ? 1 : -1;
+                this.moveAttack = random() > .25;
                 this.vel.y = this.moveAttack ? -5 : -4;
             }
         }
@@ -106,7 +106,7 @@ class Fubuki extends Actor {
     windPhase = game => {
         if (this.phaseBuffer === 30) {
             game.scene.iceWind = 120;
-            game.scene.iceWindDir = Math.random() > .5;
+            game.scene.iceWindDir = random() > .5;
             // game.playSound("miko_chant");
         }
         if (this.phaseBuffer === 60) {
@@ -117,7 +117,7 @@ class Fubuki extends Actor {
     }
 
     movePhase = game => {
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         
         this.vel.x = this.moveDir * this.moveSpeed * (this.moveAttack ? .5 : 1);
         if (this.moveAttack) {

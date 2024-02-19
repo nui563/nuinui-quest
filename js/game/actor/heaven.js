@@ -9,7 +9,7 @@ class Fairy extends Actor {
         this.pos = new Vector2(pos.x, pos.y).times(16);
         this.health = this.maxHealth;
         this.type = type;
-        this.randomBuffer = Math.random();
+        this.randomBuffer = random();
     }
     
     checkHit = (game, collisionBox) => {
@@ -44,8 +44,8 @@ class Fairy extends Actor {
         if (!this.moveBuffer && CollisionBox.intersects(this, game.scene.view)) {
             this.moveBuffer = 120;
             
-            if ((Math.random() < .5 || this.frameCount < 120) && CollisionBox.intersects(this, game.scene.view)) {
-                const rand = Math.random() < .5;
+            if ((random() < .5 || this.frameCount < 120) && CollisionBox.intersects(this, game.scene.view)) {
+                const rand = random() < .5;
                 for (let i = 0; i < 8; i++) {
                     const angle = i * (Math.PI / 4) + (rand ? 0 : Math.PI / 8);
                     const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(2);
@@ -55,7 +55,7 @@ class Fairy extends Actor {
             } else {
                 const p1 = CollisionBox.center(this);
                 const p2 = CollisionBox.center(flare);
-                const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * .5 - .25;
+                const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * .5 - .25;
                 this.vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(2);
                 game.playSound('wind');
             }
@@ -66,8 +66,8 @@ class Fairy extends Actor {
         
         // for (let i = 0; i < 2; i++) {
         //     const dist = .5;
-        //     const a = Math.cos(Math.random() * 2 * Math.PI);
-        //     const b = Math.sin(Math.random() * 2 * Math.PI);
+        //     const a = Math.cos(random() * 2 * Math.PI);
+        //     const b = Math.sin(random() * 2 * Math.PI);
         // }
 
         // Collisions
@@ -96,7 +96,7 @@ class Fairy extends Actor {
         //     const p1 = CollisionBox.center(this);
         //     const p2 = CollisionBox.center(flare);
         //     if (p1.distance(p2) < 192 && p1.y - 32 < p2.y) {
-        //         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+        //         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * 0.125 - 0.0625;
         //         const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(2);
         //         game.scene.actors.push(new Bullet(p1, vel, this));
         //         if (CollisionBox.intersects(this, game.scene.view)) game.playSound("pew");

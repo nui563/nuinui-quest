@@ -62,17 +62,17 @@ class Pekora extends Actor {
     idlePhase = game => {
         if (this.skullBoss && !this.invicibility) this.invicibility = 4;
         if (this.phaseBuffer >= (game.scene.name !== 'casino' ? 31 : 63)) {
-            if (Math.random() < (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .2)) {
-                if (game.scene.name === 'casino' || Math.random() > .75) {
+            if (random() < (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .2)) {
+                if (game.scene.name === 'casino' || random() > .75) {
                     this.phase = 'rocket';
                     this.setAnimation('rocket');
                     // game.playSound("charge");
-                } else if (this.health < this.maxHealth / 2 && Math.random() > .5) {
+                } else if (this.health < this.maxHealth / 2 && random() > .5) {
                     this.phase = 'attack3';
                     this.setAnimation('think');
                     game.playSound("charge");
                 } else {
-                    if (Math.random() > .75) {
+                    if (random() > .75) {
                         this.phase = 'attack2';
                         this.setAnimation('laugh');
                         // game.playSound('peko');
@@ -88,7 +88,7 @@ class Pekora extends Actor {
                 game.playSound("jump");
                 const flare = game.scene.actors.find(actor => actor instanceof Flare);
                 if (this.pos.distance(flare.pos) > 16 * 12) this.moveDir = flare.pos.x > this.pos.x ? 1 : -1;
-                else this.moveDir = Math.random() > .5 ? 1 : -1;
+                else this.moveDir = random() > .5 ? 1 : -1;
                 this.vel.y = -4;
             }
         }
@@ -97,7 +97,7 @@ class Pekora extends Actor {
     rocketPhase = game => {
         if (!this.phaseBuffer) {
             game.scene.actors.push(new Rocket(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -8), this.pos.y + 16), new Vector2(1 * (this.dir ? 1 : -1), 0), this));
-            // if (Math.random() > .5) game.playSound('peko');
+            // if (random() > .5) game.playSound('peko');
             game.playSound("pew");
             this.shakeBuffer = 8;
         }
@@ -114,7 +114,7 @@ class Pekora extends Actor {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(flare);
             const p2 = CollisionBox.center(this);
-            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * 0.125 - 0.0625;
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-2);
             game.scene.actors.push(new Bullet(this.pos.plus(new Vector2(8, 8)), vel, this));
             game.playSound("pew");
@@ -158,7 +158,7 @@ class Pekora extends Actor {
 
     movePhase = game => {
         if (this.skullBoss && !this.invicibility) this.invicibility = 4;
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         this.vel.x = this.moveDir * this.moveSpeed;
         if (this.phaseBuffer > 3 && this.isGrounded) {
             this.lastMove = this.phase;
@@ -209,7 +209,7 @@ class Pekora extends Actor {
         
         if (this.skullBoss) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(random() * 32 - 16, random() * 20 - 10)), new Vector2(random() * 2 - 1, random() * -1), 0);
             }
         }
 

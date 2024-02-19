@@ -49,8 +49,8 @@ class Nousabot extends Actor {
         
         for (let i = 0; i < 2; i++) {
             const dist = .5;
-            const a = Math.cos(Math.random() * 2 * Math.PI);
-            const b = Math.sin(Math.random() * 2 * Math.PI);
+            const a = Math.cos(random() * 2 * Math.PI);
+            const b = Math.sin(random() * 2 * Math.PI);
             game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
         }
 
@@ -59,7 +59,7 @@ class Nousabot extends Actor {
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
             if (p1.distance(p2) < 192 && p1.y - 32 < p2.y) {
-                const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+                const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * 0.125 - 0.0625;
                 const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(2);
                 game.scene.actors.push(new Bullet(p1, vel, this));
                 if (CollisionBox.intersects(this, game.scene.view)) game.playSound("pew");
@@ -67,7 +67,7 @@ class Nousabot extends Actor {
         }
 
         if (this.health < this.maxHealth / 2) {
-            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+            if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
@@ -156,7 +156,7 @@ class Robot extends Actor {
                 } else {
                     this.phase = 'move';
                     if (CollisionBox.intersects(this, game.scene.view)) game.playSound("boss_move");
-                    this.moveDir = Math.random() > .5 ? 1 : -1;
+                    this.moveDir = random() > .5 ? 1 : -1;
                 }
             }
         }
@@ -226,12 +226,12 @@ class Robot extends Actor {
         
         if (this.spirit) {
             game.scene.particles.smoke_spirit(this.pos.plus(new Vector2(this.size.x / 2, 0)), new Vector2(0, -1), 0);
-        } else if (this.sleep && Math.random() > .9) {
-            game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(0, -.25), 1);
+        } else if (this.sleep && random() > .9) {
+            game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8)), new Vector2(0, -.25), 1);
         }
 
         if (this.health < this.maxHealth / 2) {
-            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+            if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
@@ -320,7 +320,7 @@ class Nousakumo extends Actor {
     }
 
     idlePhase = game => {
-        if (this.phaseBuffer >= 47 && Math.random() > .98 && !this.wait) {
+        if (this.phaseBuffer >= 47 && random() > .98 && !this.wait) {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
@@ -333,7 +333,7 @@ class Nousakumo extends Actor {
                 } else {
                     this.phase = 'move';
                     // if (CollisionBox.intersects(this, game.scene.view)) game.playSound("jump");
-                    this.moveDir = Math.random() > .5 ? 1 : -1;
+                    this.moveDir = random() > .5 ? 1 : -1;
                     this.vel.y = -3;
                 }
             }
@@ -391,7 +391,7 @@ class Nousakumo extends Actor {
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
         if (this.health < this.maxHealth / 2) {
-            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+            if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
@@ -481,7 +481,7 @@ class VaporBlock extends Actor {
     draw = (game, cx) => {
         cx.save();
         cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
-        if (this.vapor) cx.translate(Math.floor(Math.random() * 2) - 1, Math.floor(Math.random() * 2) - 1);
+        if (this.vapor) cx.translate(Math.floor(random() * 2) - 1, Math.floor(random() * 2) - 1);
         if (!this.dir) {
             cx.translate(this.size.x / 2, 0);
             cx.scale(-1, 1);

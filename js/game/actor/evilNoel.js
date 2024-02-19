@@ -89,7 +89,7 @@ class EvilNoel extends Actor {
 
     movePhase = game => {
         if (!this.phaseBuffer) {
-            this.posTarget = this.posTargets[Math.floor(Math.random() * this.posTargets.length)];
+            this.posTarget = this.posTargets[Math.floor(random() * this.posTargets.length)];
         }
         if (this.pos.round().x === this.posTarget.round().x) {
             this.lastMove = this.phase;
@@ -100,7 +100,7 @@ class EvilNoel extends Actor {
     idlePhase = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (this.phaseBuffer >= 31) {
-            if (Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : .3)) {
+            if (random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : .3)) {
                 // if (!game.scene.actors.find(a => a instanceof IceShield && a.originActor === this)) {
                 //     this.phase = 'shield';
                 //     this.setAnimation('charge');
@@ -144,7 +144,7 @@ class EvilNoel extends Actor {
 
         if (this.phase !== 'weak') {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 20 - 10)), new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(random() * 32 - 16, random() * 20 - 10)), new Vector2(random() * 2 - 1, random() * -1), 0);
             }
         }
         

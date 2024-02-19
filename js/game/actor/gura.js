@@ -210,7 +210,7 @@ class Gura extends Actor {
                         this.phase = 'attack4';
                         this.targetSide = this.pos.x < 10 * 16;
                         this.vel.x = 3 * (this.targetSide ? 1 : -1);
-                        this.targetY = Math.floor(13 + Math.random() * 2) * 16;
+                        this.targetY = Math.floor(13 + random() * 2) * 16;
                         break;
                     case 3:
                         this.phase = 'attack3';
@@ -218,14 +218,14 @@ class Gura extends Actor {
                     default:
                         break;
                 }
-                if (this.attackCount < 3 || Math.random() > .5) this.attackCount += Math.random() < .5 ? 1 : -1;
+                if (this.attackCount < 3 || random() > .5) this.attackCount += random() < .5 ? 1 : -1;
                 if (this.attackCount < 0) this.attackCount = 3;
                 if (this.attackCount > 3) this.attackCount = 0;
             } else {
-                this.phase = this.attackCount > 0 && Math.random() < .2 ? 'attack4' : 'move';
+                this.phase = this.attackCount > 0 && random() < .2 ? 'attack4' : 'move';
                 this.targetSide = this.pos.x < 10 * 16;
                 this.vel.x = 3 * (this.targetSide ? 1 : -1);
-                this.targetY = Math.floor(13 + Math.random() * 4) * 16;
+                this.targetY = Math.floor(13 + random() * 4) * 16;
             }
         }
     }
@@ -248,7 +248,7 @@ class Gura extends Actor {
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
-        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(Math.random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - Math.random() * .5), 1);
+        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - random() * .5), 1);
 
         if (this === game.scene.boss) {
             if (this.healthBar < this.health) {

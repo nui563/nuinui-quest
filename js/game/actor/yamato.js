@@ -48,7 +48,7 @@ class Spirit extends Actor {
         super();
         this.pos = new Vector2(pos.x, pos.y).times(16);
         this.health = this.maxHealth;
-        this.skin = Math.random() > .5;
+        this.skin = random() > .5;
     }
     
     checkHit = (game, collisionBox) => {
@@ -111,8 +111,8 @@ class Spirit extends Actor {
 
         for (let i = 0; i < 2; i++) {
             const dist = .5;
-            const a = Math.cos(Math.random() * 2 * Math.PI);
-            const b = Math.sin(Math.random() * 2 * Math.PI);
+            const a = Math.cos(random() * 2 * Math.PI);
+            const b = Math.sin(random() * 2 * Math.PI);
             game.scene.particles.smoke_spirit(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
         }
 
@@ -175,7 +175,7 @@ class Fubuzilla extends Actor {
             game.scene.shakeBuffer = 4;
             game.playSound("rumble");
             [this, ...this.bodyParts].forEach(a => {
-                game.scene.particles.explosion(a.pos.plus(new Vector2(Math.random(), Math.random()).mult(a.size)));
+                game.scene.particles.explosion(a.pos.plus(new Vector2(random(), random()).mult(a.size)));
             })
         }
 
@@ -225,7 +225,7 @@ class Fubuzilla extends Actor {
         const bodySize = this.bodyParts.length;
         if (bodySize !== this.bodyCount) {
             for (let i = 0; i < this.bodyCount - bodySize; i++) {
-                const bodyPart = new FubuzillaBody(new Vector2(this.pos.x, this.pos.y + this.size.y + bodySize * 16 + i * 16), Math.floor(.5 + Math.random() * 2.5), this);
+                const bodyPart = new FubuzillaBody(new Vector2(this.pos.x, this.pos.y + this.size.y + bodySize * 16 + i * 16), Math.floor(.5 + random() * 2.5), this);
                 this.bodyParts.push(bodyPart);
                 game.scene.actors.push(bodyPart);
             }
@@ -253,9 +253,9 @@ class Fubuzilla extends Actor {
 
     idlePhase = game => {
         if (this.phaseBuffer >= 63) {
-            if (Math.random() > .125 && (!this.bodyParts.length || this.bodyParts.length < this.bodyCount)) this.phase = 'newBody';
-            else if (Math.random() > .5) {
-                if (Math.random() > .75 && !game.scene.actors.some(a => a instanceof Spirit)) {
+            if (random() > .125 && (!this.bodyParts.length || this.bodyParts.length < this.bodyCount)) this.phase = 'newBody';
+            else if (random() > .5) {
+                if (random() > .75 && !game.scene.actors.some(a => a instanceof Spirit)) {
                     game.scene.actors.push(new Spirit(CollisionBox.center(this).times(1/16)));
                 } else {
                     this.phase = 'attack';
@@ -341,7 +341,7 @@ class Fubuzilla extends Actor {
         }
 
         parts.forEach(a => {
-            if (a.health < a.maxHealth * .5 && Math.random() > .9) game.scene.particles.smoke_white(a.pos.plus(new Vector2(Math.random(), Math.random()).mult(a.size)), new Vector2(0, -2), 1);
+            if (a.health < a.maxHealth * .5 && random() > .9) game.scene.particles.smoke_white(a.pos.plus(new Vector2(random(), random()).mult(a.size)), new Vector2(0, -2), 1);
         });
         
         if (this === game.scene.boss) {
@@ -413,7 +413,7 @@ class FubuzillaBody extends Actor {
             game.score += 100;
 
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.explosion(this.pos.plus(new Vector2(Math.random(), Math.random()).mult(this.size)));
+                game.scene.particles.explosion(this.pos.plus(new Vector2(random(), random()).mult(this.size)));
             }
 
             game.scene.shakeBuffer = 4;

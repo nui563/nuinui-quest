@@ -60,8 +60,8 @@ const EVENTS = {
 
                             if (Math.floor(event.frameCount * .05) % 2 || game.thanks) {
                                 if (game.thanks) {
-                                    if (!(event.timelineFrame % 8)) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height))),
-                                    new Vector2(2 + Math.random() * 2, 4), 0);
+                                    if (!(event.timelineFrame % 8)) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(random() * game.width), Math.floor(random() * game.height))),
+                                    new Vector2(2 + random() * 2, 4), 0);
                                 }
                                 scene.customDraw.push(game => {
                                     if (game.thanks) game.ctx2.drawImage(game.assets.images['sp_thanks'], 0, 0);
@@ -193,12 +193,12 @@ const EVENTS = {
                                 game.scene.customDraw.push(game => {
                                     const cx = game.ctx2;
                                     cx.save();
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(Math.random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['bg_intro1'], 0, 0);
                                     cx.drawImage(game.assets.images['bg_intro2'], 0, 0);
                                     if (frame > 330) cx.drawImage(game.assets.images['bg_shikemura'], 16 * 9, 0);
                                     else cx.drawImage(game.assets.images['bg_shiraken'], 16 * 9, 0);
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(Math.random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['ms_flare'], frame < 340 ? 0 : 100, 0, 100, 128, 0, game.height - 128, 100, 128);
                                     cx.restore();
                                 });
@@ -209,7 +209,7 @@ const EVENTS = {
                                     const progress = Math.min(1, (frame - transitionIntro - 120) / 30);
                                     const cx = game.ctx2;
                                     cx.save();
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(Math.random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['ms_miko'], 0, 0, 128, 128, 9 + game.width - 128, game.height - 128 * progress, 128, 128);
                                     cx.restore();
                                 });
@@ -716,8 +716,8 @@ const EVENTS = {
                         }
 
                         if (canJanken && !(event.timelineFrame % 8)) {
-                            event.wHand += Math.random() > .5 ? 1 : -1;
-                            event.fHand += Math.random() > .5 ? 1 : -1;
+                            event.wHand += random() > .5 ? 1 : -1;
+                            event.fHand += random() > .5 ? 1 : -1;
                             if (event.wHand < 0) event.wHand = 2;
                             if (event.wHand > 2) event.wHand = 0;
                             if (event.fHand < 0) event.fHand = 2;
@@ -738,8 +738,8 @@ const EVENTS = {
 
                             if (!event.jankenBuffer) {
                                 flare.playerControl = true;
-                                event.wHand += Math.random() > .5 ? 1 : -1;
-                                event.fHand += Math.random() > .5 ? 1 : -1;
+                                event.wHand += random() > .5 ? 1 : -1;
+                                event.fHand += random() > .5 ? 1 : -1;
                                 if (event.wHand < 0) event.wHand = 2;
                                 if (event.wHand > 2) event.wHand = 0;
                                 if (event.fHand < 0) event.fHand = 2;
@@ -1004,7 +1004,7 @@ const EVENTS = {
                     (game, event) => {
                         const scene = game.scene;
                 
-                        if (Math.random() > .97) {
+                        if (random() > .97) {
                             scene.shakeBuffer = 2;
                             game.playSound("elevator");
                         }
@@ -1559,7 +1559,7 @@ const EVENTS = {
                     (game, event) => {
                         const scene = game.scene;
                 
-                        if (Math.random() > .97) {
+                        if (random() > .97) {
                             scene.shakeBuffer = 2;
                             game.playSound("elevator");
                         }
@@ -2052,8 +2052,8 @@ const EVENTS = {
                             game.ctx2.save();
                             game.ctx2.fillStyle = '#fff';
                             for (let i = 0; i < game.height; i++) {
-                                if (Math.random() > .99) {
-                                    game.ctx2.fillRect(Math.round(game.width * (0.75 + Math.random() / 4)), i, game.width / 4, 1);
+                                if (random() > .99) {
+                                    game.ctx2.fillRect(Math.round(game.width * (0.75 + random() / 4)), i, game.width / 4, 1);
                                 }
                             }
                             game.ctx2.restore();
@@ -2179,9 +2179,9 @@ const EVENTS = {
                         //         break;
                         // }
 
-                        if (event.timelineFrame > 480 && !(event.timelineFrame % 240) && Math.random() > .75) {
+                        if (event.timelineFrame > 480 && !(event.timelineFrame % 240) && random() > .75) {
                             const yPos = [9, 9.5, 10];
-                            event.addEnemy(Rock, new Vector2(10, yPos[Math.floor(Math.random() * yPos.length)]), 2, false, false, Math.random() > .5);
+                            event.addEnemy(Rock, new Vector2(10, yPos[Math.floor(random() * yPos.length)]), 2, false, false, random() > .5);
                         }
 
                         event.enemies.forEach(a => {
@@ -2242,9 +2242,9 @@ const EVENTS = {
                             game.playBGM("cosplay_pirate_idol_frenzy");
                         }
 
-                        if (event.timelineFrame > 480 && !(event.timelineFrame % 240) && Math.random() > .75) {
+                        if (event.timelineFrame > 480 && !(event.timelineFrame % 240) && random() > .75) {
                             const yPos = [9, 9.5, 10];
-                            event.addEnemy(Rock, new Vector2(10, yPos[Math.floor(Math.random() * yPos.length)]), 2, false, false, Math.random() > .5);
+                            event.addEnemy(Rock, new Vector2(10, yPos[Math.floor(random() * yPos.length)]), 2, false, false, random() > .5);
                         }
                         
                         event.enemies.forEach(a => {
@@ -2418,7 +2418,7 @@ const EVENTS = {
                             game.resetCpuKeys();
                             
                             for (let i = 0; i < 5; i++) {
-                                scene.particles.explosion(CollisionBox.center(event.flare).plus(new Vector2(Math.floor(Math.random() * 4) - 2, Math.floor(Math.random() * 4) - 2)));
+                                scene.particles.explosion(CollisionBox.center(event.flare).plus(new Vector2(Math.floor(random() * 4) - 2, Math.floor(random() * 4) - 2)));
                             } 
                             game.playSound('rumble');
                             
@@ -2974,15 +2974,15 @@ const EVENTS = {
                             if (event.timelineFrame < 180) {
                                 for (let i = 0; i < 2; i++) {
                                     game.scene.particles.smoke_pink(CollisionBox.center(event.noel).plus(new Vector2(
-                                        Math.random() * 32 - 16, Math.random() * 20 - 10 - (event.timelineFrame))),
-                                        new Vector2(Math.random() * 4 - 2, Math.random() * -1), 0);
+                                        random() * 32 - 16, random() * 20 - 10 - (event.timelineFrame))),
+                                        new Vector2(random() * 4 - 2, random() * -1), 0);
                                 }
                             } else if (event.timelineFrame < 360) {
                                 for (let i = 0; i < 4; i++) {
                                     const dist = 360 - event.timelineFrame;
                                     game.scene.particles.smoke_pink(CollisionBox.center(flare).plus(new Vector2(
-                                        Math.random() * 32 - 16, Math.random() * 20 - 10 - dist * 4)),
-                                        new Vector2(Math.random() * 2 - 1, Math.random() * -1), 0);
+                                        random() * 32 - 16, random() * 20 - 10 - dist * 4)),
+                                        new Vector2(random() * 2 - 1, random() * -1), 0);
                                 }
                             } else if (event.timelineFrame === 360) {
                                 scene.lockedViewPos = new Vector2(16 * 20 * 16, 2 * 12 * 16);
@@ -3176,8 +3176,8 @@ const EVENTS = {
                         const flare = scene.actors.find(actor => actor instanceof Flare);
                         if (flare.pos.x > 50 * 16 && flare.pos.x < 100 * 16 && !(event.frameCount % 10)) {
                             scene.actors.push(new Comet(
-                                new Vector2(flare.pos.x + Math.floor(Math.random() * 20) * 16, (4 * 12 - 1) * 16),
-                                new Vector2(Math.random() * 4 - 2, 2 + Math.random())));
+                                new Vector2(flare.pos.x + Math.floor(random() * 20) * 16, (4 * 12 - 1) * 16),
+                                new Vector2(random() * 4 - 2, 2 + random())));
                         }
                     }
                 ]
@@ -3471,10 +3471,10 @@ const EVENTS = {
                             event.end = true;
                         }
 
-                        game.scene.particles.smoke_pink(scene.view.pos.plus(new Vector2(Math.floor(Math.random() * game.width), 12 * 16)), new Vector2(Math.random() - .5, -Math.random()), 0);
+                        game.scene.particles.smoke_pink(scene.view.pos.plus(new Vector2(Math.floor(random() * game.width), 12 * 16)), new Vector2(random() - .5, -random()), 0);
 
-                        if (event.timelineFrame % 2) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height))),
-                            new Vector2(8 * (event.travelDir ? -1 : 1), Math.random() * 2 - 1), 0);
+                        if (event.timelineFrame % 2) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(random() * game.width), Math.floor(random() * game.height))),
+                            new Vector2(8 * (event.travelDir ? -1 : 1), random() * 2 - 1), 0);
 
                         if (flare.pos.x > 100 * 16) {
                             scene.actors.forEach(actor => {
@@ -3489,7 +3489,7 @@ const EVENTS = {
 
                             if (!event.travelDir && !scene.actors.find(a => event.enemies[event.travelCount].includes(a))) {
                                 event.travelCount++;
-                                event.travelDir = Math.random() > .5;
+                                event.travelDir = random() > .5;
                                 if (event.travelCount < event.enemies.length) event.enemies[event.travelCount].forEach(e => {
                                     e.pos.x += 20 * 16;
                                     scene.actors.push(e)
@@ -3510,7 +3510,7 @@ const EVENTS = {
                             
                             if (event.travelDir && !scene.actors.find(a => event.enemies[event.travelCount].includes(a))) {
                                 event.travelCount++;
-                                event.travelDir = Math.random() > .5;
+                                event.travelDir = random() > .5;
                                 if (event.travelCount < event.enemies.length) event.enemies[event.travelCount].forEach(e => scene.actors.push(e));
                             }
                         }
@@ -3895,8 +3895,8 @@ const EVENTS = {
                 timeline: [
                     (game, event) => {
                         const scene = game.scene;
-                        if (!(event.timelineFrame % 4)) scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height))),
-                            new Vector2(Math.random() * 4, 4), 0);
+                        if (!(event.timelineFrame % 4)) scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(random() * game.width), Math.floor(random() * game.height))),
+                            new Vector2(random() * 4, 4), 0);
                         const flare = scene.actors.find(actor => actor instanceof Flare);
                         if (!flare) return;
                         if (flare.pos.y >= 22 * 16) {
@@ -4055,7 +4055,7 @@ const EVENTS = {
                             });
                         } else if (event.timelineFrame > 3 * 60) {
                             if (!(event.timelineFrame % 4)) scene.particles.charge(event.demon.pos.plus(new Vector2(event.demon.size.x * .5, 64)));
-                            for (let i = 0; i < 2; i++) scene.particles.smoke_black(event.demon.pos.plus(new Vector2(event.demon.size.x * .5, 64)), new Vector2(Math.random() * 16 - 8, -2), 1);
+                            for (let i = 0; i < 2; i++) scene.particles.smoke_black(event.demon.pos.plus(new Vector2(event.demon.size.x * .5, 64)), new Vector2(random() * 16 - 8, -2), 1);
                             if (!(event.timelineFrame % 60)) game.playSound('charge2');
                         }
                     },
@@ -4217,7 +4217,7 @@ const EVENTS = {
                         const pos = new Vector2(3.5 * 20 * 16 + Math.floor(event.timelineFrame * 1.5), 8.5 * 16 - yOffset);
                         
                         for (let i = 0; i < 2; i++) {
-                            scene.particles.smoke_pink(pos.plus(new Vector2(Math.random() * 16 - 8, Math.random() * 20 - 10)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                            scene.particles.smoke_pink(pos.plus(new Vector2(random() * 16 - 8, random() * 20 - 10)), new Vector2(random() - .5, random() * -2), 0);
                         }
                         scene.customDraw.push(game => {
                             game.ctx1.save();
@@ -4242,7 +4242,7 @@ const EVENTS = {
                             scene.bossOrder = [0, 1, 2, 3, 4];
                             // scene.bossOrder = [3];
                             for (let i = scene.bossOrder.length - 1; i > 0; i--) {
-                                let j = Math.floor(Math.random() * (i + 1));
+                                let j = Math.floor(random() * (i + 1));
                                 [scene.bossOrder[i], scene.bossOrder[j]] = [scene.bossOrder[j], scene.bossOrder[i]];
                             }
                             event.key = game.saveData.getItem('nuinui-save-item-key' + scene.bossOrder[scene.keyId]);
@@ -4269,14 +4269,14 @@ const EVENTS = {
                         }
 
                         if (event.keyFrame) {
-                            if (event.keyFrame > 90) pos.x += Math.floor(Math.random() * 4 - 2);
+                            if (event.keyFrame > 90) pos.x += Math.floor(random() * 4 - 2);
                             event.keyFrame--;
                             if (!event.keyFrame) {
                                 event.next = true;
                             }
                         } else {
                             for (let i = 0; i < 2; i++) {
-                                scene.particles.smoke_pink(pos.plus(new Vector2(Math.random() * 16 - 8, Math.random() * 20 - 10)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                                scene.particles.smoke_pink(pos.plus(new Vector2(random() * 16 - 8, random() * 20 - 10)), new Vector2(random() - .5, random() * -2), 0);
                             }
                         }
 
@@ -4399,14 +4399,14 @@ const EVENTS = {
                         }
 
                         if (event.keyFrame) {
-                            if (event.keyFrame > 90) pos.x += Math.floor(Math.random() * 4 - 2);
+                            if (event.keyFrame > 90) pos.x += Math.floor(random() * 4 - 2);
                             event.keyFrame--;
                             if (!event.keyFrame) {
                                 event.next = true;
                             }
                         } else {
                             for (let i = 0; i < 2; i++) {
-                                scene.particles.smoke_pink(pos.plus(new Vector2(Math.random() * 16 - 8, Math.random() * 20 - 10)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                                scene.particles.smoke_pink(pos.plus(new Vector2(random() * 16 - 8, random() * 20 - 10)), new Vector2(random() - .5, random() * -2), 0);
                             }
                         }
 
@@ -4660,7 +4660,7 @@ const EVENTS = {
                     (game, event) => {
                         const scene = game.scene;
 
-                        if (!(event.timelineFrame % 16)) scene.particles.bubble(new Vector2(Math.random() * game.width, 12 * 16 + Math.random() * 12 * 16), new Vector2(0, -.5 - Math.random()), 0);
+                        if (!(event.timelineFrame % 16)) scene.particles.bubble(new Vector2(random() * game.width, 12 * 16 + random() * 12 * 16), new Vector2(0, -.5 - random()), 0);
 
                         if (!scene.bossKillEffect) {
                             scene.customDraw.push(game => {
@@ -5408,8 +5408,8 @@ const EVENTS = {
                             game.ctx1.restore();
                         });
 
-                        if (!(event.timelineFrame % 4)) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height))),
-                            new Vector2(Math.random(), -4), 0);
+                        if (!(event.timelineFrame % 4)) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(random() * game.width), Math.floor(random() * game.height))),
+                            new Vector2(random(), -4), 0);
                     }
                 ]
             }
@@ -5510,8 +5510,8 @@ const EVENTS = {
                 timeline: [
                     (game, event) => {
                         const scene = game.scene;
-                        if (!(event.timelineFrame % 4) && scene.windParticles) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(Math.random() * game.width), Math.floor(Math.random() * game.height))),
-                            new Vector2(-4, Math.random()), 0);
+                        if (!(event.timelineFrame % 4) && scene.windParticles) game.scene.particles.shine_vel_white(scene.view.pos.plus(new Vector2(Math.floor(random() * game.width), Math.floor(random() * game.height))),
+                            new Vector2(-4, random()), 0);
                     }
                 ]
             }
@@ -5589,8 +5589,8 @@ const EVENTS = {
 
                             scene.view.pos.x -= 20 * 16;
                             if (event.speed > 3) {
-                                event.addEnemy(Nousabot, scene.view.pos.times(1/16).plus(new Vector2(30, Math.random() < .5 ? 3.5 : 6)));
-                                event.addEnemy(Watamelon, scene.view.pos.times(1/16).plus(new Vector2(25 + Math.floor(Math.random() * 8), 9.5)));
+                                event.addEnemy(Nousabot, scene.view.pos.times(1/16).plus(new Vector2(30, random() < .5 ? 3.5 : 6)));
+                                event.addEnemy(Watamelon, scene.view.pos.times(1/16).plus(new Vector2(25 + Math.floor(random() * 8), 9.5)));
                             }
                         } else if (flare.vel.x > 7) {
                             scene.customDraw.push(game => {
@@ -5607,15 +5607,15 @@ const EVENTS = {
                             game.ctx2.save();
                             game.ctx2.fillStyle = '#fff';
                             for (let i = 0; i < game.height; i++) {
-                                if (Math.random() > .99) {
-                                    game.ctx2.fillRect(0, i, Math.round(game.width * (Math.random() * .125 * event.speed)), 1);
+                                if (random() > .99) {
+                                    game.ctx2.fillRect(0, i, Math.round(game.width * (random() * .125 * event.speed)), 1);
                                 }
                             }
 
                             const progress = (event.velAnim - 2) / 5;
                             game.ctx2.fillStyle = '#FFF';
                             game.ctx2.translate(game.width * .5, game.height - 3);
-                            if (event.speed > 6) game.ctx2.translate(Math.round(Math.random() * 2 - 1), Math.round(Math.random()));
+                            if (event.speed > 6) game.ctx2.translate(Math.round(random() * 2 - 1), Math.round(random()));
                             game.ctx2.drawImage(game.assets.images['ui_speed'], 0, 0, 64, 32, -32, -29, 64, 32);
                             game.ctx2.rotate(Math.PI + Math.PI * progress);
                             game.ctx2.fillRect(0, -1, 22, 2);
@@ -6443,15 +6443,15 @@ const EVENTS = {
                                 const progress = Math.max(0, Math.min(1, (frame - transitionIntro - 180) / 180));
                                 if (progress && progress < 1) {
                                     if (!(event.timelineFrame % 15)) game.playSound('explosion');
-                                    for (let i = 0; i < 8; i++) scene.particles.smoke_white(new Vector2(132 + Math.round(Math.random() * 64 - 32), 168 + Math.round(Math.random() * 16 - 8)), new Vector2(0, 0), 2);
+                                    for (let i = 0; i < 8; i++) scene.particles.smoke_white(new Vector2(132 + Math.round(random() * 64 - 32), 168 + Math.round(random() * 16 - 8)), new Vector2(0, 0), 2);
                                 }
                                 game.scene.customDraw.push(game => {
                                     const cx = game.ctx1;
                                     cx.save();
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(Math.random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['bg_intro1'], 0, 0);
                                     cx.drawImage(game.assets.images['bg_intro2'], 0, 0);
-                                    if (progress) cx.translate(Math.round(Math.random() * 2 - 1), 0);
+                                    if (progress) cx.translate(Math.round(random() * 2 - 1), 0);
                                     cx.drawImage(game.assets.images['bg_intro3'], 0, 0, 320, 170 - progress * 170, 0, progress * 170, 320, 170 - progress * 170);
                                     cx.restore();
                                 });

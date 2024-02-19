@@ -92,12 +92,12 @@ class Towa extends Actor {
         }
 
         if (this.frameCount > 180 && this.phaseBuffer >= (this.health < this.maxHealth * .5 ? 30 : 40)) {
-            if (Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : .5)) {
-                if (this.health < this.maxHealth * .75 && ((!this.mirror && Math.random() < .35) || (this.mirror && this.mirrorBuffer > 5 * 60))) {
+            if (random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : .5)) {
+                if (this.health < this.maxHealth * .75 && ((!this.mirror && random() < .35) || (this.mirror && this.mirrorBuffer > 5 * 60))) {
                     this.setAnimation('charge');
                     this.phase = 'mirror';
                     this.mirrorBuffer = 0;
-                } else if (Math.random() < .5 && !this.isUpsideDown && this.lastMove !== 'bibi') {
+                } else if (random() < .5 && !this.isUpsideDown && this.lastMove !== 'bibi') {
                     this.phase = 'bibi';
                     this.setAnimation('idle');
                 } else {
@@ -144,7 +144,7 @@ class Towa extends Actor {
             this.pos = this.pos.lerp(new Vector2(9.5 * 16, this.pos.y), .05);
             
             if (Math.abs(this.pos.x - 9.5 * 16) < 1) {
-                this.bibiVal = Math.floor(Math.random() * 4);
+                this.bibiVal = Math.floor(random() * 4);
                 this.bibiFrame = 0;
                 this.bibiActors = [];
                 for (let i = 0; i < 4; i++) {
@@ -188,7 +188,7 @@ class Towa extends Actor {
     focusPhase = game => {
 
         if (!this.velAngle) {
-            this.angle = (Math.PI * .5 + Math.PI * (Math.random() < .5 ? .375 : .125) * (this.dir ? -1 : 1)) * (this.isUpsideDown ? 1 : -1);
+            this.angle = (Math.PI * .5 + Math.PI * (random() < .5 ? .375 : .125) * (this.dir ? -1 : 1)) * (this.isUpsideDown ? 1 : -1);
             this.velAngle = new Vector2(Math.cos(this.angle), Math.sin(this.angle));
             this.velAngleAnim = Math.PI + (Math.PI * .5 * (this.isUpsideDown ? -1 : 1));
         }
@@ -301,15 +301,15 @@ class Towa extends Actor {
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
 
-        if (this.health && this.health < this.maxHealth * .5 && Math.random() > .9) {
+        if (this.health && this.health < this.maxHealth * .5 && random() > .9) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8)), new Vector2(random() - .5, random() * -2), 0);
             }
         }
         
         if (this.bibiPhaseBuffer) {
             for (let i = 0; i < 4; i++) {
-                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, 8 + Math.random() * 16 - 8)), new Vector2(Math.random() - .5, Math.random() * -3), 1);
+                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(random() * 32 - 16, 8 + random() * 16 - 8)), new Vector2(random() - .5, random() * -3), 1);
             }
         }
         
@@ -432,15 +432,15 @@ class Bibi extends Actor {
     }
 
     idlePhase = game => {
-        if (!this.bibiPhaseBuffer && this.frameCount > 120 && this.phaseBuffer >= 47 && Math.random() > .98 && !this.wait) {
+        if (!this.bibiPhaseBuffer && this.frameCount > 120 && this.phaseBuffer >= 47 && random() > .98 && !this.wait) {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(this);
             const p2 = CollisionBox.center(flare);
 
-            this.moveSpeed = p1.distance(p2) / 64 + Math.random() * 1.5;
+            this.moveSpeed = p1.distance(p2) / 64 + random() * 1.5;
 
             this.phase = 'move';
-            this.moveDir = p1.distance(p2) > 16 * 4 ? (this.dir ? 1 : -1) : Math.random() > .5 ? 1 : -1;
+            this.moveDir = p1.distance(p2) > 16 * 4 ? (this.dir ? 1 : -1) : random() > .5 ? 1 : -1;
             this.vel.y = -3;
             game.playSound('jump');
 
@@ -500,12 +500,12 @@ class Bibi extends Actor {
         
         if (!this.bibiPhaseBuffer) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 12 - 6, Math.random() * 16 - 8)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(random() * 12 - 6, random() * 16 - 8)), new Vector2(random() - .5, random() * -2), 0);
             }
         } else {
             if (this.invicibility < 3) this.invicibility = 10;
             for (let i = 0; i < 4; i++) {
-                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(Math.random() * 32 - 16, Math.random() * 16 - 8)), new Vector2(Math.random() - .5, Math.random() * -3), 1);
+                game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(random() * 32 - 16, random() * 16 - 8)), new Vector2(random() - .5, random() * -3), 1);
             }
         }
 
@@ -562,7 +562,7 @@ class BibiFire extends Actor {
 
     update = game => {
         for (let i = 0; i < 2; i++) {
-            game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 12 - 6, 8 + Math.random() * 16 - 8)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+            game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(random() * 12 - 6, 8 + random() * 16 - 8)), new Vector2(random() - .5, random() * -2), 0);
         }
 
         if (this.frameCount > 8 * 60) {

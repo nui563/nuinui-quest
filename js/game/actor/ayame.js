@@ -72,7 +72,7 @@ class Ayame extends Actor {
         }
 
         if (this.phaseBuffer >= (this.health < this.maxHealth * .5 ? 10 : 30)) {
-            if (Math.random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : .5)) {
+            if (random() > (!this.lastMove ? 1 : this.lastMove === 'move' ? .1 : .5)) {
                 if (game.scene.actors.some(a => a instanceof Arrow) && !game.scene.actors.some(a => a instanceof ATField)) {
                     this.phase = 'shield';
                     this.setAnimation('idle');
@@ -238,14 +238,14 @@ class Ayame extends Actor {
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
 
-        if (this.health < this.maxHealth * .5 && Math.random() > .9) {
+        if (this.health < this.maxHealth * .5 && random() > .9) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(0, -2), 1);
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8)), new Vector2(0, -2), 1);
             }
         }
         if (this.phase === 'charge') {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(-this.vel.x, 0), 0);
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8)), new Vector2(-this.vel.x, 0), 0);
             }
         }
         
@@ -330,7 +330,7 @@ class Sword extends Actor {
         super(pos);
         this.ayame = ayame;
         this.type = type;
-        this.randomAngle = Math.floor(Math.random() * 360);
+        this.randomAngle = Math.floor(random() * 360);
     }
     
     checkHit = (game, collisionBox) => {
@@ -353,9 +353,9 @@ class Sword extends Actor {
 
         this.pos = this.pos.plus(this.ayame.vel);
 
-        if (this.type !== 'asura' && Math.random() > .75) {
+        if (this.type !== 'asura' && random() > .75) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(Math.random() * 8 - 4, Math.random() * 8 - 4)), new Vector2(-this.vel.x, 0), 0);
+                game.scene.particles.smoke_spirit(CollisionBox.center(this).plus(new Vector2(random() * 8 - 4, random() * 8 - 4)), new Vector2(-this.vel.x, 0), 0);
             }
         }
 

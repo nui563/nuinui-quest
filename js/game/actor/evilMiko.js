@@ -52,7 +52,7 @@ class EvilMiko extends Actor {
             this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
             game.score += 5000;
         } else {
-            this.dragonBreath = this.health < this.maxHealth * .25 ? 180 : Math.random() > .5 ? 60 : 0;
+            this.dragonBreath = this.health < this.maxHealth * .25 ? 180 : random() > .5 ? 60 : 0;
             game.score += 100;
             this.invicibility = 30;
         }
@@ -135,7 +135,7 @@ class EvilMiko extends Actor {
         this.bucketPos = this.bucketPos.lerp(new Vector2(flare.pos.x + flare.size.x * .5, 37 * 16), .05);
 
         if (this.phaseBuffer > 120 && !(this.phaseBuffer % 2)) {
-            const bullet = new Bullet(this.bucketPos.plus(new Vector2(Math.random() * 24 - 12, 8)), new Vector2(0, 2), this, true);
+            const bullet = new Bullet(this.bucketPos.plus(new Vector2(random() * 24 - 12, 8)), new Vector2(0, 2), this, true);
             game.scene.actors.push(bullet);
         }
         
@@ -148,7 +148,7 @@ class EvilMiko extends Actor {
 
     movePhase = game => {
         if (!this.phaseBuffer) {
-            this.posTarget = !this.posTarget ? this.posTargets[1] : this.posTargets[Math.floor(Math.random() * this.posTargets.length)];
+            this.posTarget = !this.posTarget ? this.posTargets[1] : this.posTargets[Math.floor(random() * this.posTargets.length)];
         }
         if (this.pos.round().x === this.posTarget.round().x) {
             this.lastMove = this.phase;
@@ -158,7 +158,7 @@ class EvilMiko extends Actor {
     
     idlePhase = game => {
         if (this.phaseBuffer >= 31) {
-            if (Math.random() > (this.lastMove === 'move' ? .1 : .5)) {
+            if (random() > (this.lastMove === 'move' ? .1 : .5)) {
                 switch (this.attackCount % 3) {
                     case 0:
                         this.phase = 'attack2';
@@ -217,13 +217,13 @@ class EvilMiko extends Actor {
 
         if (!['sit'].includes(this.phase) && this.health) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 20 - 10)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 20 - 10)), new Vector2(random() - .5, random() * -2), 0);
             }
         }
 
         if (!['sit', 'wait'].includes(this.phase) && this.health) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_pink(this.dragonHeadpos.plus(new Vector2(Math.random() * 16 - 8, Math.random() * 64 - 32)), new Vector2(Math.random() - .5, Math.random() * -4), 0);
+                game.scene.particles.smoke_pink(this.dragonHeadpos.plus(new Vector2(random() * 16 - 8, random() * 64 - 32)), new Vector2(random() - .5, random() * -4), 0);
             }
         }
 
@@ -233,7 +233,7 @@ class EvilMiko extends Actor {
             if (!(this.frameCount % 20)) game.playSound('explosion');
 
             const pos = this.dragonHeadpos.plus(new Vector2(0, -16));
-            const angle = Math.random() * Math.PI * 2;
+            const angle = random() * Math.PI * 2;
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-8 * (this.health < this.maxHealth * .5 ? 2 : 1));
             game.scene.particles.shine_vel_white(pos, vel, 0);
 
@@ -270,7 +270,7 @@ class EvilMiko extends Actor {
         if (!['sit'].includes(this.phase) && this.health) {
             cx.save();
             cx.translate(Math.round(this.dragonHeadpos.x), Math.round(this.dragonHeadpos.y));
-            if (this.dragonBreath) cx.translate(Math.floor(Math.random() * 6) - 3, 0);
+            if (this.dragonBreath) cx.translate(Math.floor(random() * 6) - 3, 0);
             cx.drawImage(game.assets.images[`sp_dragon`], this.dragonBreath ? 32 : 0, 0, 32, 64, -16, -64, 32, 64);
             cx.restore();
 

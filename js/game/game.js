@@ -182,7 +182,7 @@ class Game {
         source.loop = false;
         source.loopStart = 0;
         source.loopEnd = source.buffer.duration;
-        if (['step', 'pew', 'bow_shoot', 'miko_chant', 'dash', 'slash', 'gun'].includes(id)) source.playbackRate.value = 1 + Math.random() * .2 - .1;
+        if (['step', 'pew', 'bow_shoot', 'miko_chant', 'dash', 'slash', 'gun'].includes(id)) source.playbackRate.value = 1 + random() * .2 - .1;
         sound.source = source;
         sound.gainNode = this.audioCtx.createGain();
         source.connect(sound.gainNode);

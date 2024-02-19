@@ -57,8 +57,8 @@ class PekoMiniBoss extends Actor {
             this.shields.push({
                 pos: CollisionBox.center(this.middleParts[3]),
                 size: new Vector2(8, 8),
-                lerpAmount: .01 + Math.random() * .05,
-                dist: 16 + Math.floor(Math.random() * 16),
+                lerpAmount: .01 + random() * .05,
+                dist: 16 + Math.floor(random() * 16),
                 health: 1
             });
         }
@@ -102,19 +102,19 @@ class PekoMiniBoss extends Actor {
 
     deathPhase = game => {
         const parts = [...this.leftParts, ...this.rightParts, ...this.middleParts];
-        const randomPart = parts[Math.floor(Math.random() * parts.length)];
-        if (Math.random() > .75) game.scene.particles.explosion(CollisionBox.center(randomPart));
+        const randomPart = parts[Math.floor(random() * parts.length)];
+        if (random() > .75) game.scene.particles.explosion(CollisionBox.center(randomPart));
     }
 
     idlePhase = game => {
         if (this.phaseBuffer >= 75) {
-            if (Math.random() > .4) {
-                const atk = Math.random();
+            if (random() > .4) {
+                const atk = random();
                 if (this.peko && this.pekoBuffer) {
                     this.phase = 'peko';
                     this.pekoBuffer = false;
                 } else {
-                    this.pekoBuffer = Math.random() < .75;
+                    this.pekoBuffer = random() < .75;
                     if (atk < .3) {
                         this.phase = 'attack';
                         this.laserTarget = this.middleParts[3].pos;
@@ -153,7 +153,7 @@ class PekoMiniBoss extends Actor {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
             const p1 = CollisionBox.center(flare);
             const p2 = this.peko;
-            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * 0.125 - 0.0625;
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-2);
             const bullet = new Bullet(this.peko.plus(new Vector2(-8, 16)), vel, this);
             bullet.pekoArrow = true;
@@ -183,7 +183,7 @@ class PekoMiniBoss extends Actor {
             const core = this.middleParts[3];
             const p1 = this.laserTarget;
             const p2 = CollisionBox.center(core);
-            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * 0.125 - 0.0625;
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-8);
             game.scene.actors.push(new Bullet(core.pos.plus(new Vector2(8, 8)), vel, this));
             game.playSound("pew");
@@ -299,12 +299,12 @@ class PekoMiniBoss extends Actor {
             shield.pos = shield.pos.lerp(CollisionBox.center(this.middleParts[3]).plus(new Vector2(-4 + Math.cos(angle) ** 3 * shield.dist, -4 + Math.sin(angle) ** 3 * shield.dist)), shield.lerpAmount * distMult);
         })
 
-        if (this.health && this.health < this.maxHealth / 2 && this.shields.length < 4 && Math.random() > .997) {
+        if (this.health && this.health < this.maxHealth / 2 && this.shields.length < 4 && random() > .997) {
             this.shields.push({
-                pos: CollisionBox.center(this.middleParts[3]).plus(new Vector2(Math.random() * 64, 16 * -8)),
+                pos: CollisionBox.center(this.middleParts[3]).plus(new Vector2(random() * 64, 16 * -8)),
                 size: new Vector2(8, 8),
-                lerpAmount: .01 + Math.random() * .05,
-                dist: 16 + Math.floor(Math.random() * 16),
+                lerpAmount: .01 + random() * .05,
+                dist: 16 + Math.floor(random() * 16),
                 health: 2
             });
         }
@@ -319,7 +319,7 @@ class PekoMiniBoss extends Actor {
         if (this.health < this.maxHealth / 2) {
             const parts = [...this.leftParts, ...this.rightParts, ...this.middleParts];
             parts.forEach(part => {
-                if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(part), new Vector2(0, -2), 1);
+                if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(part), new Vector2(0, -2), 1);
             });
         }
         

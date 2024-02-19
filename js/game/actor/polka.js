@@ -39,7 +39,7 @@ class Card extends Actor {
             if (!this.isDisabled) this.health = this.maxHealth;
         } else {
             if (this.attack && !(this.frameCount % 10)) {
-                const bullet = new Bullet(CollisionBox.center(this), new Vector2(Math.random() - .5, 4), this);
+                const bullet = new Bullet(CollisionBox.center(this), new Vector2(random() - .5, 4), this);
                 game.scene.actors.push(bullet);
                 game.playSound('pew');
             }
@@ -122,13 +122,13 @@ class Polka extends Actor {
     idlePhase = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (this.phaseBuffer >= 31) {
-            if (this.attackType === 0 && Math.random() > (this.cardAttack ? .3 : .7)) {
+            if (this.attackType === 0 && random() > (this.cardAttack ? .3 : .7)) {
                 this.cards.forEach(card => card.attack = !card.attack);
                 this.cardAttack = !this.cardAttack;
                 this.setAnimation('attack');
                 this.phase = 'attack';
                 game.playSound('no_damage');
-            } else if (this.lastMove === 'hide' || (!this.cardAttack && this.lastMove !== 'prepare' && Math.random() > .2)) {
+            } else if (this.lastMove === 'hide' || (!this.cardAttack && this.lastMove !== 'prepare' && random() > .2)) {
                 this.attackType++;
                 if (this.attackType > 2) this.attackType = 0;
                 this.setAnimation('attack');
@@ -156,7 +156,7 @@ class Polka extends Actor {
             this.lastMove = this.phase;
             this.phase = this.attackType === 2 ? 'hide' : 'idle';
             if (this.phase === 'hide') {
-                this.cardHide = this.cards[Math.floor(Math.random() * this.cards.length)];
+                this.cardHide = this.cards[Math.floor(random() * this.cards.length)];
                 this.vel = new Vector2(0, 0);
             }
         }
@@ -166,7 +166,7 @@ class Polka extends Actor {
         this.pos = new Vector2(this.cardHide.pos.x + 8, this.cardHide.pos.y);
         if (this.phaseBuffer === (this.cardCounter ? 25 : 50)) {
             if (this.cardCounter < 5) {
-                this.cardHide = this.cards[(this.cardHide.id + (Math.random() > .5 ? 1 : 3)) % this.cards.length];
+                this.cardHide = this.cards[(this.cardHide.id + (random() > .5 ? 1 : 3)) % this.cards.length];
                 this.setAnimation('attack');
                 this.lastMove = this.phase;
                 this.phase = 'fly';
@@ -208,7 +208,7 @@ class Polka extends Actor {
             game.playSound('jump');
             this.shakeBuffer = 8;
             const bullet = new Bullet(this.pos.plus(new Vector2(24 * dirVal, 8)), new Vector2(2 * dirVal, 0), this);
-            const rng = Math.random();
+            const rng = random();
             if (rng < .2) bullet.petal = true;
             if (rng > .8) bullet.iceSpike = true;
             if (bullet.iceSpike) bullet.angle = this.dir ? Math.PI : 0;

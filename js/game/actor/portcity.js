@@ -49,8 +49,8 @@ class Dokuro extends Actor {
         
         for (let i = 0; i < 2; i++) {
             const dist = .5;
-            const a = Math.cos(Math.random() * 2 * Math.PI);
-            const b = Math.sin(Math.random() * 2 * Math.PI);
+            const a = Math.cos(random() * 2 * Math.PI);
+            const b = Math.sin(random() * 2 * Math.PI);
             game.scene.particles.smoke_black(CollisionBox.center(this), new Vector2(-this.vel.x + a * dist, -this.vel.y + b * dist), 0);
         }
 
@@ -66,7 +66,7 @@ class Dokuro extends Actor {
         }
 
         if (this.health <= this.maxHealth / 2) {
-            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+            if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
@@ -159,7 +159,7 @@ class Cannon extends Actor {
         }
 
         if (this.health <= this.maxHealth / 2) {
-            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+            if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         // this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
@@ -253,7 +253,7 @@ class Pirate extends Actor {
                 } else {
                     this.phase = 'move';
                     if (CollisionBox.intersects(this, game.scene.view)) game.playSound("boss_move");
-                    this.moveDir = Math.random() > .5 ? 1 : -1;
+                    this.moveDir = random() > .5 ? 1 : -1;
                 }
             }
         }
@@ -314,7 +314,7 @@ class Pirate extends Actor {
         this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
         
         if (this.health < this.maxHealth / 2) {
-            if (Math.random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
+            if (random() > .9) game.scene.particles.smoke_white(CollisionBox.center(this), new Vector2(0, -2), 1);
         }
 
         if (this.phase === 'attack') {
@@ -420,7 +420,7 @@ class Neko extends Actor {
             cx.translate(-this.size.x / 2, 0);
         }
         for (let i = 0; i < 40; i++) {
-            cx.globalAlpha = Math.random();
+            cx.globalAlpha = random();
             cx.drawImage(game.assets.images['sp_neko'], 0, i, 32, 1, Math.cos(((this.frameCount + i) / 360) * (180 / Math.PI)) * 2 - 4, i - 4, 32, 1);
         }
         cx.restore();

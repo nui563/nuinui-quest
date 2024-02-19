@@ -56,19 +56,19 @@ class Marine extends Actor {
 
     idlePhase = game => {
         if (this.phaseBuffer >= 31) {
-            if (this.isGrounded && Math.random() > (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .4)) {
+            if (this.isGrounded && random() > (!this.lastMove ? 0 : this.lastMove === 'move' ? .8 : .4)) {
                 // Move action
                 this.phase = 'move';
                 game.playSound("jump");
                 this.moveDir = this.pos.x < 30 * 16 ? 1 : -1;
                 this.vel.y = -4;
             } else {
-                if (this.health < this.maxHealth / 2 && Math.random() > .5 && false) {
+                if (this.health < this.maxHealth / 2 && random() > .5 && false) {
                     this.phase = 'attack';
                     // this.setAnimation('think');
                     // game.playSound("charge");
                 } else {
-                    if (Math.random() > .5) {
+                    if (random() > .5) {
                         this.phase = 'dash';
                         game.playSound("miko_kick");
                         this.moveDir = this.pos.x < 30 * 16 ? 1 : -1;
@@ -90,7 +90,7 @@ class Marine extends Actor {
     //     if (!this.phaseBuffer) {
     //         game.scene.actors.push(new Rocket(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -8), this.pos.y + 16), new Vector2(1 * (this.dir ? 1 : -1), 0), this));
     //         game.playSound("pew");
-    //         if (Math.random() > .5) game.playSound('peko');
+    //         if (random() > .5) game.playSound('peko');
     //     }
     //     if (this.phaseBuffer === 39) {
     //         this.lastMove = this.phase;
@@ -148,7 +148,7 @@ class Marine extends Actor {
     // }
 
     dashPhase = game => {
-        game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         this.vel.x = this.moveDir * this.moveSpeed * 2.125;
         if (this.phaseBuffer > 3 && this.isGrounded) {
             this.lastMove = this.phase;
@@ -165,14 +165,14 @@ class Marine extends Actor {
     }
 
     movePhase = game => {
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         this.vel.x = this.moveDir * this.moveSpeed;
         if (this.phaseBuffer > 3 && this.isGrounded) {
             this.lastMove = this.phase;
             this.phase = 'idle';
             this.vel = new Vector2(0, 0);
         }
-        if (this.phaseBuffer === 26 && Math.random() > .9 && !game.scene.actors.some(a => a instanceof Dokuro)) {
+        if (this.phaseBuffer === 26 && random() > .9 && !game.scene.actors.some(a => a instanceof Dokuro)) {
             game.scene.actors.push(new Dokuro(new Vector2(29.5, 5.5)));
         }
         this.setAnimation(this.vel.y ? 'jump' : 'idle');

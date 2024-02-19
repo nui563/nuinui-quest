@@ -358,7 +358,7 @@ class Scene {
             const cx = game[`ctx${i}`];
             cx.save();
             if (this.shakeBuffer && i!==3) {
-                cx.translate(Math.floor(Math.random() * 6) - 3, 0);
+                cx.translate(Math.floor(random() * 6) - 3, 0);
                 // if (KEYMODE === 'gamepad' && game.inputManager.gamepad !== null) {
                 //     const gamepad = navigator.getGamepads()[game.inputManager.gamepad];
                 //     if (this.shakeBuffer === 1 && gamepad.vibrationActuator && gamepad.vibrationActuator.type === "dual-rumble") {
@@ -379,7 +379,7 @@ class Scene {
                         let yScale = 1;
                         if (this.boss.mirrorAnim) {
                             yScale = (this.boss.mirrorAnim / 10 - 1) * (this.boss.mirror ? 1 : -1);
-                            game.scene.particles.shine_white(this.view.pos.plus(new Vector2(Math.random() * game.width, Math.random() * game.height).round()), 1);
+                            game.scene.particles.shine_white(this.view.pos.plus(new Vector2(random() * game.width, random() * game.height).round()), 1);
                             cx.fillStyle = '#000';
                             cx.globalAlpha = this.boss.mirrorAnim / 20;
                             cx.fillRect(0, 0, game.width, game.height);
@@ -410,7 +410,7 @@ class Scene {
                         let yScale = 1;
                         if (this.boss.mirrorAnim) {
                             yScale = (this.boss.mirrorAnim / 10 - 1) * (this.boss.mirror ? 1 : -1);
-                            game.scene.particles.shine_white(this.view.pos.plus(new Vector2(Math.random() * game.width, Math.random() * game.height).round()), 1);
+                            game.scene.particles.shine_white(this.view.pos.plus(new Vector2(random() * game.width, random() * game.height).round()), 1);
                             cx.fillStyle = '#000';
                             cx.globalAlpha = this.boss.mirrorAnim / 20;
                             cx.fillRect(0, 0, game.width, game.height);
@@ -446,7 +446,7 @@ class Scene {
                         }
                         cx.restore();
                         const flare = this.actors.find(actor => actor instanceof Flare);
-                        if (this.isFocus > flare.focusTime - 30) game.scene.particles.shine_white(this.view.pos.plus(new Vector2(Math.random() * game.width, Math.random() * game.height).round()), 1);
+                        if (this.isFocus > flare.focusTime - 30) game.scene.particles.shine_white(this.view.pos.plus(new Vector2(random() * game.width, random() * game.height).round()), 1);
                         if (this.isFocus > flare.focusTime - 10) {
                             cx.fillStyle = '#fff';
                             cx.globalAlpha = (this.isFocus - flare.focusTime - 10) / 10;
@@ -461,7 +461,7 @@ class Scene {
                             cx.drawImage(game.assets.images['ui_focus'], 0, i, 336, 1, Math.cos(((this.frameCount + i) / game.height / 4) * (180 / Math.PI)) * 4 - 8, i, 336, 1);
                         }
                         const flare = this.actors.find(actor => actor instanceof Flare);
-                        if (this.isFocus > flare.focusTime - 30) game.scene.particles.shine_white(this.view.pos.plus(new Vector2(Math.random() * game.width, Math.random() * game.height).round()), 1);
+                        if (this.isFocus > flare.focusTime - 30) game.scene.particles.shine_white(this.view.pos.plus(new Vector2(random() * game.width, random() * game.height).round()), 1);
                         if (this.isFocus > flare.focusTime - 10) {
                             cx.fillStyle = '#fff';
                             cx.globalAlpha = (this.isFocus - flare.focusTime - 10) / 10;
@@ -480,7 +480,7 @@ class Scene {
                         cx.save();
                         if (actor.shakeBuffer) {
                             actor.shakeBuffer--;
-                            cx.translate(Math.floor(Math.random() * 8) - 4, 0);
+                            cx.translate(Math.floor(random() * 8) - 4, 0);
                         }
                         actor.draw(game, cx);
                         cx.restore();

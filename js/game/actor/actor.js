@@ -19,7 +19,7 @@ class Actor {
     takeHit = game => {}
     
     dropHeart = (game, rate) => {
-        if (Math.random() > rate && !(game.currentStage === 2 && game.scene.bossStarted && game.scene.actors.find(a => a instanceof Heart))) {
+        if (random() > rate && !(game.currentStage === 2 && game.scene.bossStarted && game.scene.actors.find(a => a instanceof Heart))) {
             game.scene.actors.push(new Heart(CollisionBox.center(this).plus(new Vector2(-4, -4))));
         }
     }
@@ -56,7 +56,7 @@ class Actor {
 class Elfriend extends Actor {
     size = new Vector2(24, 16);
 
-    randomFlight = Math.floor(Math.random() * 360);
+    randomFlight = Math.floor(random() * 360);
 
     constructor(pos, dir) {
         super(pos);
@@ -129,10 +129,10 @@ class Arrow extends Projectile {
             this.vel.y = -6;
         }
         if (this.type === 'petal') {
-            this.dir = Math.random() > .5;
+            this.dir = random() > .5;
             this.angle = Math.atan2(this.vel.y, this.vel.x);
         }
-        if (this.type === 'rocket') this.order = Math.random() > .5 ? 1 : -1;
+        if (this.type === 'rocket') this.order = random() > .5 ? 1 : -1;
         if (this.type !== 'mace') this.damage = ['dual'].includes(this.type) ? 2 : ['rocket'].includes(this.type) ? 5 : ['sword'].includes(this.type) ? 4 : ['fire'].includes(this.type) ? 3 : 1;
         if (this.type === 'mace2') this.damage = 48;
         if (this.type === 'bullet') {
@@ -214,8 +214,8 @@ class Arrow extends Projectile {
         } else if (this.type === 'sword' && !(this.frameCount % 4)) game.scene.particles.sparkle_fire_4(CollisionBox.center(this));
         else if (this.type === 'petal' && !(this.frameCount % 8)) game.scene.particles.sparkle_fire_3(CollisionBox.center(this));
         else if (this.type === 'rocket') {
-            if (Math.random() > .5) this.vel.y += this.order * .5;
-            else if (Math.random() > .5) this.vel.y -= this.order * .5;
+            if (random() > .5) this.vel.y += this.order * .5;
+            else if (random() > .5) this.vel.y -= this.order * .5;
             if (!(this.frameCount % 60)) this.order = -this.order;
             game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(this.vel.x > 0 ? -4 : 4, 0)), new Vector2(0, 0), 0);
         }
@@ -280,12 +280,12 @@ class Bullet extends Projectile {
         }
         else if ((originActor instanceof Miko && vel.y !== 0) || (originActor instanceof EvilFlare && originActor.phase === 'attack') || (originActor instanceof EvilMiko && !forceBullet)) {
             this.petal = true;
-            this.dir = Math.random() > .5;
+            this.dir = random() > .5;
         }
         else if (this.originActor instanceof Marine || (this.originActor instanceof EvilFlare && this.originActor.phase === 'attack2')) {
             this.anchor = true;
             this.size = new Vector2(20, 20);
-            this.dir = Math.random() > .5;
+            this.dir = random() > .5;
         }
         else if (this.originActor instanceof Oni) {
             this.size = new Vector2(8, 8);
@@ -341,9 +341,9 @@ class Bullet extends Projectile {
         if (this.orb || this.originActor instanceof Calli) {
             for (let i = 0; i < 2; i++) {
                 if (this.originActor instanceof Dragon) {
-                    game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(0, 0), 0);
+                    game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8)), new Vector2(0, 0), 0);
                 }else {
-                    game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8)), new Vector2(0, 0), 0);
+                    game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8)), new Vector2(0, 0), 0);
                 }
             }
         }
@@ -556,9 +556,9 @@ class Rocket extends Projectile {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         const p1 = CollisionBox.center(flare);
         const p2 = CollisionBox.center(this);
-        this.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + Math.random() * 0.125 - 0.0625;
+        this.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) + random() * 0.125 - 0.0625;
         const vel = new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(-1);
-        if (Math.random() > .5) vel.y -= .5;
+        if (random() > .5) vel.y -= .5;
 
         this.pos = this.pos.plus(vel);
         game.scene.particles.smoke_white(CollisionBox.center(this).plus(new Vector2(this.vel.x > 0 ? -4 : 4, 0)), new Vector2(0, 0), 0);
@@ -611,8 +611,8 @@ class Aircon extends Actor {
     }
 
     update = game => {
-        if (Math.random() > .75) {
-            game.scene.particles.shine_vel_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, 16)), new Vector2(this.dir, -3), 1);
+        if (random() > .75) {
+            game.scene.particles.shine_vel_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, 16)), new Vector2(this.dir, -3), 1);
         }
         const actors = game.scene.actors.filter(actor => ![this].includes(actor) && !actor.isSliding && actor.checkHit(game, this));
         actors.forEach(actor => {

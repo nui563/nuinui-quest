@@ -81,7 +81,7 @@ class Kiara extends Actor {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
 
         if (!this.phaseBuffer) {
-            this.shieldDash = Math.random() > .5;
+            this.shieldDash = random() > .5;
             this.setAnimation(this.shieldDash ? 'idle' : 'charge');
             game.playSound("charge");
             this.reflect = false;
@@ -133,13 +133,13 @@ class Kiara extends Actor {
     jumpPhase = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         
-        if (!(this.phaseBuffer % 4)) game.scene.particles.sparkle_fire(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), new Vector2(0, 0));
+        if (!(this.phaseBuffer % 4)) game.scene.particles.sparkle_fire(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), new Vector2(0, 0));
         
         if (!this.phaseBuffer) {
             this.dir = CollisionBox.center(this).x < CollisionBox.center(flare).x;
             game.playSound("jump");
             this.setAnimation('jump');
-            this.moveSpeed = 4 + Math.random();
+            this.moveSpeed = 4 + random();
             this.vel.y = -7;
             this.reflect = false;
         }
@@ -188,9 +188,9 @@ class Kiara extends Actor {
             if (this.health < this.maxHealth * .5 && !this.blazeMode) {
                 this.blazeMode = true;
                 this.phase = 'fire';
-            } else if (dist > 4 * 16 && Math.random() < .5) this.phase = 'jump';
+            } else if (dist > 4 * 16 && random() < .5) this.phase = 'jump';
             else {
-                if (dist > 11 * 16 || Math.random() < .5) this.phase = 'dash';
+                if (dist > 11 * 16 || random() < .5) this.phase = 'dash';
                 else if (dist < 4 * 16) this.phase = 'fire';
                 else this.phase = 'move';
             }

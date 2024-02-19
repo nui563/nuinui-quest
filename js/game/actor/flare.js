@@ -526,13 +526,13 @@ class Flare extends Actor {
         }
         
         if (this.isEvil || this.weapon === 'bow') {
-            if (game.currentStage === 3 && Math.random() > .95) this.shakeBuffer = 2;
+            if (game.currentStage === 3 && random() > .95) this.shakeBuffer = 2;
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 32 - 16)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 32 - 16)), new Vector2(random() - .5, random() * -2), 0);
             }
         }
 
-        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(Math.random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - Math.random() * .5), 1);
+        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - random() * .5), 1);
 
         let newAnimation;
         if (!this.attackCooldownAnim || this.isSliding) {

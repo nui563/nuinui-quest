@@ -53,7 +53,7 @@ class Kanata extends Actor {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (this.pos.y < -8 * 16 && !this.diveBuffer) {
             this.setAnimation('dash');
-            const rand = Math.random() < .5 ? 1 : -1;
+            const rand = random() < .5 ? 1 : -1;
             this.pos = flare.pos.plus(new Vector2(10 * 16 * rand, 10 * 16).times(-1));
             this.vel = new Vector2(3.5 * rand, 3.5);
             this.dir = rand > 0;
@@ -81,7 +81,7 @@ class Kanata extends Actor {
         if (!this.phaseBuffer) {
             this.targetSide = this.pos.x < 8.5 * 20 * 16;
             this.targetX = (8 * 20 + (this.targetSide ? 16 : 3)) * 16;
-            this.targetY = Math.floor(1 + Math.random() * 4) * 16;
+            this.targetY = Math.floor(1 + random() * 4) * 16;
         }
 
         this.setAnimation('idle');
@@ -185,7 +185,7 @@ class Kanata extends Actor {
                 this.targetSide = this.pos.x < 8.5 * 20 * 16;
                 this.vel.x = 3 * (this.targetSide ? 1 : -1);
                 this.vel.y = 4;
-                this.targetY = Math.floor(1 + Math.random() * 4) * 16;
+                this.targetY = Math.floor(1 + random() * 4) * 16;
                 game.playSound('bow_shoot');
             }
         }
@@ -209,7 +209,7 @@ class Kanata extends Actor {
         if (this.lastPhase !== this.phase) this.phaseBuffer = 0;
         else this.phaseBuffer++;
         this.lastPhase = this.phase;
-        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(Math.random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - Math.random() * .5), 1);
+        if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - random() * .5), 1);
 
         if (this === game.scene.boss) {
             if (this.healthBar < this.health) {

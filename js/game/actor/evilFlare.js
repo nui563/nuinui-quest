@@ -97,7 +97,7 @@ class EvilFlare extends Actor {
     }
     
     jumpPhase = game => {
-        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 16 - 8).round()), 0);
+        if (!(this.phaseBuffer % 4)) game.scene.particles.shine_white(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 16 - 8).round()), 0);
         if (this.phaseBuffer > 3 && this.pos.y >= 32 * 16) {
             this.pos.y = 32 * 16;
             this.vel = new Vector2(0, 0);
@@ -128,7 +128,7 @@ class EvilFlare extends Actor {
         if (this.phaseBuffer > 29 && !(this.phaseBuffer % 30)) {
             this.setAnimation('gun');
             game.scene.actors.push(new Rocket(new Vector2(this.pos.x + (this.dir ? this.size.x + 8 : -8), this.pos.y + 16), new Vector2(1 * (this.dir ? 1 : -1), 0), this));
-            // if (Math.random() > .5) game.playSound('peko');
+            // if (random() > .5) game.playSound('peko');
             game.playSound("gun");
             this.gunSide = !this.gunSide;
         }
@@ -156,11 +156,11 @@ class EvilFlare extends Actor {
             const flare = game.scene.actors.find(actor => actor instanceof Flare);
 
             if (this.attackCount < 2 || this.lastPhase === 'jump' || this.lastPhase === 'dash') {
-                if (Math.random() < .125 && !game.scene.actors.find(a => a instanceof IceShield && a.originActor === this)) {
+                if (random() < .125 && !game.scene.actors.find(a => a instanceof IceShield && a.originActor === this)) {
                     this.setAnimation('chant');
                     this.phase = 'shield';
                 } else {
-                    switch (Math.floor(Math.random() * 4)) {
+                    switch (Math.floor(random() * 4)) {
                         case 0:
                             this.setAnimation('chant');
                             this.phase = 'attack';
@@ -242,7 +242,7 @@ class EvilFlare extends Actor {
 
         if (this.health) {
             for (let i = 0; i < 2; i++) {
-                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(Math.random() * 16 - 8, Math.random() * 20 - 10)), new Vector2(Math.random() - .5, Math.random() * -2), 0);
+                game.scene.particles.smoke_pink(CollisionBox.center(this).plus(new Vector2(random() * 16 - 8, random() * 20 - 10)), new Vector2(random() - .5, random() * -2), 0);
             }
         }
 
