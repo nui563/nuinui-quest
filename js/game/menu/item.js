@@ -40,7 +40,11 @@ class Item extends Menu {
         },
         {
             id:'return to title',
-            func: (game, value) => location.reload()
+            func: (game, value) => {
+                game.saveData = new SaveData();
+                game.setStage(0);
+                game.ctx3.clearRect(0, 0, game.width, game.height);
+            }
         }
     ];
 

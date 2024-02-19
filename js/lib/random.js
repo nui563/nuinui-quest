@@ -15,7 +15,5 @@ const LCG = createLCG(1);
  * @returns {number}
  */
 function random() {
-	const n = LCG();
-	console.log(n);
-	return n;
+	return LCG();
 }
