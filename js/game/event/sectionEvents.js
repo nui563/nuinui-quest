@@ -3302,6 +3302,16 @@ const EVENTS = {
         ],
         "6_3": [
             {
+                condition: game => game.scene.polkaBossCleared,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        scene.actors.filter(a => a instanceof Aircon).forEach(a => a.dir = 0);
+                    }
+                ]
+            },
+            {
                 condition: game => !game.scene.polkaBossCleared,
                 isPersistent: false,
                 timeline: [
