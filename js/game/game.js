@@ -29,7 +29,7 @@ class Game {
     tick = 60;
     drawBuffer = false;
 
-    saveCount = 6;
+    saveCount = 5;
     saveData = new SaveData();
 
     constructor(assets, data) {

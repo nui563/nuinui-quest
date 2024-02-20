@@ -42,11 +42,6 @@ class SaveMenu extends Menu {
         this.previousMenu = previousMenu;
         this.action = action;
 
-        if (['save', 'delete'].includes(action)) {
-            this.index = 1;
-            this.indexAnim = 1;
-        }
-
         this.menuInit(game);
 
         this.gradient = game.ctx3.createLinearGradient(0, 24, 0, 48);
@@ -62,7 +57,8 @@ class SaveMenu extends Menu {
 
     menuInit = game => {
         this.saveDataArray = [];
-        for (let i = 0; i < game.saveCount; i++) {
+        const arr = ['auto', ...Array.from({ length: game.saveCount }, (_, i) => i)];
+        arr.forEach(i => {
             const saveData = localStorage.getItem(`nuinui-save-${i}`);
             if (!saveData) this.saveDataArray.push(null);
             else {
@@ -78,7 +74,7 @@ class SaveMenu extends Menu {
                     achievements: new Array(28).fill(null).map((_, i) => parsed[`nuinui-save-achievement-${i+1}`]),
                 });
             }
-        }
+        });
     }
 
     update = game => {
@@ -122,24 +118,25 @@ class SaveMenu extends Menu {
                 this.aBuffer = true;
 
                 if (this.action === 'delete') {
-                    if (this.index === 0) console.log('autosave deletion not allowed');
-                    else {
-                        game.saveData.delete(this.index);
+                    if (this.index !== 0) {
+                        game.saveData.delete(this.index-1);
                         this.menuInit(game);
                     }
                 } else if (this.action === 'save') {
-                    if (this.index === 0) console.log('autosave override not allowed');
-                    else {
+                    if (this.index !== 0) {
                         game.saveData.setItem('nuinui-save-current-stage', game.currentStage);
-                        game.saveData.save(this.index);
+                        game.saveData.save(this.index-1);
                         this.menuInit(game);
                     }
-                } else if (localStorage.getItem(`nuinui-save-${this.index}`)) {
-                    game.saveData.load(this.index);
-                    this.previousMenu = null;
-                    game.mode = 'flare';
-                    game.setStage(game.saveData.getItem('nuinui-save-current-stage'));
-                    game.ctx3.clearRect(0, 0, game.width, game.height);
+                } else {
+                    const dataIndex = this.index === 0 ? 'auto' : this.index-1;
+                    if (localStorage.getItem(`nuinui-save-${dataIndex}`)) {
+                        game.saveData.load(dataIndex);
+                        this.previousMenu = null;
+                        game.mode = 'flare';
+                        game.setStage(game.saveData.getItem('nuinui-save-current-stage'));
+                        game.ctx3.clearRect(0, 0, game.width, game.height);
+                    }
                 }
                 game.playSound('select');
             }
@@ -167,9 +164,10 @@ class SaveMenu extends Menu {
 
         cx.save();
         this.saveDataArray.slice(this.indexOffset, this.indexOffset + 3).forEach((saveData, i) => {
-            const selected = this.index === i + this.indexOffset;
+            const relIndex = i + this.indexOffset;
+            const selected = this.index === relIndex;
 
-            const autosave = ['save', 'delete'].includes(this.action) && !this.indexOffset && !i;
+            const autosave = ['save', 'delete'].includes(this.action) && relIndex === 0;
             cx.filter = autosave ? 'grayscale(100%)' : 'none';
             cx.fillStyle = selected ? '#FFF' : '#3F3FBF';
             cx.fillRect(0, 0, 184, 56);
@@ -180,7 +178,6 @@ class SaveMenu extends Menu {
 
             cx.save();
             if (selected) cx.filter = 'brightness(0)';
-            const relIndex = i + this.indexOffset;
             if (!relIndex) this.autoSaveText.draw(game, cx, new Vector2(1, 49));
             else this.fileSaveTextList[relIndex-1].draw(game, cx, new Vector2(1, 49));
             if (!saveData) this.noData.draw(game, cx, new Vector2(92, 49));

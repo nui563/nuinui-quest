@@ -32,7 +32,10 @@ class StageSelect extends Menu {
                     this.stageIndex = 0;
                 }
             }
-            if (this.frameCount === 180) this.confirm(game);
+            if (this.frameCount === 180) {
+                this.confirm(game);
+                game.saveData.save('auto');
+            }
         } else {
             if (this.confirmBuffer && !game.keys.a) {
                 this.confirm(game);
