@@ -23,7 +23,6 @@ const debugSave = game => {
 window.addEventListener('load', () => {
     fetch("save.json").then(res => res.json()).then(res => {
         const game = new Game(new Assets(), Object.freeze(res));
-        game.start();
         if (DEBUGMODE) debugSave(game);
     });
 }, { once: true });

@@ -35,7 +35,6 @@ class Game {
     constructor(assets, data) {
         // Assets
         this.assets = assets;
-        this.assets.load();
 
         // parsed game file data
         this.data = data;
@@ -60,6 +59,13 @@ class Game {
             this[`ctx${i}`] = this[`canvas${i}`].getContext('2d');
             this[`ctx${i}`].imageSmoothingEnabled = false;
         }
+
+        const loadingImage = new Image();
+        loadingImage.src = 'img/loading.gif';
+        loadingImage.style.position = 'absolute';
+        loadingImage.style.right = 0;
+        loadingImage.style.bottom = 0;
+        container.appendChild(loadingImage);
 
         {
             let hideCursor = null;
@@ -114,6 +120,11 @@ class Game {
 
         // Init stage selection
         this.scene = new Scene(this, this.data.game.stages[this.currentStage]);
+        
+        this.assets.load().then(() => {
+            loadingImage.remove();
+            this.start();
+        });
     }
 
     start = () => {
