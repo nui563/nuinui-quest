@@ -43,9 +43,7 @@ class Miko extends Actor {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
                 game.canvas1.style.filter = 'none';
                 game.canvas2.style.filter = 'none';
-                game.score += 5000;
             } else {
-                game.score += 100;
                 this.invicibility = 30;
             }
         }

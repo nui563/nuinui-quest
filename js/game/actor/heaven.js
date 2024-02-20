@@ -26,11 +26,9 @@ class Fairy extends Actor {
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.score += 100;
             this.dropHeart(game, .7);
             game.playSound('hit');
         } else {
-            game.score += 20;
             game.playSound('damage');
         }
     }

@@ -38,9 +38,7 @@ class EvilFlare extends Actor {
             this.setAnimation('hit');
             this.vel = new Vector2(this.dir ? -2 : 2, -3);
             this.phase = 'defeated';
-            game.score += 5000;
         } else {
-            game.score += 100;
             this.invicibility = 30;
         }
     }

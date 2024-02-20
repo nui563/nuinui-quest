@@ -65,7 +65,6 @@ class Spirit extends Actor {
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.score += 100;
             game.playSound('noise');
             this.dropHeart(game, .7);
 
@@ -77,7 +76,6 @@ class Spirit extends Actor {
             }
         } else {
             game.playSound('damage');
-            game.score += 20;
         }
     }
 
@@ -181,7 +179,6 @@ class Fubuzilla extends Actor {
 
         if (this.phaseBuffer >= 180) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this && !(actor instanceof FubuzillaBody));
-            game.score += 100;
         }
     }
 
@@ -291,7 +288,6 @@ class Fubuzilla extends Actor {
             game.playSound('level_start');
         } else {
             game.playSound('damage');
-            game.score += 20;
         }
     }
     
@@ -410,7 +406,6 @@ class FubuzillaBody extends Actor {
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.score += 100;
 
             for (let i = 0; i < 2; i++) {
                 game.scene.particles.explosion(this.pos.plus(new Vector2(random(), random()).mult(this.size)));
@@ -422,7 +417,6 @@ class FubuzillaBody extends Actor {
             this.fubuzilla.updateBody(game, this);
         } else {
             game.playSound('damage');
-            game.score += 20;
         }
     }
 
@@ -471,7 +465,6 @@ class Miteiru extends Actor {
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.score += 100;
             this.dropHeart(game, .7);
 
             if (other.type !== 'rocket') {
@@ -481,7 +474,6 @@ class Miteiru extends Actor {
             }
         } else {
             game.playSound('damage');
-            game.score += 20;
         }
     }
 
@@ -538,7 +530,6 @@ class Oni extends Actor {
         
         if (!this.health) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
-            game.score += 100;
             this.dropHeart(game, .7);
 
             if (other.type !== 'rocket') {
@@ -548,7 +539,6 @@ class Oni extends Actor {
             }
         } else {
             game.playSound('damage');
-            game.score += 20;
         }
     }
 

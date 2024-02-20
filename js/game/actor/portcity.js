@@ -31,9 +31,7 @@ class Dokuro extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .7);
-            game.score += 100;
         } else {
-            game.score += 20;
             game.playSound('damage');
         }
     }
@@ -124,9 +122,7 @@ class Cannon extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .7);
-            game.score += 100;
         } else {
-            game.score += 20;
             game.playSound('damage');
         }
     }
@@ -232,9 +228,7 @@ class Pirate extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .3);
-            game.score += 200;
         } else {
-            game.score += 50;
             game.playSound('damage');
         }
     }
@@ -384,9 +378,7 @@ class Neko extends Actor {
             game.scene.shakeBuffer = 4;
             this.dropHeart(game, .7);
             game.playSound('damage');
-            game.score += 50;
         } else {
-            game.score += 10;
             game.playSound('damage');
         }
     }

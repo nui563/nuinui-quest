@@ -44,6 +44,7 @@ class Assets {
 
             'font_en',
             'font_jp',
+            'ui_version',
         ],
         [
             // HUD
@@ -56,13 +57,13 @@ class Assets {
             'ui_level_icon',
             'ui_arrow',
             'ui_arrow_down',
+            'ui_arrow_up',
             'ui_warning',
             'ui_focus',
             'ui_charge_type',
             'ui_shadow_mask',
             'ui_shadow_mask_small',
             'ui_digit',
-            'ui_score',
             'ui_timer',
             'ui_timer_wide',
             'ui_text_bubble',

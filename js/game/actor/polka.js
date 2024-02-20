@@ -24,12 +24,10 @@ class Card extends Actor {
         game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         if (!this.health) {
-            game.score += 100;
             game.playSound('explosion');
             this.isDisabled = 180;
         } else {
             game.playSound('damage');
-            game.score += 20;
         }
     }
 
@@ -104,9 +102,7 @@ class Polka extends Actor {
             
             if (!this.health) {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
-                game.score += 5000;
             } else {
-                game.score += 100;
                 this.invicibility = 30;
             }
         }

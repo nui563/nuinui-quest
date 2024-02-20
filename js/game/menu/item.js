@@ -211,7 +211,7 @@ class Item extends Menu {
         cx.translate(game.width * .5 - 51 - 16, game.height - 92);
         cx.fillStyle = '#3F3FBF';
         cx.fillRect(-5, -5, 102, 22);
-        cx.fillStyle = '#0F0F3F';
+        cx.fillStyle = '#00003F';
         cx.fillRect(-4, -4, 100, 20);
         this.itemsTitle.draw(game, cx, new Vector2(96, -12));
         this.items.forEach((item, i) => {
@@ -230,7 +230,7 @@ class Item extends Menu {
         cx.translate(game.width * .5 - 51 - 16, game.height - 60);
         cx.fillStyle = '#3F3FBF';
         cx.fillRect(-5, -5, 102, 22);
-        cx.fillStyle = '#0F0F3F';
+        cx.fillStyle = '#00003F';
         cx.fillRect(-4, -4, 100, 20);
         this.skillsTitle.draw(game, cx, new Vector2(96, -12));
         this.skills.forEach((skill, i) => {
@@ -249,7 +249,7 @@ class Item extends Menu {
         cx.translate(game.width * .5 - 51 - 16, game.height - 28);
         cx.fillStyle = '#3F3FBF';
         cx.fillRect(-5, -5, 102, 22);
-        cx.fillStyle = '#0F0F3F';
+        cx.fillStyle = '#00003F';
         cx.fillRect(-4, -4, 100, 20);
         this.keysTitle.draw(game, cx, new Vector2(96, -12));
         this.keys.forEach((key, i) => {

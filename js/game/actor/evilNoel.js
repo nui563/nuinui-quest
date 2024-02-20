@@ -37,7 +37,6 @@ class EvilNoel extends Actor {
             game.scene.particles.digit(this.checkHit(game, other).pos, damage);
             game.playSound('damage');
             
-            game.score += 100;
             this.invicibility = 30;
             
             if (!this.health && this.phase !== 'defeated') {

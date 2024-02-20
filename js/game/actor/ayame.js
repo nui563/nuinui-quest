@@ -42,13 +42,11 @@ class Ayame extends Actor {
             if (!this.health) {
                 this.isUpsideDown = false;
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
-                game.score += 5000;
 
                 if (other instanceof Arrow && other.reflected) {
                     game.saveData.setItem('nuinui-save-achievement-14', true);
                 }
             } else {
-                game.score += 100;
                 this.invicibility = 30;
             }
         }

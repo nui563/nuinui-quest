@@ -21,26 +21,10 @@ class Options extends Menu {
             id:'fullscreen',
             values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
             func: (game, value) => {
-                if (window.__TAURI__) {
-                    window.__TAURI__.window.appWindow.isFullscreen().then(res => {
-                        window.__TAURI__.window.appWindow.setFullscreen(!res);
-                        game.fullscreen = !res;
-                    });
-                } else {
-                    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                    else if (document.exitFullscreen) document.exitFullscreen();
-                }
+                game.toggleFullscreen();
             },
             func2: (game, value) => {
-                if (window.__TAURI__) {
-                    window.__TAURI__.window.appWindow.isFullscreen().then(res => {
-                        window.__TAURI__.window.appWindow.setFullscreen(!res);
-                        game.fullscreen = !res;
-                    });
-                } else {
-                    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                    else if (document.exitFullscreen) document.exitFullscreen();
-                }
+                game.toggleFullscreen();
             }
         },
         {
@@ -48,10 +32,12 @@ class Options extends Menu {
             values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
             func: (game, value) => {
                 game.scale = !game.scale;
+                game.saveData.setOpt('scale', game.scale);
                 game.resize();
             },
             func2: (game, value) => {
                 game.scale = !game.scale;
+                game.saveData.setOpt('scale', game.scale);
                 game.resize();
             }
         },

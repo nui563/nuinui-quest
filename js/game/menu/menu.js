@@ -31,7 +31,9 @@ class Menu {
 }
 
 class SaveMenu extends Menu {
+    indexOffset = 0;
     index = 0;
+    indexAnim = 0;
 
     aBuffer = true;
 
@@ -40,10 +42,22 @@ class SaveMenu extends Menu {
         this.previousMenu = previousMenu;
         this.action = action;
 
+        if (['save', 'delete'].includes(action)) {
+            this.index = 1;
+            this.indexAnim = 1;
+        }
+
         this.menuInit(game);
+
+        this.gradient = game.ctx3.createLinearGradient(0, 24, 0, 48);
+        this.gradient.addColorStop(0, '#00003F');
+        this.gradient.addColorStop(.5, '#00003F');
+        this.gradient.addColorStop(1, '#000');
         
         this.titleText = new TextElem(Array.from(this.action), 'center');
-        this.noData = new TextElem(Array.from('no data'), 'left');
+        this.noData = new TextElem(Array.from('no data'), 'center');
+        this.autoSaveText = new TextElem(Array.from('autosave'), 'left');
+        this.fileSaveTextList = new Array(5).fill(null).map((_, i) => new TextElem(Array.from(`file ${i+1}`), 'left'));
     }
 
     menuInit = game => {
@@ -55,6 +69,9 @@ class SaveMenu extends Menu {
                 const parsed = JSON.parse(saveData);
                 
                 this.saveDataArray.push({
+                    noel: parsed['nuinui-save-item-noel'],
+                    stage: parsed['nuinui-save-current-stage'],
+                    stages: new Array(7).fill(null).map((_, i) => parsed[`nuinui-save-stage-${i+1}`]),
                     skills: ['fire', 'rocket', 'petal', 'sword', 'shield', 'dual'].map(skill => parsed[`nuinui-save-item-${skill}`]),
                     items: ['gun', 'clock', 'jump', 'boots', 'bow'].map(item => parsed[`nuinui-save-item-${item}`]),
                     keys: new Array(5).fill(null).map((_, i) => parsed[`nuinui-save-item-key${i}`]),
@@ -82,7 +99,10 @@ class SaveMenu extends Menu {
             if (game.keys.down && !this.downBuffer) {
                 this.downBuffer = true;
                 this.index++;
-                if (this.index === this.saveDataArray.length) this.index = 0;
+                if (this.index === this.saveDataArray.length) {
+                    this.index = 0;
+                    this.indexAnim = this.index;
+                }
                 game.playSound('menu_move');
             }
 
@@ -90,7 +110,10 @@ class SaveMenu extends Menu {
             if (game.keys.up && !this.upBuffer) {
                 this.upBuffer = true;
                 this.index--;
-                if (this.index < 0) this.index = this.saveDataArray.length - 1;
+                if (this.index < 0) {
+                    this.index = this.saveDataArray.length - 1;
+                    this.indexAnim = this.index;
+                }
                 game.playSound('menu_move');
             }
 
@@ -99,12 +122,18 @@ class SaveMenu extends Menu {
                 this.aBuffer = true;
 
                 if (this.action === 'delete') {
-                    game.saveData.delete(this.index);
-                    this.menuInit(game);
+                    if (this.index === 0) console.log('autosave deletion not allowed');
+                    else {
+                        game.saveData.delete(this.index);
+                        this.menuInit(game);
+                    }
                 } else if (this.action === 'save') {
-                    game.saveData.setItem('nuinui-save-current-stage', game.currentStage);
-                    game.saveData.save(this.index);
-                    this.menuInit(game);
+                    if (this.index === 0) console.log('autosave override not allowed');
+                    else {
+                        game.saveData.setItem('nuinui-save-current-stage', game.currentStage);
+                        game.saveData.save(this.index);
+                        this.menuInit(game);
+                    }
                 } else if (localStorage.getItem(`nuinui-save-${this.index}`)) {
                     game.saveData.load(this.index);
                     this.previousMenu = null;
@@ -115,48 +144,89 @@ class SaveMenu extends Menu {
                 game.playSound('select');
             }
         }
+        if (this.indexAnim !== this.index) {
+            this.indexAnim += (this.index - this.indexAnim) * .25;
+            if (Math.abs(this.index - this.indexAnim) < .025) this.indexAnim = this.index;
+        }
+        this.indexOffset = this.index < 3 ? 0 : 3;
         this.frameCount++;
     }
     
     drawOptions = (game, cx) => {
         cx.save();
+        this.titleText.draw(game, cx, new Vector2(game.width * .5, 5));
 
-        this.titleText.draw(game, cx, new Vector2(game.width * .5, 8));
+        cx.translate(game.width * .5 - 92, 18);
+        
+        cx.save();
+        cx.translate(0, Math.round(this.indexAnim * 58) - this.indexOffset * 58);
+        const offset = Math.floor(this.frameCount * .05) % 2;
+        cx.fillStyle = '#FFF';
+        cx.fillRect(0 - offset, 0 - offset, 184 + offset * 2, 56 + offset * 2);
+        cx.restore();
 
-        cx.translate(game.width * .5 - 80, 24);
-        this.saveDataArray.forEach((saveData, i) => {
-            if (this.index === i) {
-                const offset = Math.floor(this.frameCount * .05) % 2;
-                cx.strokeStyle = '#FFF';
-                cx.strokeRect(-.5 - offset, -.5 - offset, 161 + offset * 2, 49 + offset * 2);
-            }
-            cx.fillStyle = '#3F3FBF';
-            cx.fillRect(0, 0, 160, 48);
-            cx.fillStyle = '#0F0F3F';
-            cx.fillRect(1, 1, 158, 46);
+        cx.save();
+        this.saveDataArray.slice(this.indexOffset, this.indexOffset + 3).forEach((saveData, i) => {
+            const selected = this.index === i + this.indexOffset;
 
-            if (!saveData) this.noData.draw(game, cx, new Vector2(4, 4));
-            else {
+            const autosave = ['save', 'delete'].includes(this.action) && !this.indexOffset && !i;
+            cx.filter = autosave ? 'grayscale(100%)' : 'none';
+            cx.fillStyle = selected ? '#FFF' : '#3F3FBF';
+            cx.fillRect(0, 0, 184, 56);
+            cx.fillStyle = '#000';
+            cx.fillRect(1, 1, 182, 12);
+            cx.fillStyle = this.gradient;
+            cx.fillRect(1, 13, 182, 36);
+
+            cx.save();
+            if (selected) cx.filter = 'brightness(0)';
+            const relIndex = i + this.indexOffset;
+            if (!relIndex) this.autoSaveText.draw(game, cx, new Vector2(1, 49));
+            else this.fileSaveTextList[relIndex-1].draw(game, cx, new Vector2(1, 49));
+            if (!saveData) this.noData.draw(game, cx, new Vector2(92, 49));
+            cx.restore();
+
+            if (saveData) {
                 saveData.skills.forEach((skill, j) => {
-                    if (skill) cx.drawImage(game.assets.images['ui_charge_type'], j * 12, 0, 12, 12, 4 + j * 16, 4, 12, 12);
+                    if (skill) cx.drawImage(game.assets.images['ui_charge_type'], 2 + j * 12, 2, 8, 8, 4 + j * 12, 3, 8, 8);
                 });
 
                 saveData.items.forEach((item, j) => {
-                    if (item) cx.drawImage(game.assets.images['ui_items'], j * 20, 0, 20, 20, 2 + j * 19, 18, 20, 20);
+                    if (item) {
+                        cx.drawImage(game.assets.images['ui_items'], j * 20, 0, 20, 20, 3 + j * 20, 12, 20, 20);
+                    }
                 });
                 
                 saveData.keys.forEach((key, j) => {
-                    if (key) cx.drawImage(game.assets.images['sp_key'], j * 16, 0, 16, 16, 100 + (j % 3) * 20 + (j > 2 ? 10 : 0), 4 + Math.floor(j / 3) * 18, 16, 16);
+                    if (key) cx.drawImage(game.assets.images['sp_key'], j * 16, 0, 16, 16, 165 - 13 * j, 14, 16, 16);
+                });
+
+                saveData.stages.forEach((stage, j) => {
+                    if (stage) cx.drawImage(game.assets.images['ui_level_icon'], j * 32 + 5, 10, 22, 12, 3 + j * 26, 32, 22, 12);
                 });
 
                 saveData.achievements.forEach((achievement, j) => {
-                    cx.fillStyle = achievement ? '#3F3FBF' : '#000';
-                    cx.fillRect(5 + j * 5 + Math.floor(j / 4) * 2, 40, 3, 4);
+                    const stageIndex = Math.floor(j / 4);
+                    if (achievement) {
+                        cx.drawImage(game.assets.images[Math.floor(this.frameCount * .125) % 2 ? 'vfx_shine_white' : 'vfx_shine_2_white'], 2, 2, 5, 5, 4 + j * 5 + stageIndex * 6, 44, 5, 5);
+                    }
                 });
+
+                cx.save();
+                cx.translate(188, 0);
+                cx.scale(-1, 1);
+                if (saveData.noel) cx.drawImage(game.assets.images['sp_noel_idle'], 0, 1, 24, 23, 23, -10, 24, 23);
+                cx.drawImage(game.assets.images['sp_ponytail'], 24, 0, 24, 13, -4, 0, 24, 13);
+                cx.drawImage(game.assets.images['sp_flare_idle'], 0, 0, 32, 23, 4, -10, 32, 23);
+                cx.restore();
             }
-            // cx.drawImage(game.assets.images['ui_achievements'], i * 32, this.index * 32, 32, 32, 8, 0, 32, 32);
-            cx.translate(0, 56);
+            cx.translate(0, 58);
         });
+        cx.restore();
+
+        for (let i = 0; i < this.saveDataArray.length; i++) {
+            cx.drawImage(game.assets.images['vfx_smoke_white'], i === this.index ? 0 : 16, 0, 8, 8, 192, 51 + i * 12, 8, 8);
+        }
 
         cx.restore();
     }

@@ -139,7 +139,7 @@ class Achievements extends Menu {
 
         stage.achievements.forEach((achievement, i) => {
             cx.filter = achievement.unlocked ? 'none' : 'saturate(0)';
-            cx.fillStyle = '#0F0F3F';
+            cx.fillStyle = '#00003F';
             cx.fillRect(42, 4, 204, 24);
             achievement.textEN.draw(game, cx, new Vector2(48, 8));
             achievement.textJP.draw(game, cx, new Vector2(48, 17));

@@ -10,11 +10,17 @@ class Checkpoint extends Actor {
     update = game => {
         const flare = game.scene.actors.find(actor => actor instanceof Flare);
         if (CollisionBox.intersects(this, flare) && game.checkpoint !== this) this.setCheckpoint(game);
+        if (this.buffer) this.buffer--;
         this.frameCount++;
     }
 
     setCheckpoint = game => {
+        if (this.buffer) return;
+        this.buffer = 30;
+
         game.checkpoint = this;
+        game.saveData.setItem('nuinui-save-current-stage', game.currentStage);
+        game.saveData.save(0);
         game.playSound('start');
         game.scene.particles.explosion(this.pos);
         game.scene.shakeBuffer = 15;

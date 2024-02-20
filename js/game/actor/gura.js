@@ -30,10 +30,8 @@ class Gura extends Actor {
             
             if (!this.health) {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
-                game.score += 5000;
                 this.evil = false;
             } else {
-                game.score += 100;
                 this.invicibility = 30;
             }
         }

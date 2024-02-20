@@ -114,6 +114,7 @@ const EVENTS = {
                                 game.ctx2.save();
                                 if ([56, 58, 59].includes(Math.floor(scene.frameCount / 4) % 60)) game.ctx2.filter = 'brightness(2)';
                                 game.ctx2.drawImage(game.assets.images['ui_title'], 64, 80);
+                                game.ctx2.drawImage(game.assets.images['ui_version'], 0, 0, 36, 13, 230, 152, 36, 13);
                                 game.ctx2.restore();
                                 game.ctx2.save();
                                 game.ctx2.translate(game.width * .5, game.height - 16);
@@ -979,13 +980,10 @@ const EVENTS = {
                             event.end = true;
                             
                             game.stopBGM();
-                            game.score += 10000;
                             const time = new Date().getTime() - game.timer.getTime();
                             if (time <= 300000) {
                                 game.saveData.setItem('nuinui-save-achievement-4', true);
                             }
-                            const timerScore = Math.max(0, 300000 - time);
-                            game.score += timerScore;
 
                             game.saveData.setItem('nuinui-save-stage-2', true);
                             game.menu = new StageSelect(game, true);
@@ -1508,13 +1506,10 @@ const EVENTS = {
                             if (scene.achievement5) game.saveData.setItem('nuinui-save-achievement-5', true);
                             
                             game.stopBGM();
-                            game.score += 20000;
                             const time = new Date().getTime() - game.timer.getTime();
                             if (time <= 300000) {
                                 game.saveData.setItem('nuinui-save-achievement-8', true);
                             }
-                            const timerScore = Math.max(0, 300000 - time);
-                            game.score += timerScore;
                             
                             game.saveData.setItem('nuinui-save-stage-3', true);
                             game.menu = new StageSelect(game, true);
@@ -2327,13 +2322,10 @@ const EVENTS = {
                             event.end = true;
 
                             game.stopBGM();
-                            game.score += 30000;
                             const time = new Date().getTime() - game.timer.getTime();
                             if (time <= 300000) {
                                 game.saveData.setItem('nuinui-save-achievement-12', true);
                             }
-                            const timerScore = Math.max(0, 300000 - time);
-                            game.score += timerScore;
                             
                             game.saveData.setItem('nuinui-save-stage-4', true);
                             game.menu = new StageSelect(game, true);
@@ -3005,7 +2997,6 @@ const EVENTS = {
                             game.mode = 'noel';
 
                             game.stopBGM();
-                            game.score += 40000;
                             const noelTimer = new Date().getTime() - game.scene.noelTime;
                             if (noelTimer >= 60000) {
                                 game.saveData.setItem('nuinui-save-achievement-15', true);
@@ -3015,8 +3006,6 @@ const EVENTS = {
                             if (time <= 300000) {
                                 game.saveData.setItem('nuinui-save-achievement-16', true);
                             }
-                            const timerScore = Math.max(0, 300000 - time);
-                            game.score += timerScore;
                             
                             game.saveData.setItem('nuinui-save-stage-5', true);
                             game.menu = new StageSelect(game, true);
@@ -3626,8 +3615,6 @@ const EVENTS = {
                             if (time <= 300000) {
                                 game.saveData.setItem('nuinui-save-achievement-20', true);
                             }
-                            const timerScore = Math.max(0, 300000 - time);
-                            game.score += timerScore;
                         }
                     },
                     (game, event) => {

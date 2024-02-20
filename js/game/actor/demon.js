@@ -32,9 +32,7 @@ class Demon extends Actor {
             game.playSound('hit');
             
             if (!this.health) {
-                game.score += 5000;
             } else {
-                game.score += 100;
                 this.invicibility = 12;
             }
         }

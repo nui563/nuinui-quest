@@ -231,14 +231,6 @@ class Scene {
     }
 
     displayHUD = (game, cx) => {
-
-        cx.drawImage(game.assets.images['ui_score'], game.width - 57, 2);
-        game.scoreDisplay = game.scoreDisplay ? (1 - .1) * game.scoreDisplay + .1 * game.score : game.score;
-        const digits = ('00000000' + (game.scoreDisplay | 0)).slice(-8).split('');
-        digits.forEach((digit, i) => {
-            cx.drawImage(game.assets.images['ui_digit'], 5 * digit, 0, 5, 5, game.width - 53 + 6 * i, 5, 5, 5);
-        });
-
         if (game.timer) {
             const time = (new Date().getTime() - game.timer.getTime()) / 1000;
             let minutes = ((time / 60) % 60) | 0;
@@ -247,20 +239,20 @@ class Scene {
             seconds = ('00' + seconds).slice(-2);
 
             if (time < 3600) {
-                cx.drawImage(game.assets.images['ui_timer'], game.width - 39, 15);
+                cx.drawImage(game.assets.images['ui_timer'], game.width - 39, 2);
             } else {
-                cx.drawImage(game.assets.images['ui_timer_wide'], game.width - 57, 15);
+                cx.drawImage(game.assets.images['ui_timer_wide'], game.width - 57, 2);
                 let hours = (time / 3600) | 0;
                 hours = ('00' + hours).slice(-2);
                 hours.split('').forEach((digit, i) => {
-                    cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 53 + 6 * i, 18, 5, 5);
+                    cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 53 + 6 * i, 5, 5, 5);
                 });
             }
             minutes.split('').forEach((digit, i) => {
-                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 35 + 6 * i, 18, 5, 5);
+                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 35 + 6 * i, 5, 5, 5);
             });
             seconds.split('').forEach((digit, i) => {
-                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 17 + 6 * i, 18, 5, 5);
+                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 17 + 6 * i, 5, 5, 5);
             });
         }
 
@@ -574,7 +566,8 @@ class Scene {
                     if (this.enableHUD) this.displayHUD(game, cx);
                     if (this.isFocus) {
                         cx.save();
-                        cx.translate(-this.view.pos.x, -this.view.pos.y);
+                        const viewPos = this.view.pos.times(-1).round();
+                        cx.translate(viewPos.x, viewPos.y);
                         const flare = this.actors.find(actor => actor instanceof Flare);
                         // if (this.isFocus > flare.focusTime - 10) {
                         const focusWidth = 32;

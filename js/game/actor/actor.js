@@ -324,9 +324,7 @@ class Bullet extends Projectile {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             if (!this.orb) this.dropHeart(game, .7);
             game.playSound('damage');
-            game.score += 50;
         } else {
-            game.score += 10;
             game.playSound('damage');
         }
     }
@@ -480,7 +478,6 @@ class IceShield extends Projectile {
 
         game.playSound("no_damage");
         game.scene.actors = game.scene.actors.filter(a => a !== this);
-        game.score += 100;
     }
 
     update = game => {
@@ -539,7 +536,6 @@ class Rocket extends Projectile {
         if (this.health) {
             this.shakeBuffer = 15;
             game.playSound('hit');
-            game.score += 10;
         } else {
             if (other.type !== 'rocket') {
                 game.scene.particles.explosion(CollisionBox.center(this));
@@ -548,7 +544,6 @@ class Rocket extends Projectile {
             }
             game.scene.actors = game.scene.actors.filter(a => a !== this);
             this.dropHeart(game, .7);
-            game.score += 100;
         }
     }
 
@@ -679,7 +674,6 @@ class Torche extends Actor {
             game.scene.shakeBuffer = 2;
             game.playSound("noise");
             this.active = true;
-            game.score += 10;
         }
         if (this.active && !(this.frameCount % 4)) game.scene.particles.sparkle_fire(CollisionBox.center(this), new Vector2(0, -.5));
         this.frameCount++;

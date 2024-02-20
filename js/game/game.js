@@ -4,7 +4,7 @@ class Game {
     width = 16 * 20;
     height = 16 * 12;
 
-    fullscreen = document.fullscreenElement ? true : false;
+    fullscreen = false;
     scale = false;
 
     audioCtx = null;
@@ -21,9 +21,6 @@ class Game {
 
     currentStage = 0;
 
-    score = 0;
-    scoreDisplay = 0;
-
     mode = 'flare';
 
     isPaused = false;
@@ -32,7 +29,7 @@ class Game {
     tick = 60;
     drawBuffer = false;
 
-    saveCount = 3;
+    saveCount = 6;
     saveData = new SaveData();
 
     constructor(assets, data) {
@@ -73,16 +70,32 @@ class Game {
             });
         }
 
-        this.resize();
-        window.addEventListener('resize', this.resize);
-        if (!window.__TAURI__) document.onfullscreenchange = () => this.fullscreen = document.fullscreenElement;
-
-        // Audio
-        this.audioCtx = assets.audioCtx;
-
         // Options
         const seOpt = this.saveData.getOpt('se');
         const bgmOpt = this.saveData.getOpt('bgm');
+        const fullscreenOpt = this.saveData.getOpt('fullscreen');
+        const scaleOpt = this.saveData.getOpt('scale');
+
+        // Screen
+        this.scale = scaleOpt === 'true' ? true : false;
+        this.resize();
+        window.addEventListener('resize', this.resize);
+
+        this.fullscreen = fullscreenOpt === 'true' ? true : false;
+        if (!window.__TAURI__) {
+            document.onfullscreenchange = () => {
+                this.fullscreen = document.fullscreenElement;
+                this.saveData.setOpt('fullscreen', this.fullscreen);
+            }
+            if (Boolean(document.fullscreenElement) !== this.fullscreen) this.toggleFullscreen();
+        } else {
+            window.__TAURI__.window.appWindow.isFullscreen().then(res => {
+                if (res !== this.fullscreen) this.toggleFullscreen();
+            });
+        }
+
+        // Audio
+        this.audioCtx = assets.audioCtx;
         this.seVolume = seOpt === null ? this.seVolume : Number(seOpt);
         this.bgmVolume = bgmOpt === null ? this.bgmVolume : Number(bgmOpt);
 
@@ -228,6 +241,19 @@ class Game {
         else {
             this.bgm.source.stop();
             this.bgm = null;
+        }
+    }
+
+    toggleFullscreen = () => {
+        if (window.__TAURI__) {
+            window.__TAURI__.window.appWindow.isFullscreen().then(res => {
+                window.__TAURI__.window.appWindow.setFullscreen(!res);
+                this.fullscreen = !res;
+                this.saveData.setOpt('fullscreen', this.fullscreen);
+            });
+        } else {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
         }
     }
 

@@ -58,9 +58,7 @@ class Towa extends Actor {
                 this.isUpsideDown = false;
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
                 if (this.pos.y === 8 * 16) this.pos.y--;
-                game.score += 5000;
             } else {
-                game.score += 100;
                 this.invicibility = 30;
             }
         }
@@ -409,9 +407,7 @@ class Bibi extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .9);
-            game.score += 50;
         } else {
-            game.score += 10;
             game.playSound('damage');
             this.invicibility = 12;
         }

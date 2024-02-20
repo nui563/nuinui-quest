@@ -38,9 +38,7 @@ class Mikobell extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .6);
-            game.score += 200;
         } else {
-            game.score += 50;
             game.playSound('damage');
         }
     }
@@ -192,9 +190,7 @@ class Casinochip extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .7);
-            game.score += 100;
         } else {
-            game.score += 20;
             game.playSound('damage');
         }
     }

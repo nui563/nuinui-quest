@@ -30,10 +30,8 @@ class Nousabot extends Actor {
                 game.scene.shakeBuffer = 4;
                 game.playSound("rumble");
             }
-            game.score += 100;
             this.dropHeart(game, .7);
         } else {
-            game.score += 20;
             game.playSound('damage');
         }
     }
@@ -135,9 +133,7 @@ class Robot extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .3);
-            game.score += 200;
         } else {
-            game.score += 50;
             game.playSound('damage');
         }
     }
@@ -298,9 +294,7 @@ class Nousakumo extends Actor {
                 game.playSound("rumble");
             }
             this.dropHeart(game, .9);
-            game.score += 50;
         } else {
-            game.score += 10;
             game.playSound('damage');
         }
     }

@@ -50,10 +50,8 @@ class EvilMiko extends Actor {
         
         if (!this.health) {
             this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
-            game.score += 5000;
         } else {
             this.dragonBreath = this.health < this.maxHealth * .25 ? 180 : random() > .5 ? 60 : 0;
-            game.score += 100;
             this.invicibility = 30;
         }
     }

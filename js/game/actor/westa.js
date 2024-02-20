@@ -296,7 +296,6 @@ class Block extends Actor {
         game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
         
         game.playSound('damage');
-        game.score += 20;
         game.scene.actors = game.scene.actors.filter(a => a !== this);
         this.miko.blocks = this.miko.blocks.filter(a => a !== this);
     }

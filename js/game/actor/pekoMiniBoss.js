@@ -242,7 +242,6 @@ class PekoMiniBoss extends Actor {
             this.shields.forEach(shield => {
                 if (shield.hit) {
                     shield.health--;
-                    game.score += 10;
                     shield.hit = false;
                     game.playSound('hit');
                     if (!shield.health) game.scene.particles.mini_explosion(this.checkHit(game, other).pos);
@@ -254,7 +253,6 @@ class PekoMiniBoss extends Actor {
             this.shields = this.shields.filter(shield => shield.health);
         } else {
             this.shakeBuffer = 15;
-            game.score += 50;
             this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             game.playSound('damage');
             this.hitBuffer = 20;
@@ -262,7 +260,6 @@ class PekoMiniBoss extends Actor {
             game.scene.particles.impact(this.checkHit(game, other).pos);
             game.scene.particles.digit(this.checkHit(game, other).pos, other.damage ? other.damage : 1);
             if (!this.health) {
-                game.score += 1000;
             }
         }
     }

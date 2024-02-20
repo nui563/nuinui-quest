@@ -573,8 +573,6 @@ class Flare extends Actor {
         game.canvas2.style.filter = 'none';
         game.stopBGM();
         game.scene.nextScene = new Scene(game, game.data.game.stages[game.currentStage]);
-        game.score = 0;
-        game.scoreDisplay = 0;
     }
 
     takeHit = (game, other) => {
@@ -635,7 +633,6 @@ class Flare extends Actor {
         game.menu = new StageSelect(game, true);
 
         game.checkpoint = null;
-        game.score += 40000;
 
         const noelTimer = new Date().getTime() - game.scene.noelTime;
         if (noelTimer >= 60000) {
@@ -646,8 +643,6 @@ class Flare extends Actor {
         if (time <= 420000) {
             game.saveData.setItem('nuinui-save-achievement-16', true);
         }
-        const timerScore = Math.max(0, 420000 - time);
-        game.score += timerScore;
     }
 
     setAnimation = animation => {

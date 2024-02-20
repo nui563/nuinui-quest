@@ -38,9 +38,7 @@ class Ina extends Actor {
 
             if (!this.health) {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
-                game.score += 5000;
             } else {
-                game.score += 100;
                 this.invicibility = 30;
             }
         }
@@ -218,13 +216,11 @@ class Tentacle extends Actor {
         }
 
         if (!this.health) {
-            game.score += 100;
             game.playSound('explosion');
             this.isDisabled = 5 * 60;
             this.posTarget = this.pos.plus(new Vector2(0, 32));
         } else {
             game.playSound('damage');
-            game.score += 20;
         }
     }
 

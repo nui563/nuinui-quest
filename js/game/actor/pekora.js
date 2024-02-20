@@ -35,10 +35,8 @@ class Pekora extends Actor {
 
             if (!this.health) {
                 this.vel = new Vector2(this.dir ? -2 : 2, -2.5);
-                game.score += 5000;
             } else {
                 if (this.health < this.maxHealth * .25) this.isTired = true;
-                game.score += 100;
                 this.invicibility = 30;
             }
         }
