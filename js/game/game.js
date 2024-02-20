@@ -75,6 +75,8 @@ class Game {
         const bgmOpt = this.saveData.getOpt('bgm');
         const fullscreenOpt = this.saveData.getOpt('fullscreen');
         const scaleOpt = this.saveData.getOpt('scale');
+        const gamepadOpt = this.saveData.getOpt('gamepad');
+        const keyboardOpt = this.saveData.getOpt('keyboard');
 
         // Screen
         this.scale = scaleOpt === 'true' ? true : false;
@@ -84,7 +86,7 @@ class Game {
         this.fullscreen = fullscreenOpt === 'true' ? true : false;
         if (!window.__TAURI__) {
             document.onfullscreenchange = () => {
-                this.fullscreen = document.fullscreenElement;
+                this.fullscreen = Boolean(document.fullscreenElement);
                 this.saveData.setOpt('fullscreen', this.fullscreen);
             }
             if (Boolean(document.fullscreenElement) !== this.fullscreen) this.toggleFullscreen();
@@ -98,6 +100,11 @@ class Game {
         this.audioCtx = assets.audioCtx;
         this.seVolume = seOpt === null ? this.seVolume : Number(seOpt);
         this.bgmVolume = bgmOpt === null ? this.bgmVolume : Number(bgmOpt);
+
+        GAMEPADTYPE = gamepadOpt || 'a';
+        const keycodes = keyboardOpt ? JSON.parse(keyboardOpt) : DEFAULTKEYCODES;
+        for (const [key, value] of Object.entries(keycodes)) KEYBOARDINPUT[value] = key;
+        updateKeycodes();
 
         // DEBUG
         if (DEBUGMODE) {

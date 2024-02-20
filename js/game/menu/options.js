@@ -59,6 +59,7 @@ class Options extends Menu {
                     else if (GAMEPADTYPE === 'b') GAMEPADTYPE = 'a';
                     else if (GAMEPADTYPE === 'c') GAMEPADTYPE = 'b';
                 }
+                game.saveData.setOpt('gamepad', GAMEPADTYPE);
             }
         }
     ];

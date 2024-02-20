@@ -124,9 +124,8 @@ const KEYBOARDINPUT = {
     start: "Enter"
 }
 const updateKeycodes = () => {
-    const input = KEYMODE === 'keyboard' ? KEYBOARDINPUT : GAMEPADINPUT;
     KEYCODES = new Object();
-    for (const [key, value] of Object.entries(input)) KEYCODES[value] = key;
+    for (const [key, value] of Object.entries(KEYBOARDINPUT)) KEYCODES[value] = key;
 }
 let selectedKey = null;
 const cancelKeyChange = (game, key, opt) => {
@@ -140,6 +139,7 @@ const changeKeyHandle = (game, e, opt) => {
     KEYBOARDINPUT[selectedKey] = e.code;
     opt.value = e.code;
     updateKeycodes();
+    game.saveData.setOpt('keyboard', JSON.stringify(KEYCODES));
     game.inputManager.keyboard.enable();
     selectedKey = null;
 }
@@ -158,5 +158,7 @@ const resetKeys = game => {
     KEYCODES = {...DEFAULTKEYCODES}
     game.menu.options.filter(opt => opt.type === 'keyboard').forEach(opt => opt.value = KEYCODES[opt.id]);
     GAMEPADTYPE = 'a';
+    game.saveData.setOpt('keyboard', JSON.stringify(KEYCODES));
+    game.saveData.setOpt('gamepad', GAMEPADTYPE);
 }
 const toggleKeyMode = value => KEYMODE = value;
