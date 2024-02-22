@@ -14,7 +14,7 @@ class Game {
     soundFrame = {};
 
     seVolume = .5;
-    bgmVolume = .4;
+    bgmVolume = .3;
 
     lastKeys = null;
     cpuKeys = {};
