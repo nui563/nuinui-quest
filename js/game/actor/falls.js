@@ -151,7 +151,7 @@ class Robot extends Actor {
                     this.phase = 'attack';
                 } else {
                     this.phase = 'move';
-                    if (CollisionBox.intersects(this, game.scene.view)) game.playSound("boss_move");
+                    if (CollisionBox.intersects(this, game.scene.view)) game.playSound("robot");
                     this.moveDir = random() > .5 ? 1 : -1;
                 }
             }

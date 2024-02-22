@@ -211,7 +211,7 @@ class Towa extends Actor {
             this.phase = 'move';
             this.vel = this.velAngle.times(this.health < this.maxHealth * .25 ? 12 : 8);
             this.velAngle = null;
-            game.playSound('miko_kick');
+            game.playSound('jump2');
         }
     }
 

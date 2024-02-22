@@ -9,7 +9,7 @@ class Actor {
     update = game => this.frameCount++;
 
     draw = (game, cx) => {
-        if (DEBUGMODE) this.displayCollisionBox(game, cx);
+        if (SHOW_HITBOX) this.displayCollisionBox(game, cx);
     }
 
     checkHit = (game, collisionBox) => {

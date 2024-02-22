@@ -87,7 +87,7 @@ class Achievements extends Menu {
                 this.rightBuffer = true;
                 this.index++;
                 if (this.index === this.stages.length) this.index = 0;
-                game.playSound('menu_move');
+                game.playSound('menu');
             }
 
             if (this.leftBuffer && !game.keys.left) this.leftBuffer = false;
@@ -95,7 +95,7 @@ class Achievements extends Menu {
                 this.leftBuffer = true;
                 this.index--;
                 if (this.index < 0) this.index = this.stages.length - 1;
-                game.playSound('menu_move');
+                game.playSound('menu');
             }
         }
         

@@ -68,7 +68,7 @@ class Marine extends Actor {
                 } else {
                     if (random() > .5) {
                         this.phase = 'dash';
-                        game.playSound("miko_kick");
+                        game.playSound("jump2");
                         this.moveDir = this.pos.x < 30 * 16 ? 1 : -1;
                         this.dir = this.moveDir > 0;
                         this.vel.y = -2;
@@ -105,7 +105,7 @@ class Marine extends Actor {
             const bufferVal = Math.ceil(this.phaseBuffer / 20) + 1;
             const vel = new Vector2(bufferVal * Math.ceil(dist / 256) * (this.dir ? 1 : -1), -2 * (3 - bufferVal));
             game.scene.actors.push(new Bullet(this.pos.plus(new Vector2(10 * (this.dir ? 1 : -1), 8)), vel, this));
-            game.playSound('bow_shoot');
+            game.playSound('throw');
         }
         if (this.phaseBuffer === 59) {
             this.setAnimation('idle');

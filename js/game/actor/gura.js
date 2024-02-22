@@ -63,7 +63,7 @@ class Gura extends Actor {
             const bullet = new Bullet(CollisionBox.center(this).plus(new Vector2(16 * (this.dir ? 1 : -1), 32)), new Vector2(0, 3), this);
             bullet.trident = true;
             game.scene.actors.push(bullet);
-            game.playSound('bow_shoot');
+            game.playSound('throw');
         }
 
         if (dist < 1) {

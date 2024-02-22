@@ -42,7 +42,7 @@ class EvilNoel extends Actor {
             if (!this.health && this.phase !== 'defeated') {
                 this.phase = 'defeated';
                 game.stopBGM();
-                game.playSound('level_start');
+                game.playSound('cling');
                 this.setAnimation('hit');
                 game.scene.bossKillEffect = 60;
                 game.scene.isFocus = 0;

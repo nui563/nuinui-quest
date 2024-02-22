@@ -107,7 +107,7 @@ class Miko extends Actor {
             this.vel.x = 4 * (this.dir ? 1 : -1);
             this.vel.y = 2;
             this.setAnimation('kick');
-            game.playSound("miko_kick");
+            game.playSound("jump2");
         }
         else if (this.phaseBuffer && this.isGrounded) {
             this.lastMove = this.phase;
@@ -138,7 +138,7 @@ class Miko extends Actor {
                 game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x + this.phaseBuffer * 4, 24 * 16), new Vector2(0, 3), this));
                 game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x - this.phaseBuffer * 4, 24 * 16), new Vector2(0, 3), this));
             }
-            game.playSound("miko_chant");
+            game.playSound("pew2");
         }
         if (this.phaseBuffer === 64) {
             this.chantLevel++;

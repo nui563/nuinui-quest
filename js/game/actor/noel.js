@@ -279,7 +279,7 @@ class Noel extends Flare {
                 mace.isPersistent = true;
                 game.scene.actors.push(mace);
     
-                game.playSound('bow_shoot');
+                game.playSound('throw');
                 game.scene.particles.mace(CollisionBox.center(this).plus(new Vector2(16 * (this.dir ? 1 : -1), 0)), this.dir, this.noelAttack !== 0);
                 this.attackCooldown = keyChargeAttack ? 12 : 24;
                 this.attackCooldownAnim = 24;

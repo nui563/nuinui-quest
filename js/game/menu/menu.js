@@ -99,7 +99,7 @@ class SaveMenu extends Menu {
                     this.index = 0;
                     this.indexAnim = this.index;
                 }
-                game.playSound('menu_move');
+                game.playSound('menu');
             }
 
             if (this.upBuffer && !game.keys.up) this.upBuffer = false;
@@ -110,7 +110,7 @@ class SaveMenu extends Menu {
                     this.index = this.saveDataArray.length - 1;
                     this.indexAnim = this.index;
                 }
-                game.playSound('menu_move');
+                game.playSound('menu');
             }
 
             if (this.aBuffer && !game.keys.a) this.aBuffer = false;

@@ -479,7 +479,7 @@ class Scene {
                         actor.draw(game, cx);
                         cx.restore();
                     });
-                    if (DEBUGMODE) this.actors.forEach(a => a.displayCollisionBox(game, cx));
+                    if (SHOW_HITBOX) this.actors.forEach(a => a.displayCollisionBox(game, cx));
                     
                     this.particles.draw(cx, game.assets, 1);
                     
@@ -487,7 +487,7 @@ class Scene {
 
                     this.drawTiles(game, cx, this.foreground);
 
-                    if (DEBUGMODE) this.currentSection.collisions.forEach(a => {
+                    if (SHOW_HITBOX) this.currentSection.collisions.forEach(a => {
                         cx.save();
                         cx.translate(Math.round(a.pos.x), Math.round(a.pos.y));
                         cx.fillStyle = "#00f8";

@@ -14,7 +14,7 @@ class BowPickup extends Actor {
             flare.weapon = this.type;
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             game.saveData.setItem(`nuinui-save-item-${this.type}`, true);
         }
 
@@ -43,7 +43,7 @@ class RocketPickup extends Actor {
             flare.chargeTypeList.push('rocket');
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-rocket', true);
         }
@@ -73,7 +73,7 @@ class PetalPickup extends Actor {
             flare.chargeTypeList.push('petal');
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-petal', true);
         }
@@ -102,7 +102,7 @@ class SwordPickup extends Actor {
             flare.chargeTypeList.push('sword');
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-sword', true);
         }
@@ -132,7 +132,7 @@ class ShieldPickup extends Actor {
             flare.chargeTypeList.push('shield');
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-shield', true);
         }
@@ -163,7 +163,7 @@ class KiritoPickup extends Actor {
             flare.chargeTypeList.push('dual');
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-dual', true);
         }
@@ -193,7 +193,7 @@ class ClockPickup extends Actor {
             flare.item = true;
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-clock', true);
         }
@@ -223,7 +223,7 @@ class JumpPickup extends Actor {
             flare.doubleJump = true;
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-jump', true);
         }
@@ -253,7 +253,7 @@ class BootsPickup extends Actor {
             flare.canWallJump = true;
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem('nuinui-save-item-boots', true);
         }
@@ -285,7 +285,7 @@ class KeyPickup extends Actor {
         if (CollisionBox.intersects(this, flare)) {
             game.scene.actors = game.scene.actors.filter(actor => actor !== this);
             game.scene.particles.sparkle_white(CollisionBox.center(this));
-            game.playSound('object_pickup');
+            game.playSound('jingle');
             
             game.saveData.setItem(`nuinui-save-item-key${this.id}`, true);
         }

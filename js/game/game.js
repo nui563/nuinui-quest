@@ -13,7 +13,7 @@ class Game {
     bgmId = null;
     soundFrame = {};
 
-    seVolume = .3;
+    seVolume = .5;
     bgmVolume = .4;
 
     lastKeys = null;
@@ -63,8 +63,9 @@ class Game {
         const loadingImage = new Image();
         loadingImage.src = 'img/loading.gif';
         loadingImage.style.position = 'absolute';
-        loadingImage.style.right = 0;
-        loadingImage.style.bottom = 0;
+        loadingImage.style.left = '50%';
+        loadingImage.style.top = '51px';
+        loadingImage.style.transform = 'translate(-50%, 0)';
         container.appendChild(loadingImage);
 
         {
@@ -213,7 +214,7 @@ class Game {
         source.loop = false;
         source.loopStart = 0;
         source.loopEnd = source.buffer.duration;
-        if (['step', 'pew', 'bow_shoot', 'miko_chant', 'dash', 'slash', 'gun'].includes(id)) source.playbackRate.value = 1 + random() * .2 - .1;
+        if (['step', 'pew', 'throw', 'dash', 'slash', 'gun'].includes(id)) source.playbackRate.value = 1 + random() * .2 - .1;
         sound.source = source;
         sound.gainNode = this.audioCtx.createGain();
         source.connect(sound.gainNode);

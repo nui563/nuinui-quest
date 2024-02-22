@@ -57,13 +57,13 @@ class StageSelect extends Menu {
                     this.leftBuffer = true;
                     this.stageIndex--;
                     if (this.stageIndex < 0) this.stageIndex = this.stages.length - 1;
-                    game.playSound('menu_move');
+                    game.playSound('menu');
                 }
                 if (game.keys.right && !this.rightBuffer) {
                     this.rightBuffer = true;
                     this.stageIndex++;
                     if (this.stageIndex === this.stages.length) this.stageIndex = 0;
-                    game.playSound('menu_move');
+                    game.playSound('menu');
                 }
     
                 if (this.aBuffer && !game.keys.a) this.aBuffer = false;

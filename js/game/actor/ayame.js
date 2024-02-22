@@ -108,7 +108,7 @@ class Ayame extends Actor {
             this.lastMove = this.phase;
             this.phase = 'move';
             this.vel = new Vector2(Math.cos(this.angle), Math.sin(this.angle)).times(12);
-            game.playSound('miko_kick');
+            game.playSound('jump2');
         }
     }
 

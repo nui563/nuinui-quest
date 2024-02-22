@@ -100,7 +100,7 @@ class Options extends Menu {
                 this.downBuffer = true;
                 this.optionIndex++;
                 if (this.optionIndex === options.length) this.optionIndex = 0;
-                game.playSound('menu_move');
+                game.playSound('menu');
             }
 
             if (this.upBuffer && !game.keys.up) this.upBuffer = false;
@@ -108,7 +108,7 @@ class Options extends Menu {
                 this.upBuffer = true;
                 this.optionIndex--;
                 if (this.optionIndex < 0) this.optionIndex = options.length - 1;
-                game.playSound('menu_move');
+                game.playSound('menu');
             }
 
             if (this.leftBuffer && !game.keys.left) this.leftBuffer = false;

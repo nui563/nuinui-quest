@@ -55,7 +55,7 @@ class EvilFlare extends Actor {
                 game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x + this.phaseBuffer * 4, 24 * 16), new Vector2(0, 3), this));
                 game.scene.actors.push(new Bullet(new Vector2(CollisionBox.center(this).x - this.phaseBuffer * 4, 24 * 16), new Vector2(0, 3), this));
             }
-            game.playSound("miko_chant");
+            game.playSound("pew2");
         }
         if (this.phaseBuffer === 64) {
             this.lastMove = this.phase;
@@ -71,7 +71,7 @@ class EvilFlare extends Actor {
             const bufferVal = Math.ceil((this.phaseBuffer-40) / 20) + .5;
             const vel = new Vector2(bufferVal * (this.dir ? 1 : -1), -2 * (3 - bufferVal));
             game.scene.actors.push(new Bullet(this.pos.plus(new Vector2(10 * (this.dir ? 1 : -1), 8)), vel, this));
-            game.playSound('bow_shoot');
+            game.playSound('throw');
             this.gunSide = !this.gunSide;
         }
         if (this.phaseBuffer === 99) {

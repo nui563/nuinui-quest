@@ -164,7 +164,7 @@ class Calli extends Actor {
             const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
             const vel = new Vector2(Math.cos(angle), Math.sin(angle)).times(-1);
             game.scene.actors.push(new Bullet(p2, vel, this));
-            game.playSound('bow_shoot');
+            game.playSound('throw');
         }
         
         if (this.phaseBuffer >= 240) {

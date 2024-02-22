@@ -1,4 +1,5 @@
-let DEBUGMODE = false;
+let DEBUGMODE = true;
+let SHOW_HITBOX = false;
 
 const debugSave = game => {
     for (let i = 1; i <= 27; i++) game.saveData.setItem(`nuinui-save-achievement-${i}`, true);

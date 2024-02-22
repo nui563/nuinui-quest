@@ -508,7 +508,7 @@ class Flare extends Actor {
                     game.scene.actors.push(arrow);
                 }
             }
-            if (this.chargeTypeList[this.chargeType] !== 'dual' || !keyChargeAttack) game.playSound(this.jetski || this.moto ? "pew" : this.weapon === 'bow' ? "bow_shoot" : 'gun');
+            if (this.chargeTypeList[this.chargeType] !== 'dual' || !keyChargeAttack) game.playSound(this.jetski || this.moto ? "pew" : this.weapon === 'bow' ? "throw" : 'gun');
             this.attackBuffer = true;
             this.attackCooldown = keyChargeAttack ? 36 : this.jetski ? 9 : this.weapon === 'gun' ? 9 : 12;
             this.attackCooldownAnim = 12;
@@ -617,7 +617,7 @@ class Flare extends Actor {
                 this.playerControl = false;
                 this.setAnimation('hit');
                 this.animationLocked = true;
-                game.playSound('level_start');
+                game.playSound('cling');
                 game.scene.bossKillEffect = 60;
                 game.scene.isFocus = 0;
                 game.scene.blackout = false;

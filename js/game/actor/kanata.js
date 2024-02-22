@@ -184,7 +184,7 @@ class Kanata extends Actor {
                 this.vel.x = 3 * (this.targetSide ? 1 : -1);
                 this.vel.y = 4;
                 this.targetY = Math.floor(1 + random() * 4) * 16;
-                game.playSound('bow_shoot');
+                game.playSound('throw');
             }
         }
     }

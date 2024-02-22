@@ -134,7 +134,7 @@ class PekoMiniBoss extends Actor {
         }
 
         if (this.phaseBuffer === 15) {
-            game.playSound("boss_move");
+            game.playSound("robot");
             this.middleVel = new Vector2(this.moveSpeed * (this.middleParts[3].pos.x < this.pos.x + this.size.x / 2 ? 1 : -1), 0);
         }
 
@@ -174,7 +174,7 @@ class PekoMiniBoss extends Actor {
 
         if (this.phaseBuffer >= 180) {
             this.phase = 'release';
-            game.playSound("level_start");
+            game.playSound("cling");
         } else if (!(this.phaseBuffer % 60)) game.playSound("charge");
     }
 

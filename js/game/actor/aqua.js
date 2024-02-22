@@ -46,7 +46,7 @@ class Aqua extends Actor {
                     game.playBGM('sneak');
                 }
                 this.phase = 'defeated';
-                game.playSound('level_start');
+                game.playSound('cling');
                 game.scene.bossKillEffect = 60;
                 game.scene.isFocus = 0;
                 this.vel.y = -4;
@@ -83,7 +83,7 @@ class Aqua extends Actor {
             const bufferVal = Math.ceil(this.phaseBuffer / 20) + 1;
             const vel = new Vector2(bufferVal * Math.ceil(dist / 256) * (this.dir ? 1 : -1), -2 * (3 - bufferVal));
             game.scene.actors.push(new Bullet(this.pos.plus(new Vector2(10 * (this.dir ? 1 : -1), 8)), vel, this));
-            game.playSound('bow_shoot');
+            game.playSound('throw');
         }
         if (this.phaseBuffer === 59) {
             this.setAnimation('idle');

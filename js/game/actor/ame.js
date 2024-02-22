@@ -123,7 +123,7 @@ class Ame extends Actor {
             this.vel.y = 2;
             this.vel.x = 0;
             this.setAnimation('pound');
-            game.playSound("miko_kick");
+            game.playSound("jump2");
         }
         else if (this.phaseBuffer > 30 && this.isGrounded) {
             game.scene.shakeBuffer = 15;

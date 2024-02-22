@@ -246,7 +246,7 @@ class Pirate extends Actor {
                     this.phase = 'attack';
                 } else {
                     this.phase = 'move';
-                    if (CollisionBox.intersects(this, game.scene.view)) game.playSound("boss_move");
+                    if (CollisionBox.intersects(this, game.scene.view)) game.playSound("robot");
                     this.moveDir = random() > .5 ? 1 : -1;
                 }
             }
@@ -255,7 +255,7 @@ class Pirate extends Actor {
 
     attackPhase = game => {
         if (!this.phaseBuffer) {
-            if (CollisionBox.intersects(this, game.scene.view)) game.playSound("boss_move");
+            if (CollisionBox.intersects(this, game.scene.view)) game.playSound("robot");
         }
         game.scene.particles.smoke_white(new Vector2(this.pos.x + this.size.x / 2, this.pos.y + this.size.y), new Vector2(0, 0), 0);
         const x = this.phaseBuffer / 128;

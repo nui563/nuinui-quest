@@ -74,14 +74,14 @@ const EVENTS = {
                                 event.rightBuffer = true;
                                 event.menuCursor++;
                                 if (event.menuCursor > 3) event.menuCursor = 0;
-                                game.playSound('menu_move');
+                                game.playSound('menu');
                             }
                             if (event.leftBuffer && !game.keys.left) event.leftBuffer = false;
                             if (game.keys.left && !event.leftBuffer) {
                                 event.leftBuffer = true;
                                 event.menuCursor--;
                                 if (event.menuCursor < 0) event.menuCursor = 3;
-                                game.playSound('menu_move');
+                                game.playSound('menu');
                             }
                     
                             if (event.aBuffer && !game.keys.a) event.aBuffer = false;
@@ -291,7 +291,7 @@ const EVENTS = {
                 
                         if (frame > 760 && frame < 860) {
                             if (frame === 761) {
-                                game.playSound('level_start');
+                                game.playSound('jingle');
                                 if (['flare', 'cursed'].includes(game.mode)) {
                                     event.flare.setAnimation('look');
                                 }
@@ -514,7 +514,7 @@ const EVENTS = {
                                 event.boss.laserTarget = null;
                                 event.boss.middleVel = new Vector2(0, 0);
 
-                                game.playSound('level_start');
+                                game.playSound('cling');
                                 scene.bossKillEffect = 60;
                                 scene.actors = scene.actors.filter(a => !(a instanceof Bullet));
                                 scene.actors = scene.actors.filter(a => !(a instanceof Rocket));
@@ -907,7 +907,7 @@ const EVENTS = {
                             scene.actors = scene.actors.filter(a => !(a instanceof Rocket));
                             game.stopBGM();
 
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
 
@@ -1004,7 +1004,7 @@ const EVENTS = {
                 
                         if (random() > .97) {
                             scene.shakeBuffer = 2;
-                            game.playSound("elevator");
+                            game.playSound("shake");
                         }
 
                         if (event.aBuffer && !game.keys.a) event.aBuffer = false;
@@ -1166,7 +1166,7 @@ const EVENTS = {
                         if (event.timelineFrame > 59 && event.timelineFrame < 240) {
                             if (event.timelineFrame === 60) {
                                 flare.setAnimation('look');
-                                game.playSound('level_start');
+                                game.playSound('cling');
                                 flare.animationLocked = true;
                             }
                         }
@@ -1299,7 +1299,7 @@ const EVENTS = {
 
                         if (!event.boss.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
 
@@ -1443,7 +1443,7 @@ const EVENTS = {
                         
                         if (!event.miko.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -1556,7 +1556,7 @@ const EVENTS = {
                 
                         if (random() > .97) {
                             scene.shakeBuffer = 2;
-                            game.playSound("elevator");
+                            game.playSound("shake");
                         }
 
                         if (event.aBuffer && !game.keys.a) event.aBuffer = false;
@@ -2267,7 +2267,7 @@ const EVENTS = {
                         }
                         
                         if (!event.marine.health) {
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             if (scene.altColor) scene.rain = false;
@@ -2482,7 +2482,7 @@ const EVENTS = {
                         if (event.timelineFrame > 59 && event.timelineFrame < 240) {
                             if (event.timelineFrame === 60) {
                                 flare.setAnimation('look');
-                                game.playSound('level_start');
+                                game.playSound('cling');
                                 flare.animationLocked = true;
                             }
                         }
@@ -2569,7 +2569,7 @@ const EVENTS = {
                                 delete scene.foreground[`60_${63 + y}`];
                             }
 
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
 
@@ -2676,7 +2676,7 @@ const EVENTS = {
                             scene.bossText = null;
 
                             flare.playerControl = false;
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
 
@@ -2839,7 +2839,7 @@ const EVENTS = {
                         
                         if (!event.fubuki.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -3237,7 +3237,7 @@ const EVENTS = {
                         
                         if (!event.suisei.health) {
                             game.stopBGM();
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -3360,7 +3360,7 @@ const EVENTS = {
 
                         if (!event.polka.health) {
                             game.stopBGM();
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -3598,7 +3598,7 @@ const EVENTS = {
 
                         if (!event.miko.health) {
                             game.stopBGM();
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 120;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -3803,7 +3803,7 @@ const EVENTS = {
 
                         if (!event.flare.health && scene.boss) {
                             game.stopBGM();
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 120;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -3958,7 +3958,7 @@ const EVENTS = {
                         if (scene.boss && event.demon.phase === 'end') {
                             scene.boss.targetPos.y -= 128;
                             game.stopBGM();
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 120;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -4570,7 +4570,7 @@ const EVENTS = {
 
                         if (event.boss && !event.boss.health) {
 
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -4711,7 +4711,7 @@ const EVENTS = {
 
                         if (event.boss && !event.boss.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -4861,7 +4861,7 @@ const EVENTS = {
 
                         if (!event.boss.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -5129,7 +5129,7 @@ const EVENTS = {
                             }
 
                             scene.rain = false;
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -5250,7 +5250,7 @@ const EVENTS = {
 
                         if (event.boss && !event.boss.health) {
                             if ((scene.isFocus || scene.isAmeFocus) && !game.saveData.getItem('nuinui-save-achievement-22')) game.saveData.setItem('nuinui-save-achievement-22', true);
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.isAmeFocus = 0;
@@ -5674,7 +5674,7 @@ const EVENTS = {
                         }
                         event.blocs.filter(bloc => !((event.timelineFrame + bloc.offset) % bloc.frame)).forEach(bloc => {
                             bloc.active = !bloc.active;
-                            game.playSound('elevator');
+                            game.playSound('shake');
                             if (bloc.active) {
                                 scene.currentSection.collisions.push(bloc);
                                 scene.foreground[`${bloc.pos.x / 16}_${bloc.pos.y / 16}`] = '06';
@@ -5743,7 +5743,7 @@ const EVENTS = {
                         }
                         event.blocs.filter(bloc => !((event.timelineFrame + bloc.offset) % bloc.frame)).forEach(bloc => {
                             bloc.active = !bloc.active;
-                            game.playSound('elevator');
+                            game.playSound('shake');
                             if (bloc.active) {
                                 scene.currentSection.collisions.push(bloc);
                                 scene.foreground[`${bloc.pos.x / 16}_${bloc.pos.y / 16}`] = '06';
@@ -5863,7 +5863,7 @@ const EVENTS = {
 
                         if (event.boss && !event.boss.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -6023,7 +6023,7 @@ const EVENTS = {
 
                         if (event.boss && !event.boss.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 120;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -6162,7 +6162,7 @@ const EVENTS = {
                         }
                         event.blocs.filter(bloc => !((event.timelineFrame + bloc.offset) % bloc.frame)).forEach(bloc => {
                             bloc.active = !bloc.active;
-                            game.playSound('elevator');
+                            game.playSound('shake');
                             if (bloc.active) {
                                 scene.currentSection.collisions.push(bloc);
                                 scene.foreground[`${bloc.pos.x / 16}_${bloc.pos.y / 16}`] = '06';
@@ -6260,7 +6260,7 @@ const EVENTS = {
                         const flare = scene.actors.find(actor => actor instanceof Flare);
 
                         if (event.boss && !event.boss.health) {
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
                             scene.boss = null;
@@ -6312,7 +6312,7 @@ const EVENTS = {
 
                         if (event.boss && !event.boss.health) {
                             
-                            game.playSound('level_start');
+                            game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.boss.mirror = false;
                             scene.isFocus = 0;

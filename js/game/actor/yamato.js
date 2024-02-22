@@ -190,7 +190,7 @@ class Fubuzilla extends Actor {
 
         if (this.phaseBuffer >= 180) {
             this.phase = 'release';
-            game.playSound("level_start");
+            game.playSound("cling");
         } else if (!(this.phaseBuffer % 60)) game.playSound("charge");
     }
 
@@ -285,7 +285,7 @@ class Fubuzilla extends Actor {
         if (!this.health && this.phase !== 'death') {
             game.scene.actors = game.scene.actors.filter(a => ![Bullet, Spirit, Robot].some(b => a instanceof b));
             this.phase = 'death';
-            game.playSound('level_start');
+            game.playSound('cling');
         } else {
             game.playSound('damage');
         }
