@@ -137,7 +137,7 @@ const EVENTS = {
                         
                         switch (frame) {
                             case 30:
-                                if (!event.newGame) {
+                                if (!event.newGame && game.mode !== 'noel') {
                                     event.flare.setAnimation('wakeup');
                                     game.playSound('question');
                                 }
@@ -4134,8 +4134,8 @@ const EVENTS = {
                             scene.actors.push(event.flare);
 
                             // --- debug
-                            // event.flare.pos.x = 4.5 * 16 * 20;
-                            // event.flare.pos.y = 5 * 16;
+                            // event.flare.pos.x = 4 * 16 * 20;
+                            // event.flare.pos.y = 2 * 12;
                             // scene.enableHUD = true;
                             // event.flare.animationLocked = false;
                             // event.flare.setAnimation('idle');

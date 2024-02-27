@@ -73,6 +73,7 @@ class Scene {
                 Math.max(this.currentSection.pos.x, Math.min(this.currentSection.pos.x + this.currentSection.size.x - this.view.size.x, center.x - this.view.size.x / 2)),
                 Math.max(this.currentSection.pos.y, Math.min(this.currentSection.pos.y + this.currentSection.size.y - this.view.size.y, center.y - this.view.size.y / 2))
             ).round();
+            // pos = center.plus(new Vector2(-this.view.size.x / 2, -this.view.size.y / 2)).round();
         }
         
         if (this.lockedViewPos) {

@@ -141,7 +141,7 @@ class Ina extends Actor {
             this.scrollSpeed = this.scrollSpeed === 1 ? (random() > .5 ? 2 : 0) : 1;
             game.scene.shakeBuffer = 15;
             game.playSound('charge2');
-            game.scene.thunder = 60;
+            game.scene.thunder = 30;
         }
 
         if (this === game.scene.boss) {

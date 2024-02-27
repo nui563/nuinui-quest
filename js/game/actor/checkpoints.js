@@ -20,6 +20,7 @@ class Checkpoint extends Actor {
 
         game.checkpoint = this;
         game.saveData.setItem('nuinui-save-current-stage', game.currentStage);
+        game.saveData.setItem('nuinui-save-current-mode', game.mode);
         game.saveData.save('auto');
         game.playSound('start');
         game.scene.particles.explosion(this.pos);

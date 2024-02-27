@@ -42,36 +42,34 @@ class Options extends Menu {
             }
         },
         {
-            id:'delete save data',
-            func: (game, value) => game.menu = new SaveMenu(game, game.menu, 'delete')
+            id:'customize',
+            func: (game, value) => game.menu = new Controls(game, game.menu)
         },
         {
-            id:'type',
-            type: 'gamepad',
-            values: ['a', 'b', 'c'].map(a => [a, new TextElem(Array.from(a), 'left')]),
-            func2: (game, value) => {
-                if (value > 0) {
-                    if (GAMEPADTYPE === 'a') GAMEPADTYPE = 'b';
-                    else if (GAMEPADTYPE === 'b') GAMEPADTYPE = 'c';
-                    else if (GAMEPADTYPE === 'c') GAMEPADTYPE = 'a';
-                } else {
-                    if (GAMEPADTYPE === 'a') GAMEPADTYPE = 'c';
-                    else if (GAMEPADTYPE === 'b') GAMEPADTYPE = 'a';
-                    else if (GAMEPADTYPE === 'c') GAMEPADTYPE = 'b';
-                }
-                game.saveData.setOpt('gamepad', GAMEPADTYPE);
+            id:'reset',
+            func: (game, value) => {
+                KEYCODES = {...DEFAULTKEYCODES};
+                KEYBOARDINPUT = {...DEFAULT_KEYBOARD_INPUT};
+                GAMEPAD_INPUT = {...GAMEPAD_DEFAULT_INPUT};
+                game.saveData.setOpt('keyboard', JSON.stringify(KEYCODES));
+                game.saveData.setOpt('gamepad', JSON.stringify(GAMEPAD_INPUT));
             }
+        },
+        {
+            id:'delete save file',
+            func: (game, value) => game.menu = new SaveMenu(game, game.menu, 'delete')
         }
     ];
+
+    sectionTitles = ['audio', 'video', 'controls', 'data'];
 
     constructor(game, previousMenu=null) {
         super();
         this.previousMenu = previousMenu;
         this.options.find(opt => opt.id === 'sfx').value = game.seVolume;
         this.options.find(opt => opt.id === 'bgm').value = game.bgmVolume;
-
         this.titleText = new TextElem(Array.from('options'), 'center');
-        Object.entries(KEYBOARDINPUT).forEach(([key, value]) => this.options.push({id:key, value:value, type:'keyboard', func: (game) => changeKeyKeyboard(game, key)}));
+        this.sectionTitles = this.sectionTitles.map(title => new TextElem(Array.from(title), 'left'));
         this.options.forEach(option => option.text = new TextElem(Array.from(option.id), 'left'));
     }
 
@@ -145,7 +143,12 @@ class Options extends Menu {
         cx.translate(game.width * .5 - 96, 24);
 
         cx.save();
-        this.options.filter(opt => !opt.type || opt.type === KEYMODE).forEach((opt, i) => {
+        this.options.forEach((opt, i) => {
+            if (!(i % 2)) {
+                this.sectionTitles[Math.floor(i / 2)].draw(game, cx, new Vector2(32, 0));
+                cx.translate(0, 12);
+            }
+
             opt.text.draw(game, cx, new Vector2(16, 0));
 
             cx.save();
@@ -175,27 +178,12 @@ class Options extends Menu {
                 case 'fullscreen':
                     opt.values[game[opt.id === 'integer scaling' ? 'scale' : opt.id] ? 1 : 0].draw(game, cx, new Vector2(96, 0));
                     break;
-                case 'left':
-                case 'right':
-                case 'up':
-                case 'down':
-                case 'l':
-                case 'r':
-                case 'a':
-                case 'b':
-                case 'c':
-                case 'start':
-                    if (opt.value) new TextElem(Array.from(opt.value.toLowerCase()), 'left').draw(game, cx, new Vector2(96, 0));
-                    break;
-                case 'type':
-                    new TextElem(Array.from(GAMEPADTYPE), 'left').draw(game, cx, new Vector2(96, 0));
-                    cx.drawImage(game.assets.images[`opt_type_${GAMEPADTYPE}`], 0, 0, 110, 32, 24, 16, 110, 32);
                 default:
                     break;
             }
             cx.restore();
-            cx.translate(0, opt.type === 'keyboard' ? 8 : 12);
-            if ([1, 3, 4].includes(i)) cx.translate(0, 8);
+            cx.translate(0, 12);
+            if ([1, 3, 5].includes(i)) cx.translate(0, 8);
         });
         cx.restore();
 

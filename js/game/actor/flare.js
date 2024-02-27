@@ -255,7 +255,7 @@ class Flare extends Actor {
             CollisionBox.collidesWithInAxis({pos:{x:this.pos.x,y:this.pos.y},size:{x:this.size.x,y:0}}, collision, 'y') &&
             CollisionBox.intersectsInAxis(this, collision, 'x'));
         
-        if (!this.moto && !this.jetski && !this.isSliding && !this.slideBuffer && this.isGrounded && keys.a && keys.down) {
+        if (!this.moto && !this.jetski && !this.isSliding && !this.slideBuffer && this.isGrounded && ((keys.a && keys.down) || keys.d)) {
             this.vel.x = this.slidePower * (this.dir ? 1 : -1);
             this.isSliding = true;
             this.slideBuffer = true;
@@ -264,7 +264,7 @@ class Flare extends Actor {
             game.scene.particles.run(this, this.dir);
             game.playSound('dash');
         } else {
-            if ((!this.isSliding && !keys.a) || (this.isSliding && this.slideBuffer && !keys.a)) {
+            if ((!this.isSliding && !keys.a && !keys.d) || (this.isSliding && this.slideBuffer && !keys.a && !keys.d)) {
                 this.slideBuffer = false;
             }
             if (this.isSliding && (!this.isGrounded || Math.abs(this.vel.x) < 1.73)) {
@@ -304,8 +304,8 @@ class Flare extends Actor {
 
         // Jump
         this.isJumping = false;
-        if (this.jumpBuffer && !keys.a) this.jumpBuffer = false;
-        if (((this.isGrounded && !this.vel.y) || (this.doubleJump && !this.doubleJumpBuffer) || (wallJump)) && keys.a && !this.jumpBuffer && !this.slideBuffer && !ceilObstacle && !(keys.down && this.slideBuffer)) {
+        if (this.jumpBuffer && !keys.a && !keys.d) this.jumpBuffer = false;
+        if (((this.isGrounded && !this.vel.y) || (this.doubleJump && !this.doubleJumpBuffer) || (wallJump)) && (keys.a || keys.d) && !this.jumpBuffer && !this.slideBuffer && !ceilObstacle && !(keys.down && this.slideBuffer)) {
             if (!this.isGrounded) this.doubleJumpBuffer = true;
             this.jumpPower = this.isGrounded ? this.jumpSpeed : 2;
             this.jumpBuffer = true;
@@ -327,7 +327,7 @@ class Flare extends Actor {
             }
         }
 
-        if (this.jumpInput && keys.a) {
+        if (this.jumpInput && (keys.a || keys.d)) {
             if (this.doubleJumpBuffer) {
                 this.vel.y = -this.jumpPower * 2;
                 this.jumpInput = false;

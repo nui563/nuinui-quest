@@ -1,5 +1,5 @@
 class KeyboardListener {
-    keys = { left: false, right: false, down: false, up: false, a: false, b: false, c: false, l: false, r: false, start: false }
+    keys = { left: false, right: false, down: false, up: false, a: false, b: false, c: false, l: false, r: false, start: false, d: false}
 
     constructor() {
         this.enable();
@@ -46,53 +46,30 @@ class InputManager {
     getGamepadKeys = () => {
         if (this.gamepadIndex === null || this.gamepadIndex > navigator.getGamepads().length || !navigator.getGamepads()[this.gamepadIndex]) return {}
         const gamepad = navigator.getGamepads()[this.gamepadIndex];
-        switch (GAMEPADTYPE) {
-            case 'a':
-                return {
-                    left: (gamepad.axes[0] && gamepad.axes[0] < -0.5) || (gamepad.buttons[14] && gamepad.buttons[14].value),
-                    right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
-                    up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
-                    down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
-                    a: (gamepad.buttons[0] && gamepad.buttons[0].value),
-                    b: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
-                    c: (gamepad.buttons[3] && gamepad.buttons[3].value),
-                    l: (gamepad.buttons[4] && gamepad.buttons[4].value) || (gamepad.buttons[6] && gamepad.buttons[6].value),
-                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value),
-                    start: (gamepad.buttons[9] && gamepad.buttons[9].value)
-                }
-            case 'b':
-                return {
-                    left: (gamepad.axes[0] && gamepad.axes[0] < -0.5) || (gamepad.buttons[14] && gamepad.buttons[14].value),
-                    right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
-                    up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
-                    down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
-                    a: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
-                    b: (gamepad.buttons[0] && gamepad.buttons[0].value),
-                    c: (gamepad.buttons[3] && gamepad.buttons[3].value),
-                    l: (gamepad.buttons[4] && gamepad.buttons[4].value) || (gamepad.buttons[6] && gamepad.buttons[6].value),
-                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value),
-                    start: (gamepad.buttons[9] && gamepad.buttons[9].value)
-                }
-            case 'c':
-                return {
-                    left: (gamepad.axes[0] && gamepad.axes[0] < -0.5) || (gamepad.buttons[14] && gamepad.buttons[14].value),
-                    right: (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value),
-                    up: (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value),
-                    down: (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value),
-                    a: (gamepad.buttons[1] && gamepad.buttons[1].value) || (gamepad.buttons[2] && gamepad.buttons[2].value),
-                    b: (gamepad.buttons[3] && gamepad.buttons[3].value),
-                    c: (gamepad.buttons[0] && gamepad.buttons[0].value),
-                    l: (gamepad.buttons[4] && gamepad.buttons[4].value) || (gamepad.buttons[6] && gamepad.buttons[6].value),
-                    r: (gamepad.buttons[5] && gamepad.buttons[5].value) || (gamepad.buttons[7] && gamepad.buttons[7].value),
-                    start: (gamepad.buttons[9] && gamepad.buttons[9].value)
-                }
-            default:
-                return {}
-        }
+        const input = {};
+        input.left = (gamepad.axes[0] && gamepad.axes[0] < -0.5) || (gamepad.buttons[14] && gamepad.buttons[14].value);
+        input.right = (gamepad.axes[0] && gamepad.axes[0] > 0.5) || (gamepad.buttons[15] && gamepad.buttons[15].value);
+        input.up = (gamepad.axes[1] && gamepad.axes[1] < -0.5) || (gamepad.buttons[12] && gamepad.buttons[12].value);
+        input.down = (gamepad.axes[1] && gamepad.axes[1] > 0.5) || (gamepad.buttons[13] && gamepad.buttons[13].value);
+        input.start = gamepad.buttons[9] && gamepad.buttons[9].value;
+        Object.entries(GAMEPAD_INPUT).forEach(([key, value]) => {
+            input[key] = value.some(i => gamepad.buttons[i] && gamepad.buttons[i].value);
+        });
+        return input;
     }
 }
 
 let KEYMODE = 'keyboard';
+
+const GAMEPAD_DEFAULT_INPUT = {
+    l: [4, 6],
+    r: [5, 7],
+    a: [0],
+    b: [1, 2],
+    c: [3],
+    d: []
+}
+let GAMEPAD_INPUT = {...GAMEPAD_DEFAULT_INPUT};
 
 const DEFAULTKEYCODES = {
     ArrowLeft: "left",
@@ -108,10 +85,7 @@ const DEFAULTKEYCODES = {
 }
 let KEYCODES = {...DEFAULTKEYCODES};
 
-const GAMEPADDEFAULTTYPE = 'a';
-let GAMEPADTYPE = GAMEPADDEFAULTTYPE;
-
-const KEYBOARDINPUT = {
+const DEFAULT_KEYBOARD_INPUT = {
     left: "ArrowLeft",
     right: "ArrowRight",
     up: "ArrowUp",
@@ -121,8 +95,10 @@ const KEYBOARDINPUT = {
     c: "KeyC",
     l: "KeyA",
     r: "KeyS",
-    start: "Enter"
+    start: "Enter",
+    d: ""
 }
+let KEYBOARDINPUT = {...DEFAULT_KEYBOARD_INPUT};
 const updateKeycodes = () => {
     KEYCODES = new Object();
     for (const [key, value] of Object.entries(KEYBOARDINPUT)) KEYCODES[value] = key;
@@ -143,22 +119,19 @@ const changeKeyHandle = (game, e, opt) => {
     game.inputManager.keyboard.enable();
     selectedKey = null;
 }
-const changeKeyKeyboard = (game, key) => {
-    const opt = game.menu.options.find(opt => opt.id === key);
+const changeKeyKeyboard = (game, opt, key) => {
     if (selectedKey) cancelKeyChange(game, selectedKey, opt);
     selectedKey = key;
-    if (KEYBOARDINPUT[selectedKey]) {
-        opt.value = '...';
-        game.inputManager.keyboard.disable();
-        document.body.onkeydown = e => changeKeyHandle(game, e, opt);
-    }
+    opt.value = '...';
+    game.inputManager.keyboard.disable();
+    document.body.onkeydown = e => changeKeyHandle(game, e, opt);
 }
 const resetKeys = game => {
     if (selectedKey) cancelKeyChange(game, selectedKey);
-    KEYCODES = {...DEFAULTKEYCODES}
+    KEYCODES = {...DEFAULTKEYCODES};
+    GAMEPAD_INPUT = {...GAMEPAD_DEFAULT_INPUT};
     game.menu.options.filter(opt => opt.type === 'keyboard').forEach(opt => opt.value = KEYCODES[opt.id]);
-    GAMEPADTYPE = 'a';
     game.saveData.setOpt('keyboard', JSON.stringify(KEYCODES));
-    game.saveData.setOpt('gamepad', GAMEPADTYPE);
+    game.saveData.setOpt('gamepad', JSON.stringify(GAMEPAD_INPUT));
 }
 const toggleKeyMode = value => KEYMODE = value;

@@ -415,6 +415,7 @@ class Assets {
             "bg_kiara",
 
             "ui_speed",
+            'ui_gamepad',
 
             'credits',
 

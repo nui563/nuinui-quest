@@ -67,6 +67,7 @@ class SaveMenu extends Menu {
                 this.saveDataArray.push({
                     noel: parsed['nuinui-save-item-noel'],
                     stage: parsed['nuinui-save-current-stage'],
+                    mode: parsed['nuinui-save-current-mode'],
                     stages: new Array(7).fill(null).map((_, i) => parsed[`nuinui-save-stage-${i+1}`]),
                     skills: ['fire', 'rocket', 'petal', 'sword', 'shield', 'dual'].map(skill => parsed[`nuinui-save-item-${skill}`]),
                     items: ['gun', 'clock', 'jump', 'boots', 'bow'].map(item => parsed[`nuinui-save-item-${item}`]),
@@ -125,6 +126,7 @@ class SaveMenu extends Menu {
                 } else if (this.action === 'save') {
                     if (this.index !== 0) {
                         game.saveData.setItem('nuinui-save-current-stage', game.currentStage);
+                        game.saveData.setItem('nuinui-save-current-mode', game.mode);
                         game.saveData.save(this.index-1);
                         this.menuInit(game);
                     }
@@ -133,7 +135,7 @@ class SaveMenu extends Menu {
                     if (localStorage.getItem(`nuinui-save-${dataIndex}`)) {
                         game.saveData.load(dataIndex);
                         this.previousMenu = null;
-                        game.mode = 'flare';
+                        game.mode = game.saveData.getItem('nuinui-save-current-mode')
                         game.setStage(game.saveData.getItem('nuinui-save-current-stage'));
                         game.ctx3.clearRect(0, 0, game.width, game.height);
                     }

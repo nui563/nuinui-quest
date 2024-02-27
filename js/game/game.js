@@ -108,7 +108,8 @@ class Game {
         this.seVolume = seOpt === null ? this.seVolume : Number(seOpt);
         this.bgmVolume = bgmOpt === null ? this.bgmVolume : Number(bgmOpt);
 
-        GAMEPADTYPE = gamepadOpt || 'a';
+        // Input
+        if (gamepadOpt && gamepadOpt.length > 1) for (const [key, value] of Object.entries(JSON.parse(gamepadOpt))) GAMEPAD_INPUT[key] = value;
         const keycodes = keyboardOpt ? JSON.parse(keyboardOpt) : DEFAULTKEYCODES;
         for (const [key, value] of Object.entries(keycodes)) KEYBOARDINPUT[value] = key;
         updateKeycodes();
