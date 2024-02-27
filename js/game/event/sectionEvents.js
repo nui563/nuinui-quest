@@ -727,7 +727,7 @@ const EVENTS = {
 
                         if (!event.jankenBuffer) event.result = null;
 
-                        if (canJanken && !event.jankenBuffer && game.keys.down && event.wHand !== undefined) {
+                        if (canJanken && !event.jankenBuffer && (game.keys.down || game.keys.d) && event.wHand !== undefined) {
                             flare.playerControl = false;
                             game.playSound('select');
                             event.jankenBuffer = 60;
@@ -4242,7 +4242,7 @@ const EVENTS = {
 
                         const keyActive = event.key && !event.keyBuffer && dist < 3 * 16 && flare.isGrounded;
 
-                        if (keyActive && !event.keyBuffer && game.keys.down && !flare.isSliding) {
+                        if (keyActive && !event.keyBuffer && (game.keys.down || game.keys.d) && !flare.isSliding) {
                             flare.playerControl = false;
                             if (scene.isFocus) scene.isFocus = 0;
 
@@ -4373,7 +4373,7 @@ const EVENTS = {
 
                         const keyActive = event.key && !event.keyBuffer && dist < 3 * 16 && flare.isGrounded;
 
-                        if (keyActive && !event.keyBuffer && game.keys.down && !flare.isSliding) {
+                        if (keyActive && !event.keyBuffer && (game.keys.down || game.keys.d) && !flare.isSliding) {
                             flare.playerControl = false;
                             if (scene.isFocus) scene.isFocus = 0;
 
