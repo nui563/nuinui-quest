@@ -13,7 +13,7 @@ class Game {
     bgmId = null;
     soundFrame = {};
 
-    seVolume = .5;
+    seVolume = .3;
     bgmVolume = .3;
 
     lastKeys = null;
