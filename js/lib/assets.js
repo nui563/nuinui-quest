@@ -253,6 +253,7 @@ class Assets {
             'sp_hand',
             'sp_watame',
             'sp_nousagi',
+            'sp_nousagi2',
             'sp_nousakumo',
             'sp_35p',
             'sp_bullet',

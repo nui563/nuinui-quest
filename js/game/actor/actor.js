@@ -84,6 +84,33 @@ class Elfriend extends Actor {
     }
 }
 
+class NousagiMiner extends Actor {
+    size = new Vector2(16, 16);
+
+    constructor(pos, dir) {
+        super();
+        this.pos = new Vector2(pos.x, pos.y).times(16);
+        this.dir = dir;
+    }
+
+    update = game => {
+        if (!((this.frameCount + 40) % 80) && CollisionBox.intersects(this, game.scene.view)) game.playSound('no_damage');
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        if (!this.dir) {
+            cx.translate(this.size.x / 2, 0);
+            cx.scale(-1, 1);
+            cx.translate(-this.size.x / 2, 0);
+        }
+        cx.drawImage(game.assets.images['sp_nousagi2'], Math.floor((this.frameCount) * .125) % 10 * 48, 0, 48, 32, -16, -16, 48, 32);
+        cx.restore();
+    }
+}
+
 class Projectile extends Actor {
     damage = 1;
 
