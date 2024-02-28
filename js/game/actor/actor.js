@@ -106,7 +106,7 @@ class NousagiMiner extends Actor {
             cx.scale(-1, 1);
             cx.translate(-this.size.x / 2, 0);
         }
-        cx.drawImage(game.assets.images['sp_nousagi2'], Math.floor((this.frameCount) * .125) % 10 * 48, 0, 48, 32, -16, -16, 48, 32);
+        cx.drawImage(game.assets.images['sp_nousagi2'], Math.floor((this.frameCount) * .125) % 10 * 48, 0, 48, 32, -16, -15, 48, 32);
         cx.restore();
     }
 }

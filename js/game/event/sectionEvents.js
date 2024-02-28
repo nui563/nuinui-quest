@@ -42,12 +42,9 @@ const EVENTS = {
                             event.text = new TextElem(Array.from(`press z to start`), 'right');
                             //opening menu
                             event.menuCursor = 0;
-                            event.menuOptions = [
-                                'new game',
-                                'continue',
-                                'options',
-                                'credits'
-                            ].map(label => new TextElem(Array.from(label), 'center'));
+                            const options = ['new game', 'continue', 'options', 'credits'];
+                            if (window.__TAURI__) options.push('quit game');
+                            event.menuOptions = options.map(label => new TextElem(Array.from(label), 'center'));
 
                             if (game.thanks) game.playSound('stage_clear');
                         }
@@ -73,14 +70,14 @@ const EVENTS = {
                             if (game.keys.right && !event.rightBuffer) {
                                 event.rightBuffer = true;
                                 event.menuCursor++;
-                                if (event.menuCursor > 3) event.menuCursor = 0;
+                                if (event.menuCursor > event.menuOptions.length - 1) event.menuCursor = 0;
                                 game.playSound('menu');
                             }
                             if (event.leftBuffer && !game.keys.left) event.leftBuffer = false;
                             if (game.keys.left && !event.leftBuffer) {
                                 event.leftBuffer = true;
                                 event.menuCursor--;
-                                if (event.menuCursor < 0) event.menuCursor = 3;
+                                if (event.menuCursor < 0) event.menuCursor = event.menuOptions.length - 1;
                                 game.playSound('menu');
                             }
                     
@@ -104,6 +101,9 @@ const EVENTS = {
                                         break;
                                     case 3:
                                         game.menu = new Credits(game);
+                                        break;
+                                    case 4:
+                                        if (window.__TAURI__.window.appWindow) window.__TAURI__.window.appWindow.close();
                                         break;
                                     default:
                                         break;
