@@ -22,6 +22,7 @@ const debugSave = game => {
 }
 
 window.addEventListener('load', () => {
+    window.oncontextmenu = e => e.preventDefault();
     fetch("save.json").then(res => res.json()).then(res => {
         const game = new Game(new Assets(), Object.freeze(res));
         if (DEBUGMODE) debugSave(game);
