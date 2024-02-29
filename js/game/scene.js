@@ -272,6 +272,13 @@ class Scene {
                 cx.fillRect(9, 16 + maxHealthWidth - healthWidth, 6, healthWidth);
                 cx.fillStyle = flare instanceof Noel ? '#FFFFBF' : '#FF9F7F';
                 cx.fillRect(11, 16 + maxHealthWidth - healthWidth, 3, healthWidth);
+                if (flare.helpHealth) {
+                    const helpHealthWidth = Math.ceil(flare.helpHealth * maxHealthWidth / flare.maxHealth);
+                    cx.fillStyle = '#7FBFFF';
+                    cx.fillRect(9, 16 + maxHealthWidth - helpHealthWidth, 6, helpHealthWidth);
+                    cx.fillStyle = '#BFFFFF';
+                    cx.fillRect(11, 16 + maxHealthWidth - helpHealthWidth, 3, helpHealthWidth);
+                }
                 cx.drawImage(game.assets.images['ui_healthbar'], 4, 0);
                 cx.drawImage(game.assets.images['ui_boss_icon'], flare instanceof Noel ? 80 : 0, 0, 8, 8, 8, 6, 8, 8);
             }

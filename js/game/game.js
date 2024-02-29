@@ -32,6 +32,8 @@ class Game {
     saveCount = 5;
     saveData = new SaveData();
 
+    deathCount = 0;
+
     constructor(assets, data) {
         // Assets
         this.assets = assets;
@@ -186,6 +188,7 @@ class Game {
 
     setStage = stageIndex => {
         this.checkpoint = null;
+        this.deathCount = 0;
         this.currentStage = stageIndex;
         this.scene = new Scene(this, this.data.game.stages[this.currentStage]);
         this.resetCpuKeys();

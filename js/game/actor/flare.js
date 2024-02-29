@@ -62,6 +62,7 @@ class Flare extends Actor {
     }
 
     maxHealth = 16;
+    helpHealth = 0;
 
     // Flare animations
     animations = {
@@ -560,6 +561,12 @@ class Flare extends Actor {
 
         if (this.vel.y > 0) this.jumpPower = 0;
 
+        if (this.helpHealth) {
+            this.helpPos = this.dir ? this.pos.plus(new Vector2(-16, 0)) : this.pos.plus(new Vector2(this.size.x + 16, 0));
+            if (!this.helpPosAnim) this.helpPosAnim = CollisionBox.center(this);
+            else this.helpPosAnim = this.helpPosAnim.lerp(this.helpPos, .05);
+        }
+
         this.lastMovement = movement;
         if (this.invicibility) this.invicibility--;
         if (this.focusCooldown && !game.scene.isFocus) this.focusCooldown--;
@@ -572,6 +579,7 @@ class Flare extends Actor {
         game.canvas1.style.filter = 'none';
         game.canvas2.style.filter = 'none';
         game.stopBGM();
+        game.deathCount++;
         game.scene.nextScene = new Scene(game, game.data.game.stages[game.currentStage]);
     }
 
@@ -594,8 +602,10 @@ class Flare extends Actor {
             else game.playSound('damage');
             const damage = other.damage ? other.damage : 1;
             if (!(other.originActor instanceof Cannon && game.currentStage === 4)) {
-                this.health = Math.max(0, this.health - damage);
-                this.invicibility = 45;
+                if (this.helpHealth) this.helpHealth = Math.max(0, this.helpHealth - damage);
+                else this.health = Math.max(0, this.health - damage);
+                if (!this.helpHealth) this.helpPosAnim = null;
+                this.invicibility = this.helpHealth ? 60 : 45;
             }
             this.chargeShotBuffer = 0;
             game.scene.shakeBuffer = 8;
@@ -731,5 +741,14 @@ class Flare extends Actor {
             cx.drawImage(game.assets.images['vfx_rapid_fire'], 24 * (Math.floor(this.frameCount / 2) % 2), 0, 24, 24, 24, 12, 24, 24);
         }
         cx.restore();
+        
+        if (this.helpHealth && this.helpPosAnim) {
+            cx.save();
+            cx.translate(Math.round(this.helpPosAnim.x), Math.round(this.helpPosAnim.y));
+            if (!this.dir) cx.scale(-1, 1);
+            cx.drawImage(game.assets.images['sp_elfriend_help'], Math.floor(this.frameCount * .2) % 2 * 24, 0, 24, 24,
+                -12, -12 + Math.sin(this.frameCount / 16) * 4, 24, 24);
+            cx.restore();
+        }
     }
 }

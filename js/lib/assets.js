@@ -7,6 +7,7 @@ class Assets {
             'bg_forest',
             'sp_flare_sleep',
             'sp_elfriend_idle',
+            'sp_elfriend_help',
 
             'ms_flare',
             'ms_miko',

@@ -1,5 +1,6 @@
 class Noel extends Flare {
     maxHealth = 16;
+    helpHealth = 0;
 
     lastPoses = [];
     slidePower = 5;
@@ -319,6 +320,12 @@ class Noel extends Flare {
 
         if (game.scene.underwater && !(this.frameCount % 32)) game.scene.particles.bubble(this.pos.plus(new Vector2(random() * 6 - 3 + (this.dir ? this.size.x : 0), 8)), new Vector2(0, -.5 - random() * .5), 1);
 
+        if (this.helpHealth) {
+            this.helpPos = this.dir ? this.pos.plus(new Vector2(-16, 0)) : this.pos.plus(new Vector2(this.size.x + 16, 0));
+            if (!this.helpPosAnim) this.helpPosAnim = CollisionBox.center(this);
+            else this.helpPosAnim = this.helpPosAnim.lerp(this.helpPos, .05);
+        }
+
         this.lastMovement = movement;
         if (this.noelAttack) this.noelAttack--;
         if (this.invicibility) this.invicibility--;
@@ -352,8 +359,10 @@ class Noel extends Flare {
             else game.playSound('damage');
             const damage = other.damage ? other.damage : 1;
             if (!(other.originActor instanceof Cannon && game.currentStage === 4)) {
-                this.health = Math.max(0, this.health - damage);
-                this.invicibility = 45;
+                if (this.helpHealth) this.helpHealth = Math.max(0, this.helpHealth - damage);
+                else this.health = Math.max(0, this.health - damage);
+                if (!this.helpHealth) this.helpPosAnim = null;
+                this.invicibility = this.helpHealth ? 60 : 45;
             }
             this.chargeShotBuffer = 0;
             game.scene.shakeBuffer = 8;
@@ -410,5 +419,14 @@ class Noel extends Flare {
                 cx.restore();
             }
         });
+        
+        if (this.helpHealth && this.helpPosAnim) {
+            cx.save();
+            cx.translate(Math.round(this.helpPosAnim.x), Math.round(this.helpPosAnim.y));
+            if (!this.dir) cx.scale(-1, 1);
+            cx.drawImage(game.assets.images['sp_elfriend_help'], Math.floor(this.frameCount * .2) % 2 * 24, 0, 24, 24,
+                -12, -12 + Math.sin(this.frameCount / 16) * 4, 24, 24);
+            cx.restore();
+        }
     }
 }

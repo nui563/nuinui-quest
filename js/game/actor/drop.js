@@ -34,6 +34,7 @@ class Heart extends Actor {
         let collision = false;
         const flare = game.scene.actors.find(a => a instanceof Flare);
         if (CollisionBox.intersects(this, flare)) {
+            if (game.deathCount > 2) this.heal = 4;
             flare.health = Math.min(flare.maxHealth, flare.health + this.heal);
             game.playSound('heal');
             collision = true;

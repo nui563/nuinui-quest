@@ -113,6 +113,8 @@ class Item extends Menu {
         newPlayer.jetski = oldPlayer.jetski;
         newPlayer.moto = oldPlayer.moto;
         newPlayer.doubleJumpBuffer = oldPlayer.doubleJumpBuffer;
+        newPlayer.helpHealth = oldPlayer.helpHealth;
+        newPlayer.helpPosAnim = oldPlayer.helpPosAnim;
         game.scene.actors.push(newPlayer);
         game.scene.view.target = newPlayer;
 

@@ -25,8 +25,7 @@ const EVENTS = {
 
                             // --- debug
                             // event.flare.pos.x = 7 * 16 * 20;
-                            // // event.flare.pos.y = 1.25 * 16 * 12;
-                            // event.flare.pos.y = 0;
+                            // event.flare.pos.y = 3.25 * 16 * 12;
                             // scene.enableHUD = true;
                             // event.flare.animationLocked = false;
                             // event.flare.setAnimation('idle');
