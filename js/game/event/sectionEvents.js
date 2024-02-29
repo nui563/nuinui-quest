@@ -3977,7 +3977,7 @@ const EVENTS = {
                         if (scene.lockedViewPos && event.viewTarget) scene.lockedViewPos = scene.lockedViewPos.lerp(event.viewTarget, .1);
 
                         if (event.yAxe && event.yAxe < 10 * 16 && event.demon.phase !== 'death') {
-                            game.playSound('death');
+                            game.playSound('noise');
                             scene.bossKillEffect = 120;
                             event.nextBuffer = 60;
                             event.demon.phase = 'death';

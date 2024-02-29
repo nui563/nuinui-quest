@@ -451,7 +451,6 @@ class Assets {
         { id: 'dash' },
         { id: 'slash' },
         { id: 'gun' },
-        { id: 'death' },
         { id: 'stage_clear' },
         { id: 'explosion' },
         { id: 'laser' },
