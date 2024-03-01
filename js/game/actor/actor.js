@@ -184,7 +184,7 @@ class Arrow extends Projectile {
         // if (this.frameCount % 2) game.scene.particles.smoke2(CollisionBox.center(this), new Vector2(-Math.sign(this.vel.x), -(Math.sign(this.vel.y) + 1)), 0);
 
         let collision = false;
-        const actorCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || ((this.type === 'fire' && actor instanceof Bullet && actor.iceSpike) ||actor instanceof Rocket || actor.orb || (actor instanceof IceShield && actor.originActor !== this.originActor))) && !(actor instanceof Torche) && !(actor instanceof Heart) && !(actor instanceof ATField) && (!(actor instanceof Kiara) || !actor.reflect) && !(actor instanceof ShirakenHelper) && !(actor instanceof Scythe) && (![this.originActor].includes(actor) || this.reflected) && actor.checkHit(game, this));
+        const actorCollisions = game.scene.actors.filter(actor => (!(actor instanceof Projectile) || ((this.type === 'fire' && actor instanceof Bullet && actor.iceSpike) ||actor instanceof Rocket || actor.orb || (actor instanceof IceShield && actor.originActor !== this.originActor))) && !(actor instanceof Torche) && !(actor instanceof Heart) && !(actor instanceof ATField) && (!(actor instanceof Kiara) || !actor.reflect) && !(actor instanceof ShirakenHelper) && !(actor instanceof Scythe) && !(actor instanceof NousagiMiner) && (![this.originActor].includes(actor) || this.reflected) && actor.checkHit(game, this));
         if (actorCollisions.length) {
             actorCollisions.forEach(collision => {
                 collision.takeHit(game, this);
@@ -740,14 +740,25 @@ class MovingBlock extends Actor {
     }
 
     update = game => {
-        if (!(this.frameCount % 8)) {
-            game.scene.particles[this.dir ? 'sparkle_fire' : 'sparkle_fire_2'](this.pos.plus(new Vector2(this.dir ? 0 : this.size.x, 8)), new Vector2((this.dir ? 1 : -1) * (this.size.x / 32), 0), 1);
-        }
-        
         const actors = game.scene.actors.filter(actor => ![this].includes(actor) && !(actor instanceof Projectile) && CollisionBox.intersects(this, actor));
         actors.forEach(actor => {
             actor.vel.x = Math.min(8, Math.max(-8, actor.vel.x + .5 * (this.dir ? 1 : -1)));
         });
         this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y) + 1);
+        if (!this.dir) {
+            cx.translate(this.size.x * .5, 0);
+            cx.scale(-1, 1);
+            cx.translate(-this.size.x * .5, 0);
+        }
+        const offset = Math.floor(this.frameCount / 3) % 4 * 16;
+        cx.drawImage(game.assets.images['sp_belt'], 0, offset, 16, 16, 0, 0, 16, 16);
+        for (let i = 1; i < this.size.x / 16 - 1; i++) cx.drawImage(game.assets.images['sp_belt'], 16, offset, 16, 16, i * 16, 0, 16, 16);
+        cx.drawImage(game.assets.images['sp_belt'], 32, offset, 16, 16, this.size.x - 16, 0, 16, 16);
+        cx.restore();
     }
 }

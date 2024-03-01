@@ -77,6 +77,7 @@ class Assets {
             'ui_flare',
             'ui_items',
             'ui_achievements',
+            'ui_help',
 
             'opt_type_a',
             'opt_type_b',
@@ -270,6 +271,7 @@ class Assets {
             'sp_rock',
             'sp_atfield',
             'sp_throne',
+            'sp_belt',
 
             "sp_checkpoint",
             "sp_clock",

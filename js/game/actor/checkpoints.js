@@ -22,8 +22,9 @@ class Checkpoint extends Actor {
                         game.ctx2.save();
                         game.ctx2.filter = 'invert(1)';
                         game.ctx2.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
-                        game.ctx2.translate(Math.round(this.pos.x), Math.round(this.pos.y - 32));
+                        game.ctx2.translate(Math.round(flare.pos.x), Math.round(flare.pos.y - 24));
                         game.ctx2.drawImage(game.assets.images['ui_text_bubble'], 32, 0, 32, 32, -16, -16, 32, 32);
+                        game.ctx2.drawImage(game.assets.images['ui_help'], 0, 0, 32, 8, -16, -8, 32, 8);
                         game.ctx2.drawImage(game.assets.images['ui_arrow_down'], 0, 0, 16, 16, 6, -(Math.floor(this.frameCount / 32) % 2), 16, 16);
                         game.ctx2.restore();
                     }

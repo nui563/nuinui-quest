@@ -391,6 +391,7 @@ class Noel extends Flare {
         const anim = data.animation === 'run' && this.runAttackBuffer ? 'run_attack' : data.animation;
         const animFrame = Math.floor(data.animationFrame * speed) % frames;
         if (!game.assets.images[`sp_noel_${anim}`]) return;
+        if (['run', 'run_attack'].includes(anim)) cx.translate(8, 0);
         cx.drawImage(game.assets.images[`sp_noel_${anim}`], (animFrame + ((anim === 'attack' || anim === 'aerial') && this.noelAttackAnim ? 1 : 0)) * size.x, 0, size.x, size.y,
             offset.x, offset.y, size.x, size.y);
     }

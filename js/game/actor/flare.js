@@ -665,6 +665,8 @@ class Flare extends Actor {
     playAnimation = (game, cx) => {
         const {offset, size, speed, frames} = this.animations[this.animation];
 
+        if (['run', 'run_attack'].includes(this.animation)) cx.translate(8, 0);
+
         if (!['sleep', 'wakeup', 'back'].includes(this.animation)) {
             const velX = this.animation === 'run' && !this.vel.x ? 2 : this.vel.x;
             const side = Math.round(velX) || [this.weapon, `${this.weapon}_fall`, `${this.weapon}_jump`, 'moto'].includes(this.animation);

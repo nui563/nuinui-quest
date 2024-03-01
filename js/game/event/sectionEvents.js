@@ -25,7 +25,7 @@ const EVENTS = {
 
                             // --- debug
                             // event.flare.pos.x = 7 * 16 * 20;
-                            // event.flare.pos.y = 3.25 * 16 * 12;
+                            // event.flare.pos.y = 0 * 16 * 12;
                             // scene.enableHUD = true;
                             // event.flare.animationLocked = false;
                             // event.flare.setAnimation('idle');
@@ -638,18 +638,27 @@ const EVENTS = {
                 isPersistent: false,
                 timeline: [
                     (game, event) => {
-                        game.scene.customDraw.push(game => {
-                            const cx = game.ctx0;
-                            cx.save();
-                            cx.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
-                            cx.translate((8 * 20 - 1) * 16, 3 * 16);
-                            cx.drawImage(game.assets.images['ui_tuto_2'], Math.floor(event.timelineFrame / 8) % 2 ? 0 : 16, Math.floor(event.timelineFrame / 16) % 2 ? 0 : 16, 16, 16, 0, 0, 16, 16);
-                            cx.drawImage(game.assets.images['ui_tuto_3'], 0, Math.floor(event.timelineFrame / 16) % 2 ? 0 : 16, 32, 16, 16, 0, 32, 16);
-                            cx.translate(0, 2 * 16);
-                            cx.drawImage(game.assets.images['ui_tuto_2'], 16, Math.floor(event.timelineFrame / 16) % 2 ? 0 : 16, 16, 16, 0, 0, 16, 16);
-                            cx.drawImage(game.assets.images['ui_tuto_3'], 32, Math.floor(event.timelineFrame / 16) % 2 ? 0 : 16, 32, 16, 16, 0, 32, 16);
-                            cx.restore();
-                        });
+                        if (!event.timelineFrame) {
+                            event.belt = game.scene.actors.find(actor => actor instanceof MovingBlock && actor.size.x > 16 * 3);
+                            event.beltTuto = true;
+                        }
+
+                        if (event.beltTuto && event.belt && !event.belt.dir) event.beltTuto = false;
+
+                        if (event.beltTuto) {
+                            game.scene.customDraw.push(game => {
+                                const cx = game.ctx0;
+                                cx.save();
+                                cx.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                                const offset = Math.floor(event.timelineFrame / 16) % 2;
+                                cx.strokeStyle = !offset ? '#7F7FFF' : '#fff';
+                                cx.strokeRect(event.belt.pos.x - 1.5 - offset, event.belt.pos.y - .5 - offset, event.belt.size.x + 3 + offset * 2, event.belt.size.y + 3 + offset * 2);
+                                cx.translate((8 * 20 - 1) * 16, 5.5 * 16);
+                                cx.drawImage(game.assets.images['ui_tuto_2'], Math.floor(event.timelineFrame / 8) % 2 ? 0 : 16, Math.floor(event.timelineFrame / 16) % 2 ? 0 : 16, 16, 16, 0, 0, 16, 16);
+                                cx.drawImage(game.assets.images['ui_tuto_3'], 0, Math.floor(event.timelineFrame / 16) % 2 ? 0 : 16, 32, 16, 16, 0, 32, 16);
+                                cx.restore();
+                            });
+                        }
                     }
                 ]
             }
