@@ -1,75 +1,130 @@
 class Options extends Menu {
     optionIndex = 0;
+    options = [];
 
-    options = [
+    sections = [
         {
-            id:'sfx',
-            func2: (game, value) => {
-                game.seVolume = Math.max(0, Math.min(1, Math.round((game.seVolume + value) * 10) / 10));
-                game.saveData.setOpt('se', game.seVolume);
-            }
+            id: 'audio',
+            options: [
+                {
+                    id:'sfx',
+                    func2: (game, value) => {
+                        game.seVolume = Math.max(0, Math.min(1, Math.round((game.seVolume + value) * 10) / 10));
+                        game.saveData.setOpt('se', game.seVolume);
+                    }
+                },
+                {
+                    id:'bgm',
+                    func2: (game, value) => {
+                        game.bgmVolume = Math.max(0, Math.min(1, Math.round((game.bgmVolume + value) * 10) / 10));
+                        game.saveData.setOpt('bgm', game.bgmVolume);
+                        if (game.bgm) game.bgm.updateVolume();
+                    }
+                }
+            ]
         },
         {
-            id:'bgm',
-            func2: (game, value) => {
-                game.bgmVolume = Math.max(0, Math.min(1, Math.round((game.bgmVolume + value) * 10) / 10));
-                game.saveData.setOpt('bgm', game.bgmVolume);
-                if (game.bgm) game.bgm.updateVolume();
-            }
+            id: 'video',
+            options: [
+                {
+                    id:'fullscreen',
+                    values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
+                    func: (game, value) => {
+                        game.toggleFullscreen();
+                    },
+                    func2: (game, value) => {
+                        game.toggleFullscreen();
+                    }
+                },
+                {
+                    id:'integer scaling',
+                    values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
+                    func: (game, value) => {
+                        game.scale = !game.scale;
+                        game.saveData.setOpt('scale', game.scale);
+                        game.resize();
+                    },
+                    func2: (game, value) => {
+                        game.scale = !game.scale;
+                        game.saveData.setOpt('scale', game.scale);
+                        game.resize();
+                    }
+                }
+            ]
         },
         {
-            id:'fullscreen',
-            values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
-            func: (game, value) => {
-                game.toggleFullscreen();
-            },
-            func2: (game, value) => {
-                game.toggleFullscreen();
-            }
+            id: 'controls',
+            options: [
+                {
+                    id:'customize',
+                    func: (game, value) => game.menu = new Controls(game, game.menu)
+                },
+                {
+                    id:'reset',
+                    func: (game, value) => {
+                        KEYCODES = {...DEFAULTKEYCODES};
+                        KEYBOARDINPUT = {...DEFAULT_KEYBOARD_INPUT};
+                        GAMEPAD_INPUT = {...GAMEPAD_DEFAULT_INPUT};
+                        game.saveData.setOpt('keyboard', JSON.stringify(KEYCODES));
+                        game.saveData.setOpt('gamepad', JSON.stringify(GAMEPAD_INPUT));
+                    }
+                }
+            ]
         },
         {
-            id:'integer scaling',
-            values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
-            func: (game, value) => {
-                game.scale = !game.scale;
-                game.saveData.setOpt('scale', game.scale);
-                game.resize();
-            },
-            func2: (game, value) => {
-                game.scale = !game.scale;
-                game.saveData.setOpt('scale', game.scale);
-                game.resize();
-            }
+            id: 'misc.',
+            options: [
+                {
+                    id: 'screen shake',
+                    values: ['no', 'yes'].map(a => new TextElem(Array.from(a), 'left')),
+                    func: (game, value) => {
+                        game.screenShake = !game.screenShake;
+                        game.saveData.setOpt('screenShake', game.screenShake);
+                    },
+                    func2: (game, value) => {
+                        game.screenShake = !game.screenShake;
+                        game.saveData.setOpt('screenShake', game.screenShake);
+                    }
+                },
+                {
+                    id: 'color palette',
+                    values: ['default', 'special'].map(a => new TextElem(Array.from(a), 'left')),
+                    func: (game, value) => {
+                        game.altColor = !game.altColor;
+                        game.saveData.setOpt('altColor', game.altColor);
+                    },
+                    func2: (game, value) => {
+                        game.altColor = !game.altColor;
+                        game.saveData.setOpt('altColor', game.altColor);
+                    }
+                }
+            ]
         },
         {
-            id:'customize',
-            func: (game, value) => game.menu = new Controls(game, game.menu)
-        },
-        {
-            id:'reset',
-            func: (game, value) => {
-                KEYCODES = {...DEFAULTKEYCODES};
-                KEYBOARDINPUT = {...DEFAULT_KEYBOARD_INPUT};
-                GAMEPAD_INPUT = {...GAMEPAD_DEFAULT_INPUT};
-                game.saveData.setOpt('keyboard', JSON.stringify(KEYCODES));
-                game.saveData.setOpt('gamepad', JSON.stringify(GAMEPAD_INPUT));
-            }
-        },
-        {
-            id:'delete save file',
-            func: (game, value) => game.menu = new SaveMenu(game, game.menu, 'delete')
+            id: 'data',
+            options: [
+                {
+                    id:'delete save file',
+                    func: (game, value) => game.menu = new SaveMenu(game, game.menu, 'delete')
+                }
+            ]
         }
     ];
-
-    sectionTitles = ['audio', 'video', 'controls', 'data'];
 
     constructor(game, previousMenu=null) {
         super();
         this.previousMenu = previousMenu;
-        this.options.find(opt => opt.id === 'sfx').value = game.seVolume;
-        this.options.find(opt => opt.id === 'bgm').value = game.bgmVolume;
+
+        if (!game.saveData.getOpt('altColorUnlocked')) {
+            const section = this.sections.find(s => s.id === 'misc.');
+            section.options = section.options.filter(opt => opt.id !== 'color palette');
+        }
+
         this.titleText = new TextElem(Array.from('options'), 'center');
-        this.sectionTitles = this.sectionTitles.map(title => new TextElem(Array.from(title), 'left'));
+        this.sections.forEach(section => {
+            section.title = new TextElem(Array.from(section.id), 'left');
+            this.options.push(...section.options);
+        });
         this.options.forEach(option => option.text = new TextElem(Array.from(option.id), 'left'));
     }
 
@@ -142,50 +197,66 @@ class Options extends Menu {
 
         cx.translate(game.width * .5 - 96, 24);
 
-        cx.save();
-        this.options.forEach((opt, i) => {
-            if (!(i % 2)) {
-                this.sectionTitles[Math.floor(i / 2)].draw(game, cx, new Vector2(32, 0));
-                cx.translate(0, 12);
-            }
+        cx.translate(8, 0);
 
-            opt.text.draw(game, cx, new Vector2(16, 0));
+        this.sections.forEach((section, i) => {
+            if (i) cx.translate(0, 16);
+            section.title.draw(game, cx, new Vector2(16, 0));
+            cx.translate(0, 10);
 
-            cx.save();
-            
-            if (this.optionIndex === i) {
-                cx.drawImage(game.assets.images['ui_arrow'], 0, 0, 8, 8, 8 - Math.floor(this.frameCount * .05) % 2, 0, 8, 8);
-            }
+            section.options.forEach((opt, j) => {
+                if (j) cx.translate(0, 10);
+                opt.text.draw(game, cx, new Vector2(8, 0));
 
-            cx.translate(16, 0);
-            switch (opt.id) {
-                case 'sfx':
-                case 'bgm':
-                    const val = game[`${opt.id === 'sfx' ? 'se' : 'bgm'}Volume`];
+                if (opt === this.options[this.optionIndex]) {
+                    cx.drawImage(game.assets.images['ui_arrow'], 0, 0, 8, 8, -Math.floor(this.frameCount * .05) % 2, 0, 8, 8);
+                }
+                
+                cx.save();
+                cx.translate(8, 0);
+                switch (opt.id) {
+                    case 'sfx':
+                    case 'bgm':
+                        const val = game[`${opt.id === 'sfx' ? 'se' : 'bgm'}Volume`];
 
-                    cx.save();
-                    cx.fillStyle = '#FFF';
-                    cx.translate(96, 0);
-                    for (let i = 0; i <= 10; i++) {
-                        const currVal = i / 10;
-                        if (val === currVal) cx.fillRect(i * 6, 0, 3, 7);
-                        else if (val <= currVal) cx.fillRect(i * 6 + 1, 3, 1, 1);
-                        else cx.fillRect(i * 6, 2, 3, 3);
-                    }
-                    cx.restore();
-                    break;
-                case 'integer scaling':
-                case 'fullscreen':
-                    opt.values[game[opt.id === 'integer scaling' ? 'scale' : opt.id] ? 1 : 0].draw(game, cx, new Vector2(96, 0));
-                    break;
-                default:
-                    break;
-            }
-            cx.restore();
-            cx.translate(0, 12);
-            if ([1, 3, 5].includes(i)) cx.translate(0, 8);
+                        cx.save();
+                        cx.fillStyle = '#FFF';
+                        cx.translate(96, 0);
+                        for (let i = 0; i <= 10; i++) {
+                            const currVal = i / 10;
+                            if (val === currVal) cx.fillRect(i * 6, 0, 3, 7);
+                            else if (val <= currVal) cx.fillRect(i * 6 + 1, 3, 1, 1);
+                            else cx.fillRect(i * 6, 2, 3, 3);
+                        }
+                        cx.restore();
+                        break;
+                    case 'integer scaling':
+                    case 'fullscreen':
+                    case 'screen shake':
+                    case 'color palette':
+                        let value;
+                        switch (opt.id) {
+                            case 'integer scaling':
+                                value = 'scale';
+                                break;
+                            case 'screen shake':
+                                value = 'screenShake';
+                                break;
+                            case 'color palette':
+                                value = 'altColor'
+                                break;
+                            default:
+                                value = opt.id;
+                                break;
+                        }
+                        opt.values[game[value] ? 1 : 0].draw(game, cx, new Vector2(96, 0));
+                        break;
+                    default:
+                        break;
+                }
+                cx.restore();
+            });
         });
-        cx.restore();
 
         cx.restore();
     }

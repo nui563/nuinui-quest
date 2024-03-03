@@ -33,6 +33,8 @@ class Game {
     saveData = new SaveData();
 
     deathCount = 0;
+    altColor = false;
+    screenShake = true;
 
     constructor(assets, data) {
         // Assets
@@ -86,6 +88,8 @@ class Game {
         const scaleOpt = this.saveData.getOpt('scale');
         const gamepadOpt = this.saveData.getOpt('gamepad');
         const keyboardOpt = this.saveData.getOpt('keyboard');
+        const altColorOpt = this.saveData.getOpt('altColor');
+        const screenShakeOpt = this.saveData.getOpt('screenShake');
 
         // Screen
         this.scale = scaleOpt === 'true' ? true : false;
@@ -109,6 +113,10 @@ class Game {
         this.audioCtx = assets.audioCtx;
         this.seVolume = seOpt === null ? this.seVolume : Number(seOpt);
         this.bgmVolume = bgmOpt === null ? this.bgmVolume : Number(bgmOpt);
+
+        // Misc
+        this.altColor = altColorOpt === 'true' ? true : false;
+        this.screenShake = screenShakeOpt === 'false' ? false : true;
 
         // Input
         if (gamepadOpt && gamepadOpt.length > 1) for (const [key, value] of Object.entries(JSON.parse(gamepadOpt))) GAMEPAD_INPUT[key] = value;

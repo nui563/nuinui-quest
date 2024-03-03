@@ -193,12 +193,12 @@ const EVENTS = {
                                 game.scene.customDraw.push(game => {
                                     const cx = game.ctx2;
                                     cx.save();
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350 && game.screenShake) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['bg_intro1'], 0, 0);
                                     cx.drawImage(game.assets.images['bg_intro2'], 0, 0);
                                     if (frame > 330) cx.drawImage(game.assets.images['bg_shikemura'], 16 * 9, 0);
                                     else cx.drawImage(game.assets.images['bg_shiraken'], 16 * 9, 0);
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350 && game.screenShake) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['ms_flare'], frame < 340 ? 0 : 100, 0, 100, 128, 0, game.height - 128, 100, 128);
                                     cx.restore();
                                 });
@@ -209,7 +209,7 @@ const EVENTS = {
                                     const progress = Math.min(1, (frame - transitionIntro - 120) / 30);
                                     const cx = game.ctx2;
                                     cx.save();
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350 && game.screenShake) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['ms_miko'], 0, 0, 128, 128, 9 + game.width - 128, game.height - 128 * progress, 128, 128);
                                     cx.restore();
                                 });
@@ -1745,7 +1745,7 @@ const EVENTS = {
                         game.scene.customDraw.push(game => {
                             game.ctx0.save();
                             game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
-                            game.ctx0.drawImage(game.assets.images['sp_port_clock'], game.scene.altColor ? 128 : 0, 0, 128, 128, 61.5 * 16, 52 * 16, 128, 128);
+                            game.ctx0.drawImage(game.assets.images['sp_port_clock'], game.altColor ? 128 : 0, 0, 128, 128, 61.5 * 16, 52 * 16, 128, 128);
                             game.ctx0.restore();
                         });
                     }
@@ -2045,11 +2045,11 @@ const EVENTS = {
                             game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
                             const scrollVal = Math.floor(event.timelineFrame * .5) % 320;
                             const scrollVal2 = Math.floor(-event.timelineFrame * .0625) % 320;
-                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.scene.altColor ? '_alt' : '') + '2'], 0, 0, 320, 160, 20 * 16 + scrollVal2, 0, 320, 160);
-                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.scene.altColor ? '_alt' : '') + '2'], 0, 0, 320, 160, 20 * 16 + scrollVal2 + 320, 0, 320, 160);
-                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.scene.altColor ? '_alt' : '')], 0, 0, 320, 160, 20 * 16 + scrollVal, 0, 320, 160);
-                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.scene.altColor ? '_alt' : '')], 0, 0, 320, 160, 20 * 16 + scrollVal - 320, 0, 320, 160);
-                            if (Math.floor(event.timelineFrame * .5) < 320) game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.scene.altColor ? '_alt' : '')], 320, 0, 320, 160, 20 * 16 + scrollVal, 0, 320, 160);
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.altColor ? '_alt' : '') + '2'], 0, 0, 320, 160, 20 * 16 + scrollVal2, 0, 320, 160);
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.altColor ? '_alt' : '') + '2'], 0, 0, 320, 160, 20 * 16 + scrollVal2 + 320, 0, 320, 160);
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.altColor ? '_alt' : '')], 0, 0, 320, 160, 20 * 16 + scrollVal, 0, 320, 160);
+                            game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.altColor ? '_alt' : '')], 0, 0, 320, 160, 20 * 16 + scrollVal - 320, 0, 320, 160);
+                            if (Math.floor(event.timelineFrame * .5) < 320) game.ctx0.drawImage(game.assets.images['bg_port_scroll' + (game.altColor ? '_alt' : '')], 320, 0, 320, 160, 20 * 16 + scrollVal, 0, 320, 160);
                             game.ctx0.restore();
                             
                             game.ctx2.save();
@@ -2088,7 +2088,7 @@ const EVENTS = {
                             };
 
                             scene.bossStarted = true;
-                            if (scene.altColor) scene.rain = true;
+                            if (game.altColor) scene.rain = true;
                             
                             scene.achievement11 = true;
                         }
@@ -2278,7 +2278,7 @@ const EVENTS = {
                             game.playSound('cling');
                             scene.bossKillEffect = 60;
                             scene.isFocus = 0;
-                            if (scene.altColor) scene.rain = false;
+                            if (game.altColor) scene.rain = false;
 
                             event.next = true;
 
@@ -6333,6 +6333,8 @@ const EVENTS = {
                             game.stopBGM();
                             
                             game.saveData.setItem('nuinui-save-achievement-28', true);
+                            game.saveData.setOpt('altColorUnlocked', true);
+                            game.altColor = true;
                             event.next = true;
                         }
                     },
@@ -6443,7 +6445,7 @@ const EVENTS = {
                                 game.scene.customDraw.push(game => {
                                     const cx = game.ctx1;
                                     cx.save();
-                                    if (frame > 330 && frame < 350) cx.translate(Math.floor(random() * 4 - 2), 0);
+                                    if (frame > 330 && frame < 350 && game.screenShake) cx.translate(Math.floor(random() * 4 - 2), 0);
                                     cx.drawImage(game.assets.images['bg_intro1'], 0, 0);
                                     cx.drawImage(game.assets.images['bg_intro2'], 0, 0);
                                     if (progress) cx.translate(Math.round(random() * 2 - 1), 0);

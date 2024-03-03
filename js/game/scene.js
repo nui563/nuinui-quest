@@ -23,8 +23,6 @@ class Scene {
 
     shakeBuffer = 0;
 
-    altColor = false;
-
     constructor(game, data) {
         this.name = data.name;
         this.sectionEvents = EVENTS[this.name];
@@ -56,8 +54,6 @@ class Scene {
             this.currentSection = this.sections[0];
             this.currentSection.events.forEach(event => this.events.push(new GameEvent(event.timeline, event.isPersistent)));
         }
-
-        if (game.saveData.getItem('nuinui-save-achievement-28')) this.altColor = true;
 
         this.view.size = new Vector2(game.width, game.height);
         this.setViewPos();
@@ -191,7 +187,7 @@ class Scene {
                     if (this.name === 'forest' && tile > 36 && tile < 40 && Math.floor(this.frameCount / 8) % 2) tile += 8;
                     if (tile > 63) tile += 8 * (Math.floor(this.frameCount / (tile === 69 ? 12 : tile > 69 && this.name === 'forest' ? 24 : 6)) % 3);
                     const towerScrollOffset = (!this.towerScroll || (tiles !== this.background && x > 22 && x < 37)) ? 0 : Math.floor(this.frameCount / this.towerScroll) % 16;
-                    ctx.drawImage(game.assets.images[`ts_${this.name}${this.altColor ? '_alt' : ''}`], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16 + towerScrollOffset, 16, 16);
+                    ctx.drawImage(game.assets.images[`ts_${this.name}${game.altColor ? '_alt' : ''}`], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16 + towerScrollOffset, 16, 16);
                 }
             }
         }
@@ -205,7 +201,7 @@ class Scene {
     }
 
     drawBackground = (game, cx) => {
-        const img = `bg_${this.name}${this.altColor ? '_alt' : ''}`;
+        const img = `bg_${this.name}${game.altColor ? '_alt' : ''}`;
         cx.drawImage(game.assets.images[img], 0, 0, game.width, game.height, 0, 0, game.width, game.height);
         if (this.travelEvent) {
             for (let i = 0; i < game.height; i++) {
@@ -359,7 +355,7 @@ class Scene {
         for (let i = 0; i < 3; i++) {
             const cx = game[`ctx${i}`];
             cx.save();
-            if (this.shakeBuffer && i!==3) {
+            if (game.screenShake && this.shakeBuffer && i!==3) {
                 cx.translate(Math.floor(random() * 6) - 3, 0);
                 // if (KEYMODE === 'gamepad' && game.inputManager.gamepad !== null) {
                 //     const gamepad = navigator.getGamepads()[game.inputManager.gamepad];
