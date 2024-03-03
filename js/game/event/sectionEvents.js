@@ -6333,8 +6333,6 @@ const EVENTS = {
                             game.stopBGM();
                             
                             game.saveData.setItem('nuinui-save-achievement-28', true);
-                            game.saveData.setOpt('altColorUnlocked', true);
-                            game.altColor = true;
                             event.next = true;
                         }
                     },
@@ -6420,6 +6418,8 @@ const EVENTS = {
                             flare.animationLocked = false;
                             game.cpuKeys.left = true;
                             if (flare.pos.x < -128) {
+                                game.saveData.setOpt('altColorUnlocked', true);
+                                game.altColor = true;
                                 game.menu = new StageSelect(game, true);
                                 game.thanks = true;
                                 event.end = true;
