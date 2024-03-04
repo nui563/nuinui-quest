@@ -60,6 +60,7 @@ class Assets {
             'ui_arrow_down',
             'ui_arrow_up',
             'ui_warning',
+            'ui_warning2',
             'ui_focus',
             'ui_charge_type',
             'ui_shadow_mask',
@@ -251,6 +252,7 @@ class Assets {
             'sp_miteiru',
             'sp_oni',
             'sp_thunder',
+            'sp_iroha',
 
             'sp_hand',
             'sp_watame',
@@ -574,6 +576,10 @@ class Assets {
         {
             id: "towa",
             loopStart: 9.967
+        },
+        {
+            id: "waterfall",
+            loopStart: 0
         }
     ];
     

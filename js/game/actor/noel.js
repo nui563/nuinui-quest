@@ -332,7 +332,7 @@ class Noel extends Flare {
         if (this.focusCooldown && !game.scene.isFocus) this.focusCooldown--;
 
         if (!(this.frameCount % 3)) {
-            if (this.animation === 'slide' || (this.slideJump)) this.lastPoses.push({ frameCount: this.frameCount, animationFrame: this.animationFrame, animation: this.animation, pos: this.pos.value(), size: this.size.value(), dir: this.dir });
+            if (this.animation === 'slide' || this.slideJump) this.lastPoses.push({ frameCount: this.frameCount, animationFrame: this.animationFrame, animation: this.animation, pos: this.pos.value(), size: this.size.value(), dir: this.dir });
         }
         this.lastPoses = this.lastPoses.filter(lastPos => this.frameCount - lastPos.frameCount < 12);
 

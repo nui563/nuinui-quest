@@ -2378,8 +2378,8 @@ const EVENTS = {
                             event.flare.playerControl = false;
 
                             // --- debug
-                            // event.flare.pos.x = 15 * 16 * 20;
-                            // event.flare.pos.y = 0 * 12;
+                            // event.flare.pos.x = 3.5 * 16 * 20;
+                            // event.flare.pos.y = 6.5 * 12 * 16;
                             // scene.enableHUD = true;
                             // event.flare.animationLocked = false;
                             // event.flare.setAnimation('idle');
@@ -3018,6 +3018,187 @@ const EVENTS = {
                             game.saveData.setItem('nuinui-save-stage-5', true);
                             game.menu = new StageSelect(game, true);
                         }
+                    }
+                ]
+            }
+        ],
+        "2_6": [
+            {
+                condition: game => game.scene.actors.find(actor => actor instanceof Flare).pos.x > 50 * 16,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.stopBGM();
+                        game.playBGM('beat_of_a_hundred_flowers', true);
+                        event.end = true;
+                    }
+                ]
+            }
+        ],
+        "3_6": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.stopBGM();
+                        game.playBGM('waterfall', true);
+                        event.end = true;
+                    }
+                ]
+            },
+            //iroha event where you can press down to initiate a duel style cutscene
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        event.popup = false;
+                        if (!event.timelineFrame) {
+                            event.iroha = {
+                                pos: new Vector2((3 * 20 + (scene.irohaDuelCleared ? 8.5 : 13)) * 16, 7 * 12 * 16 - 32 - 48),
+                                dir: !scene.irohaDuelCleared,
+                                offset: scene.irohaDuelCleared ? 3 : 0
+                            }
+                        }
+
+                        if (!scene.irohaDuelCleared) {
+                            if (flare instanceof Noel && flare.isGrounded && flare.dir && flare.pos.x > scene.currentSection.pos.x + 6 * 16 && flare.pos.x < scene.currentSection.pos.x + 9 * 16) {
+                                event.popup = true;
+                                if (game.keys.down) {
+                                    game.playSound('question');
+                                    flare.setAnimation('idle');
+                                    flare.animationLocked = true;
+                                    flare.playerControl = false;
+                                    flare.noelAttackAnim = 0;
+                                    flare.vel.x = 0;
+                                    event.popup = false;
+                                    event.next = true;
+                                }
+                            }
+                        }
+
+                        scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate(event.iroha.pos.x, event.iroha.pos.y);
+                            game.ctx0.scale(event.iroha.dir ? 1 : -1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_iroha'], event.iroha.offset * 48, 0, 48, 48, -24, 1, 48, 48);
+                            game.ctx0.restore();
+                        });
+
+                        if (event.popup) {
+                            game.scene.customDraw.push(game => {
+                                game.ctx2.save();
+                                game.ctx2.filter = 'invert(1)';
+                                game.ctx2.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                                game.ctx2.translate(Math.round(flare.pos.x), Math.round(flare.pos.y - 24));
+                                game.ctx2.drawImage(game.assets.images['ui_text_bubble'], 32, 0, 32, 32, -16, -16, 32, 32);
+                                game.ctx2.drawImage(game.assets.images['ui_help'], 0, 8, 32, 8, -16, -8, 32, 8);
+                                game.ctx2.drawImage(game.assets.images['ui_arrow_down'], 0, 0, 16, 16, 6, -(Math.floor(event.timelineFrame / 32) % 2), 16, 16);
+                                game.ctx2.restore();
+                            });
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        if (event.timelineFrame === 60) event.iroha.offset = 1;
+                        if (event.timelineFrame === 90) event.iroha.dir = false;
+
+                        if (event.timelineFrame === 180) {
+                            flare.setAnimation('attack');
+                            event.iroha.offset = 2;
+                            event.iroha.pos.x += 8;
+                            game.playSound('throw');
+                        }
+                        
+                        if (event.timelineFrame === 7 * 60) game.playSound('explosion');
+
+                        scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            
+                            if (event.timelineFrame > 7 * 60 && event.timelineFrame) {
+                                game.ctx0.save();
+                                if (Math.floor(event.timelineFrame / 2) % 2) game.ctx0.filter = 'brightness(2)';
+                                game.ctx0.drawImage(game.assets.images['ui_warning2'], 0, 0, 96, 96, game.width / 2 - 48, game.height / 2 - 48, 96, 96);
+                                game.ctx0.restore();
+                            }
+
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate(event.iroha.pos.x, event.iroha.pos.y);
+                            game.ctx0.scale(event.iroha.dir ? 1 : -1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_iroha'], event.iroha.offset * 48, 0, 48, 48, -24, 1, 48, 48);
+                            game.ctx0.restore();
+                        });
+
+                        if (event.timelineFrame > 180 && (game.keys.a || event.timelineFrame > 7.5 * 60)) {
+                            game.playSound('cling');
+
+                            event.iroha.offset = 4;
+                            event.iroha.pos.x -= 56;
+                            flare.pos.x = event.iroha.pos.x;
+                            if (game.keys.a) flare.noelAttackAnim = 1;
+
+                            event.result = event.timelineFrame < 7 * 60 ? 'early' : event.timelineFrame > 7.5 * 60 ? 'late' : 'perfect';
+
+                            event.next = true;
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        let randomOffset = 0;
+
+                        if (event.timelineFrame < 60) {
+                            event.iroha.pos.x -= .75 * (1 - event.timelineFrame / 60);
+                            flare.pos.x += .75 * (1 - event.timelineFrame / 60);
+                            //white flash screen
+                            scene.customDraw.push(game => {
+                                game.ctx2.save();
+                                game.ctx2.fillStyle = `rgba(255, 255, 255, ${1 - event.timelineFrame / 60})`;
+                                game.ctx2.fillRect(0, 0, game.width, game.height);
+                                game.ctx2.restore();
+                            });
+                        }
+                        
+                        if (event.timelineFrame === 120) game.playSound('damage');
+                        if (event.timelineFrame > 120 && event.timelineFrame < 140) {
+                            if (event.result === 'perfect') {
+                                randomOffset = Math.round(random() * 8) - 4;
+                            } else {
+                                flare.shakeBuffer = 2;
+                            }
+                            // flare.setAnimation('idle');
+                            // flare.animationLocked = false;
+                            // flare.playerControl = true;
+                            // event.end = true;
+                        }
+
+                        if (event.timelineFrame === 200) {
+                            game.playSound('hit');
+                            if (event.result === 'perfect') {
+                                event.iroha.offset = 3;
+                                flare.setAnimation('idle');
+                                flare.animationLocked = false;
+                                flare.playerControl = true;
+                                scene.irohaDuelCleared = true;
+                            } else {
+                                flare.die(game);
+                            }
+                        }
+                        
+                        scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate(Math.round(event.iroha.pos.x), event.iroha.pos.y);
+                            game.ctx0.scale(event.iroha.dir ? 1 : -1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_iroha'], event.iroha.offset * 48, 0, 48, 48, -24 + randomOffset, 1, 48, 48);
+                            game.ctx0.restore();
+                        });
                     }
                 ]
             }
