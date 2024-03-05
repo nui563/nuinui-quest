@@ -79,6 +79,7 @@ class Assets {
             'ui_items',
             'ui_achievements',
             'ui_help',
+            'ui_noel',
 
             'opt_type_a',
             'opt_type_b',

@@ -2,6 +2,7 @@ class Item extends Menu {
     optionIndex = 0;
 
     progress = 0;
+    modeAnim = 0;
 
     aBuffer = true;
 
@@ -19,10 +20,12 @@ class Item extends Menu {
             values: ['flare', 'noel', 'cursed'].map(a => new TextElem(Array.from(a), 'left')),
             func: (game, value) => {
                 game.menu.gamemodeIndex++;
+                game.menu.modeAnim = 0;
                 game.menu.applyMode(game);
             },
             func2: (game, value) => {
                 game.menu.gamemodeIndex += value > 0 ? 1 : -1;
+                game.menu.modeAnim = 0;
                 game.menu.applyMode(game);
             }
         },
@@ -176,6 +179,7 @@ class Item extends Menu {
         }
         
         this.progress = Math.min(1, this.frameCount * .05);
+        if (this.modeAnim < 1) this.modeAnim += .05;
         this.frameCount++;
     }
     
@@ -267,9 +271,9 @@ class Item extends Menu {
         
         // portrait
         cx.save();
-        cx.globalAlpha = this.progress;
-        const xOffset = Math.round(48 * (1 - Math.pow(2, -10 * this.progress)));
-        cx.drawImage(game.assets.images['ui_flare'], 0, 0, 128, 144, game.width - 96 - xOffset, game.height - 144, 128, 144);
+        cx.globalAlpha = this.modeAnim;
+        const xOffset = Math.round(48 * (1 - Math.pow(2, -10 * this.modeAnim)));
+        cx.drawImage(game.assets.images[game.mode === 'noel' ? 'ui_noel' : 'ui_flare'], 0, 0, 128, 144, game.width - 96 - xOffset, game.height - 144, 128, 144);
         cx.restore();
     }
 }
