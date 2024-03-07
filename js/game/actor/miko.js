@@ -28,7 +28,7 @@ class Miko extends Actor {
         if (!this.invicibility) {
 
             
-            if (game.scene.achievement7 && other.type) game.scene.achievement7 = false;
+            if (game.scene.achievement7 && other.type && (other.type !== 'mace' || other.charged)) game.scene.achievement7 = false;
 
             this.health = Math.max(0, this.health - (other.damage ? other.damage : 1));
             this.shakeBuffer = 15;

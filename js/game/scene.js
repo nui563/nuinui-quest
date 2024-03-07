@@ -184,7 +184,6 @@ class Scene {
                 let tile = tiles[`${x}_${y}`];
                 if (tile !== undefined) {
                     tile = parseInt(tile, 16);
-                    if (this.name === 'forest' && tile > 36 && tile < 40 && Math.floor(this.frameCount / 8) % 2) tile += 8;
                     if (tile > 63) tile += 8 * (Math.floor(this.frameCount / (tile === 69 ? 12 : tile > 69 && this.name === 'forest' ? 24 : 6)) % 3);
                     const towerScrollOffset = (!this.towerScroll || (tiles !== this.background && x > 22 && x < 37)) ? 0 : Math.floor(this.frameCount / this.towerScroll) % 16;
                     ctx.drawImage(game.assets.images[`ts_${this.name}${game.altColor ? '_alt' : ''}`], (tile % 8) * 16, Math.floor(tile / 8) * 16, 16, 16, x * 16, y * 16 + towerScrollOffset, 16, 16);

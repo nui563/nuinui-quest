@@ -276,6 +276,7 @@ class Noel extends Flare {
                     this
                 );
                 mace.damage = keyChargeAttack ? 5 : 2;
+                if (keyChargeAttack) mace.charged = true;
                 // mace.damage = 64;
                 mace.isPersistent = true;
                 game.scene.actors.push(mace);

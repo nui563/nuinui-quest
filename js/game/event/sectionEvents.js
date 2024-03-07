@@ -24,8 +24,8 @@ const EVENTS = {
                             event.flare.animationLocked = true;
 
                             // --- debug
-                            // event.flare.pos.x = 7 * 16 * 20;
-                            // event.flare.pos.y = 0 * 16 * 12;
+                            // event.flare.pos.x = 12 * 16 * 20;
+                            // event.flare.pos.y = 0.5 * 16 * 12;
                             // scene.enableHUD = true;
                             // event.flare.animationLocked = false;
                             // event.flare.setAnimation('idle');
@@ -996,6 +996,257 @@ const EVENTS = {
                             game.saveData.setItem('nuinui-save-stage-2', true);
                             game.menu = new StageSelect(game, true);
                         }
+                    }
+                ]
+            }
+        ],
+
+        
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        "7_1": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate((7 * 20) * 16, (1 * 12 + 9) * 16);
+                            for (let i = 0; i < 9; i++) {
+                                game.ctx0.drawImage(game.assets.images['sp_peko_rocket'], 0, 0, 16, 16, 16 + i * 16 - Math.floor(event.timelineFrame / 2) % 16, 6, 16, 16);
+                                game.ctx0.drawImage(game.assets.images['sp_gem'], 32, 0, 16, 16, 11 * 16 + i * 16 - Math.floor(event.timelineFrame / 2) % 16, 5, 16, 16);
+                            }
+                            game.ctx0.restore();
+                        });
+                    }
+                ]
+            }
+        ],
+
+        
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        "7_3": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate((7 * 20) * 16, (3 * 12 + 9) * 16);
+                            for (let i = 0; i < 9; i++) {
+                                game.ctx0.drawImage(game.assets.images['sp_gem'], 0, 0, 16, 16, i * 16 + Math.floor(event.timelineFrame / 2) % 16, 5, 16, 16);
+                                game.ctx0.drawImage(game.assets.images['sp_gem'], 16, 0, 16, 16, 10 * 16 + i * 16 + Math.floor(event.timelineFrame / 2) % 16, 5, 16, 16);
+                            }
+                            game.ctx0.restore();
+                        });
+                    }
+                ]
+            }
+        ],
+        
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        "12_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        
+                        event.popup = false;
+                        if (!event.timelineFrame) {
+                            event.koyori = {
+                                pos: new Vector2((12 * 20 + 17) * 16, 7 * 16),
+                                dir: false,
+                                offset: 1
+                            }
+                        }
+
+                        if (!scene.koyoriCleared) {
+                            if (flare.isGrounded && !flare.isSliding && flare.dir && flare.pos.x > scene.currentSection.pos.x + 9 * 16 && flare.pos.x < scene.currentSection.pos.x + 10 * 16) {
+                                event.popup = true;
+                                if (game.keys.down) {
+                                    game.playSound('question');
+                                    flare.playerControl = false;
+                                    flare.vel.x = 0;
+                                    flare.pos.x = (12 * 20 + 9.5) * 16;
+                                    event.popup = false;
+                                    event.koyori.offset = 0;
+                                    event.next = true;
+                                }
+                            }
+                        }
+
+                        event.koyori.dir = flare.pos.x > event.koyori.pos.x;
+
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                            game.ctx0.translate(event.koyori.pos.x, event.koyori.pos.y);
+                            if (!event.koyori.dir) game.ctx0.scale(-1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_koyori'], event.koyori.offset * 48, 0, 48, 48, -24, 1, 48, 48);
+                            if (!(Math.floor(event.timelineFrame / 10) % 30)) game.ctx0.drawImage(game.assets.images['sp_koyori'], 0, 48, 9, 9, -5, 21, 9, 9);
+                            game.ctx0.restore();
+                        });
+
+                        if (event.popup) {
+                            game.scene.customDraw.push(game => {
+                                game.ctx2.save();
+                                game.ctx2.filter = 'invert(1)';
+                                game.ctx2.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                                game.ctx2.translate(Math.round(flare.pos.x), Math.round(flare.pos.y - 24));
+                                game.ctx2.drawImage(game.assets.images['ui_text_bubble'], 32, 0, 32, 32, -16, -16, 32, 32);
+                                game.ctx2.drawImage(game.assets.images['ui_help'], 0, 8, 32, 8, -16, -8, 32, 8);
+                                game.ctx2.drawImage(game.assets.images['ui_arrow_down'], 0, 0, 16, 16, 6, -(Math.floor(event.timelineFrame / 32) % 2), 16, 16);
+                                game.ctx2.restore();
+                            });
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        game.cpuKeys.a = game.keys.a;
+                        game.cpuKeys.b = game.keys.b;
+                        flare.dir = game.keys.left === game.keys.right ? flare.dir : game.keys.right;
+                        
+                        if (!event.timelineFrame) {
+                            event.items = [];
+                            event.score = 0;
+                            event.errors = 0;
+                            event.timeInterval = 90;
+                            event.timeBuffer = event.timeInterval;
+                        }
+
+                        if (event.timelineFrame > 60 && !event.timeBuffer) {
+                            if (event.timeInterval > 50) event.timeInterval--;
+                            event.timeBuffer = event.timeInterval;
+                            const itemPos = random() < .5 ? 7 : 12;
+                            event.items.push({
+                                pos: new Vector2((12 * 20 + itemPos) * 16 + 2, 0),
+                                size: new Vector2(12, 6),
+                                type: random() > .5 ? 'gem' : 'peko_rocket'
+                            });
+                            if (event.score > 25 && random() < .1) event.items.push({
+                                pos: new Vector2((12 * 20 + (itemPos === 7 ? 12 : 7)) * 16 + 2, 0),
+                                size: new Vector2(12, 6),
+                                type: random() > .5 ? 'gem' : 'peko_rocket'
+                            });
+                        } else event.timeBuffer--;
+
+                        event.items.forEach(item => {
+                            const belt = scene.actors.find(actor => actor instanceof MovingBlock && CollisionBox.intersects(item, actor))
+                            if (belt) item.pos.x += belt.dir ? 1 : -1;
+                            else item.pos.y += .5;
+
+                            if (item.pos.y > 11 * 16) {
+                                event.items = event.items.filter(a => a !== item);
+                                const correct = (item.type === 'gem' && item.pos.x > (12 * 20 + 8) * 16 && item.pos.x < (12 * 20 + 11) * 16) ||
+                                    (item.type === 'peko_rocket' && (item.pos.x < (12 * 20 + 8) * 16 || item.pos.x > (12 * 20 + 11) * 16));
+                                //optimize correct condition
+                                if (!correct) {
+                                    event.errors++;
+                                    game.playSound('explosion');
+                                    event.koyori.offset = 3;
+                                    scene.particles.explosion(new Vector2(item.pos.x, item.pos.y + 3));
+                                    scene.shakeBuffer = 2;
+                                    if (event.errors >= 3) {
+                                        event.result = false;
+                                        event.next = true;
+
+                                        event.items.forEach(item => {
+                                            for (let i = 0; i < 8; i++) scene.particles.shine_white(new Vector2(item.pos.x, item.pos.y + 3), 1);
+                                        });
+                                        event.items = [];
+                                    }
+                                } else {
+                                    event.score++;
+                                    game.playSound('heal');
+                                    event.koyori.offset = 2;
+                                }
+                                event.koyori.offsetBuffer = 30;
+                            }
+                        });
+
+                        for (let i = 0; i < event.errors; i++) {
+                            const possibles = [5, 9, 10, 14];
+                            const pos = new Vector2((12 * 20 + random() + possibles[Math.floor(random() * possibles.length)]) * 16, 12 * 16);
+                            scene.particles.smoke_white(pos, new Vector2(0, -4), 1);
+                        }
+
+                        if (event.koyori.offsetBuffer) event.koyori.offsetBuffer--;
+                        else event.koyori.offset = 0;
+
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+
+                            // items
+                            event.items.forEach(item => {
+                                game.ctx0.drawImage(game.assets.images[`sp_${item.type}`], 0, 0, 16, 16, Math.round(item.pos.x) - 2, Math.round(item.pos.y) - 6, 16, 16);
+                            });
+
+                            for (let i = 0; i < 3 - event.errors; i++) {
+                                game.ctx0.drawImage(game.assets.images['sp_heart'], 0, 0, 8, 8, 2 + (12 * 20 + 9) * 16 + i * 10, 70, 8, 8);
+                            }
+
+                            // score
+                            let score = Array.from(event.score.toString());
+                            while (score.length < 3) score.unshift('0');
+                            if (score.length > 3) score = ['9', '9', '9'];
+                            score.forEach((s, i) => {
+                                game.ctx0.drawImage(game.assets.images['font_en'], 6 * s, 0, 6, 6, (12 * 20 + 6) * 16 + 6 * i + 6 * 9, 64, 6, 6);
+                            });
+
+                            // koyori
+                            game.ctx0.translate(event.koyori.pos.x, event.koyori.pos.y);
+                            if (!event.koyori.dir) game.ctx0.scale(-1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_koyori'], event.koyori.offset * 48, 0, 48, 48, -24, 1, 48, 48);
+                            if (!(Math.floor(event.timelineFrame / 10) % 30)) game.ctx0.drawImage(game.assets.images['sp_koyori'], 0, 48, 9, 9, -5, 21, 9, 9);
+                            game.ctx0.restore();
+                        });
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 0) {
+                            event.koyori.offset = 1;
+                            flare.playerControl = true;
+                            
+                            if (event.score >= 50 && !game.saveData.getItem('nuinui-save-item-emblem1')) {
+                                game.scene.actors.push(new EmblemPickup(event.koyori.pos.plus(new Vector2(-8, -8)), 1));
+                            }
+                        }
+                        
+                        event.koyori.dir = flare.pos.x > event.koyori.pos.x;
+
+                        game.scene.customDraw.push(game => {
+                            game.ctx0.save();
+                            game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+
+                            // score
+                            let score = Array.from(event.score.toString());
+                            while (score.length < 3) score.unshift('0');
+                            if (score.length > 3) score = ['9', '9', '9'];
+                            score.forEach((s, i) => {
+                                game.ctx0.drawImage(game.assets.images['font_en'], 6 * s, 0, 6, 6, (12 * 20 + 6) * 16 + 6 * i + 6 * 9, 64, 6, 6);
+                            });
+
+                            // koyori
+                            game.ctx0.translate(event.koyori.pos.x, event.koyori.pos.y);
+                            if (!event.koyori.dir) game.ctx0.scale(-1, 1);
+                            game.ctx0.drawImage(game.assets.images['sp_koyori'], event.koyori.offset * 48, 0, 48, 48, -24, 1, 48, 48);
+                            if (!(Math.floor(event.timelineFrame / 10) % 30)) game.ctx0.drawImage(game.assets.images['sp_koyori'], 0, 48, 9, 9, -5, 21, 9, 9);
+                            game.ctx0.restore();
+                        });
                     }
                 ]
             }
@@ -3186,6 +3437,11 @@ const EVENTS = {
                                 flare.animationLocked = false;
                                 flare.playerControl = true;
                                 scene.irohaDuelCleared = true;
+
+                                
+                                if (!game.saveData.getItem('nuinui-save-item-emblem0')) {
+                                    game.scene.actors.push(new EmblemPickup(event.iroha.pos.plus(new Vector2(-8, -8)), 0));
+                                }
                             } else {
                                 flare.die(game);
                             }

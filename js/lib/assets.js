@@ -254,6 +254,9 @@ class Assets {
             'sp_oni',
             'sp_thunder',
             'sp_iroha',
+            'sp_koyori',
+            'sp_gem',
+            'sp_holox',
 
             'sp_hand',
             'sp_watame',

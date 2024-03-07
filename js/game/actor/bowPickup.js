@@ -300,3 +300,41 @@ class KeyPickup extends Actor {
         cx.restore();
     }
 }
+
+class EmblemPickup extends Actor {
+    size = new Vector2(16, 16);
+
+    constructor(pos, id) {
+        super(pos);
+        this.id = id;
+    }
+
+    update = game => {
+        this.pos.y += Math.cos(Math.floor(this.frameCount * 3) * (Math.PI / 180)) / 4;
+        if (!(this.frameCount % 24)) {
+            game.scene.particles.shine_white(CollisionBox.center(this), 1);
+            game.scene.particles.smoke_black(CollisionBox.center(this).plus(new Vector2(random() * 32 - 16, random() * 16 - 8)), new Vector2(random() - .5, random() * -3), 1);
+        }
+
+        const flare = game.scene.actors.find(actor => actor instanceof Flare);
+        if (CollisionBox.intersects(this, flare)) {
+            game.scene.actors = game.scene.actors.filter(actor => actor !== this);
+            game.scene.particles.sparkle_white(CollisionBox.center(this));
+            game.playSound('jingle');
+            
+            game.saveData.setItem(`nuinui-save-item-emblem${this.id}`, true);
+        }
+
+        this.frameCount++;
+    }
+
+    draw = (game, cx) => {
+        cx.save();
+        cx.translate(Math.round(this.pos.x), Math.round(this.pos.y));
+        cx.filter = 'invert(1)';
+        cx.drawImage(game.assets.images['vfx_explosion'], 0, 0, 18, 18, -1, -1, 18, 18);
+        cx.filter = 'none';
+        cx.drawImage(game.assets.images['sp_holox'], 10 * this.id, 0, 10, 10, 3, 3, 10, 10);
+        cx.restore();
+    }
+}

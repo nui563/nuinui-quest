@@ -72,6 +72,7 @@ class SaveMenu extends Menu {
                     skills: ['fire', 'rocket', 'petal', 'sword', 'shield', 'dual'].map(skill => parsed[`nuinui-save-item-${skill}`]),
                     items: ['gun', 'clock', 'jump', 'boots', 'bow'].map(item => parsed[`nuinui-save-item-${item}`]),
                     keys: new Array(5).fill(null).map((_, i) => parsed[`nuinui-save-item-key${i}`]),
+                    emblems: new Array(5).fill(null).map((_, i) => parsed[`nuinui-save-item-emblem${i}`]),
                     achievements: new Array(28).fill(null).map((_, i) => parsed[`nuinui-save-achievement-${i+1}`]),
                 });
             }
@@ -188,6 +189,10 @@ class SaveMenu extends Menu {
             if (saveData) {
                 saveData.skills.forEach((skill, j) => {
                     if (skill) cx.drawImage(game.assets.images['ui_charge_type'], 2 + j * 12, 2, 8, 8, 4 + j * 12, 3, 8, 8);
+                });
+
+                saveData.emblems.forEach((emblem, j) => {
+                    if (emblem) cx.drawImage(game.assets.images['sp_holox'], j * 10, 0, 10, 10, 75 + 12 * j, 2, 10, 10);
                 });
 
                 saveData.items.forEach((item, j) => {
