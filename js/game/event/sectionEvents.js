@@ -1278,14 +1278,14 @@ const EVENTS = {
                             event.flare.setAnimation('idle');
 
                             // --- debug
-                            event.flare.pos.x = 5.25 * 16 * 20;
-                            event.flare.pos.y = .5 * 16 * 12;
-                            scene.enableHUD = true;
-                            event.flare.animationLocked = false;
-                            event.flare.setAnimation('idle');
-                            event.flare.playerControl = true;
-                            event.end = true;
-                            game.timer = new Date();
+                            // event.flare.pos.x = 5.25 * 16 * 20;
+                            // event.flare.pos.y = .5 * 16 * 12;
+                            // scene.enableHUD = true;
+                            // event.flare.animationLocked = false;
+                            // event.flare.setAnimation('idle');
+                            // event.flare.playerControl = true;
+                            // event.end = true;
+                            // game.timer = new Date();
                             // ---
 
                             scene.view.target = event.flare;
