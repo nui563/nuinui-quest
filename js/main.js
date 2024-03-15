@@ -1,4 +1,4 @@
-let DEBUGMODE = false;
+let DEBUGMODE = true;
 let SHOW_HITBOX = false;
 
 const debugSave = game => {

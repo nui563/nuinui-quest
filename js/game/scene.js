@@ -514,7 +514,7 @@ class Scene {
                         cx.fillRect(0, 0, game.width, game.height);
                         cx.globalCompositeOperation = "destination-out";
 
-                        const largeLight = this.actors.filter(a => a instanceof Flare || a instanceof Calli || a instanceof EvilNoel || a instanceof Aqua || (a instanceof Torche && a.active));
+                        const largeLight = this.actors.filter(a => a instanceof Flare || a instanceof Calli || a instanceof EvilNoel || a instanceof Aqua || (a instanceof Torche && a.active) || a.blackoutObject);
                         largeLight.forEach(a => {
                             cx.save();
                             const pos = CollisionBox.center(a).round();

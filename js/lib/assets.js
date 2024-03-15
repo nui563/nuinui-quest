@@ -153,7 +153,8 @@ class Assets {
             'vfx_water_trail',
             'vfx_mace',
             'vfx_digit',
-            'vfx_bubble'
+            'vfx_bubble',
+            'vfx_stun'
         ],
         [
             'sp_pekora_idle',
@@ -257,6 +258,8 @@ class Assets {
             'sp_koyori',
             'sp_gem',
             'sp_holox',
+            'sp_chloe',
+            'sp_card2',
 
             'sp_hand',
             'sp_watame',

@@ -972,7 +972,7 @@ const EVENTS = {
         "5_1": [
             {
                 condition: game => true,
-                isPersistent: true,
+                isPersistent: false,
                 timeline: [
                     (game, event) => {
                         const scene = game.scene;
@@ -1278,14 +1278,14 @@ const EVENTS = {
                             event.flare.setAnimation('idle');
 
                             // --- debug
-                            // event.flare.pos.x = 12.5 * 16 * 20;
-                            // event.flare.pos.y = 0 * 16 * 12;
-                            // scene.enableHUD = true;
-                            // event.flare.animationLocked = false;
-                            // event.flare.setAnimation('idle');
-                            // event.flare.playerControl = true;
-                            // event.end = true;
-                            // game.timer = new Date();
+                            event.flare.pos.x = 5.25 * 16 * 20;
+                            event.flare.pos.y = .5 * 16 * 12;
+                            scene.enableHUD = true;
+                            event.flare.animationLocked = false;
+                            event.flare.setAnimation('idle');
+                            event.flare.playerControl = true;
+                            event.end = true;
+                            game.timer = new Date();
                             // ---
 
                             scene.view.target = event.flare;
@@ -1799,6 +1799,542 @@ const EVENTS = {
                             game.ctx0.drawImage(game.assets.images['sp_shion'], 48 * (Math.floor(event.timelineFrame * .125) % 2), 0, 48, 48, -24, 1, 48, 48);
                             game.ctx0.restore();
                         });
+                    }
+                ]
+            }
+        ],
+        
+        //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        "5_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        game.scene.blackout = false;
+                        event.end = true;
+                    }
+                ]
+            }
+        ],
+
+        "4_0": [
+            {
+                condition: game => true,
+                isPersistent: false,
+                timeline: [
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+                        
+                        event.popup = false;
+                        if (!event.timelineFrame) {
+                            if (!scene.chloeCleared) scene.blackout = true;
+
+                            [6.5, 9.5].forEach((x, i) => {
+                                scene.actors.push({
+                                    blackoutObject: true,
+                                    pos: new Vector2((4 * 20 + x) * 16, (8.5 - i) * 16),
+                                    size: new Vector2(16, 16),
+                                    update: () => {},
+                                    draw: () => {},
+                                    checkHit: () => false
+                                });
+                            });
+
+                            event.chloe = {
+                                pos: new Vector2((4 * 20 + 7) * 16, 7 * 16),
+                                dir: true,
+                                offset: scene.chloeCleared ? 3 : 0,
+                                icon: 13,
+                                health: 16,
+                                maxHealth: 16,
+                                healthBar: 0,
+                                shakeBuffer: 0,
+                                draw: function() {
+                                    game.scene.customDraw.push(game => {
+                                        game.ctx0.save();
+                                        game.ctx0.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                                        game.ctx0.drawImage(game.assets.images['sp_chloe'], 10, 48, 18, 8, (4 * 20 + 9.5) * 16 - 1, 8.5 * 16, 18, 8);
+                                        game.ctx0.translate(this.pos.x, this.pos.y);
+                                        if (this.dir) game.ctx0.scale(-1, 1);
+                                        if (this.shakeBuffer) game.ctx0.translate(Math.round(random() * 8) - 4, 0);
+                                        if (this.stunBuffer) game.ctx0.drawImage(game.assets.images[`vfx_stun`], Math.floor(event.timelineFrame * .125) % 4 * 24, 0, 24, 12, -12, 0, 24, 12);
+                                        game.ctx0.drawImage(game.assets.images['sp_chloe'], this.offset * 48, 0, 48, 48, -24, 1, 48, 48);
+                                        if (this.stunBuffer > 30 && this.offset) game.ctx0.drawImage(game.assets.images[`sp_chloe`], 0, 48, 9, 3, -4, 22, 9, 3);
+                                        game.ctx0.restore();
+                                    });
+                                }
+                            }
+                        }
+
+                        if (!scene.chloeCleared) {
+                            if (flare.isGrounded && !flare.isSliding && !flare.dir && flare.pos.x >= scene.currentSection.pos.x + 12 * 16 && flare.pos.x <= scene.currentSection.pos.x + 13 * 16) {
+                                event.popup = true;
+                                if (game.keys.down) {
+                                    game.playSound('question');
+                                    flare.playerControl = false;
+                                    flare.vel.x = 0;
+                                    flare.pos.x = (4 * 20 + 12.5) * 16;
+                                    event.popup = false;
+                                    event.downBuffer = true;
+
+                                    scene.boss = event.chloe;
+                                    scene.bossText = new TextElem(Array.from('sakamata chloe'), 'left');
+
+                                    event.next = true;
+                                }
+                            }
+                        }
+
+                        event.chloe.dir = flare.pos.x > event.chloe.pos.x;
+
+                        event.chloe.draw();
+
+                        if (event.popup) {
+                            game.scene.customDraw.push(game => {
+                                game.ctx2.save();
+                                game.ctx2.filter = 'invert(1)';
+                                game.ctx2.translate(-game.scene.view.pos.x, -game.scene.view.pos.y);
+                                game.ctx2.translate(Math.round(flare.pos.x), Math.round(flare.pos.y - 24));
+                                game.ctx2.drawImage(game.assets.images['ui_text_bubble'], 32, 0, 32, 32, -16, -16, 32, 32);
+                                game.ctx2.drawImage(game.assets.images['ui_help'], 0, 8, 32, 8, -16, -8, 32, 8);
+                                game.ctx2.drawImage(game.assets.images['ui_arrow_down'], 0, 0, 16, 16, 6, -(Math.floor(event.timelineFrame / 32) % 2), 16, 16);
+                                game.ctx2.restore();
+                            });
+                        }
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.downBuffer && !game.keys.down) event.downBuffer = false;
+                        if (event.upBuffer && !game.keys.up) event.upBuffer = false;
+                        if (event.aBuffer && !game.keys.a) event.aBuffer = false;
+
+                        if (!event.timelineFrame) {
+                            class Card {
+                                flipped = true;
+                                flipBuffer = 0;
+
+                                targetSlot = null;
+
+                                constructor(suit, value, deck) {
+                                    this.suit = suit;
+                                    this.value = value;
+                                    this.deck = deck;
+                                    this.pos = deck.pos.value();
+                                    this.slot = deck;
+                                }
+
+                                flip() {
+                                    this.flipBuffer = 30;
+                                }
+
+                                update() {
+                                    if (this.targetSlot) {
+                                        const target = this.targetSlot.pos;
+                                        this.pos.x += (target.x - this.pos.x) * .25;
+                                        this.pos.y += (target.y - this.pos.y) * .25;
+                                        if (Math.abs(this.pos.x - target.x) < 1) this.pos.x = target.x;
+                                        if (Math.abs(this.pos.y - target.y) < 1) this.pos.y = target.y;
+                                        if (this.pos.equals(target)) {
+                                            this.targetSlot.cards.push(this);
+                                            this.slot = this.targetSlot;
+                                            this.targetSlot = null;
+                                        }
+                                    }
+                                    if (this.flipBuffer) {
+                                        if (this.flipBuffer === 15) this.flipped = !this.flipped;
+                                        this.flipBuffer--;
+                                    }
+                                }
+
+                                draw(cx) {
+                                    cx.save();
+                                    cx.translate(Math.round(this.pos.x) + 16, Math.round(this.pos.y));
+                                    const slot = this.slot || this.targetSlot;
+                                    if (slot && !(slot instanceof Deck)) cx.translate(0, slot === this.slot ? -slot.cards.indexOf(this) : -slot.cards.length);
+                                    cx.scale(this.flipBuffer ? (Math.cos((this.flipBuffer / 30) * Math.PI) * (this.flipBuffer > 15 ? -1 : 1)) : 1, 1);
+                                    cx.translate(-16, 0);
+                                    cx.drawImage(game.assets.images['sp_card2'], this.flipped ? 32 : 0, 0, 32, 48, 0, 0, 32, 48);
+                                    if (this.flipped) {
+                                        switch (this.value) {
+                                            case 1:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 24 - 4, 6, 8);
+                                                break;
+                                            case 2:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 36 - 4, 6, 8);
+                                                break;
+                                            case 3:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 36 - 4, 6, 8);
+                                                break;
+                                            case 4:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 36 - 4, 6, 8);
+                                                break;
+                                            case 5:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 36 - 4, 6, 8);
+                                                break;
+                                            case 6:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 36 - 4, 6, 8);
+                                                break;
+                                            case 7:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 18 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 36 - 4, 6, 8);
+                                                break;
+                                            case 8:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 18 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 30 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 24 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 36 - 4, 6, 8);
+                                                break;
+                                            case 9:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 20 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 28 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 20 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 28 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 24 - 4, 6, 8);
+                                                break;
+                                            case 10:
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 20 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 28 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 8 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 12 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 20 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 28 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 24 - 3, 36 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 16 - 4, 6, 8);
+                                                cx.drawImage(game.assets.images['sp_card2'], 1 + 6 * this.suit, 48, 6, 8, 16 - 3, 32 - 4, 6, 8);
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                        cx.drawImage(game.assets.images['sp_card2'], 1 + 5 * (this.value-1), 56, 5, 5, 2, 2, 5, 5);
+                                        cx.drawImage(game.assets.images['sp_card2'], 1 + 5 * (this.value-1), 56, 5, 5, 25, 41, 5, 5);
+                                    }
+                                    cx.restore();
+                                }
+                            }
+
+                            class CardSlot {
+                                cards = [];
+
+                                constructor(pos) {
+                                    this.pos = pos;
+                                }
+
+                                shuffle() {
+                                    for (let i = this.cards.length - 1; i > 0; i--) {
+                                        let j = Math.floor(random() * (i + 1));
+                                        let temp = this.cards[i];
+                                        this.cards[i] = this.cards[j];
+                                        this.cards[j] = temp;
+                                    }
+                                }
+                            }
+
+                            class Deck extends CardSlot {
+                                constructor(pos) {
+                                    super(pos);
+                                    for (let i = 0; i < 40; i++) {
+                                        this.cards.push(new Card(i % 4, Math.floor(i / 4) + 1, this));
+                                    }
+                                }
+                            }
+
+                            event.hilo = {
+                                state: 'initTable',
+                                nextState: null,
+                                stateBuffer: 0,
+                                score: 0,
+                                deck: new Deck(new Vector2(9 * 16, 12 * 16)),
+                                table: [],
+                                changeState: function() {
+                                    this.state = this.nextState;
+                                    this.nextState = null;
+                                    this.stateBuffer = 0;
+                                    this.playerOptions = null;
+                                },
+                                init: function() {
+                                    for (let i = 0; i < 10; i++) {
+                                        const slot = new CardSlot(new Vector2(4 + (i % 5) * 2.5, i < 5 ? .5 : 4).times(16));
+                                        this.table.push(slot);
+                                    }
+                                    this.cards = [...this.deck.cards];
+                                },
+                                initTable: function() {
+                                    const interval = 15;
+
+                                    if (!this.stateBuffer) this.deck.shuffle();
+
+                                    if (this.stateBuffer < interval * 10 && !(this.stateBuffer % interval)) {
+                                        const card = this.deck.cards.pop();
+                                        card.slot = null;
+                                        card.targetSlot = this.table[this.stateBuffer / interval];
+                                        game.playSound('step');
+                                    }
+
+                                    if (!this.playerOptions && this.table.every(slot => slot.cards.length && slot.cards[0].flipped)) {
+                                        this.playerOptions = [
+                                            { text: new TextElem(Array.from('ok'), 'left'), action: () => this.nextState = 'prepareRound' },
+                                            { text: new TextElem(Array.from('shuffle'), 'left'), action: () => this.nextState = 'resetTable' }
+                                        ];
+                                        this.playerOptionsIndex = 0;
+                                    }
+                                },
+                                resetTable: function() {
+                                    if (!this.stateBuffer) {
+                                        game.playSound('dash');
+                                        this.table.forEach(slot => {
+                                            const card = slot.cards.pop();
+                                            card.slot = null;
+                                            card.targetSlot = this.deck;
+                                        });
+                                    }
+                                    if (this.stateBuffer === 60) {
+                                        this.nextState = 'initTable';
+                                    }
+                                },
+                                prepareRound: function() {
+                                    const interval = 15;
+                                    const offset = 60;
+                                    
+                                    if (!this.stateBuffer) {
+                                        this.table.forEach(slot => slot.cards.forEach(card => card.flip()));
+                                    }
+
+                                    if (this.stateBuffer >= offset && !(this.stateBuffer % interval)) {
+                                        let i = (this.stateBuffer - offset) / interval;
+                                        if (i < 9) {
+                                            if (i >= 1) i++;
+                                            const card = this.table[i].cards.pop();
+                                            card.slot = null;
+                                            card.targetSlot = this.table[1];
+                                            game.playSound('step');
+                                        }
+                                    }
+
+                                    if (this.table[1].cards.length === 10) {
+                                        this.table[1].shuffle();
+                                        this.nextState = 'askForGuess';
+                                    }
+                                },
+                                askForGuess: function() {
+                                    if (!this.stateBuffer) {
+                                        const cart = this.table[1].cards.pop();
+                                        cart.slot = null;
+                                        cart.targetSlot = this.table[2];
+                                        game.playSound('step');
+                                    }
+
+                                    if (this.table[2].cards.length && this.table[1].cards.length + this.table[6].cards.length === 9) {
+                                        const card = this.table[2].cards[0];
+                                        if (!card.flipBuffer) {
+                                            if (card.flipped) {
+                                                const cart = this.table[1].cards.pop();
+                                                cart.slot = null;
+                                                cart.targetSlot = this.table[7];
+                                                game.playSound('step');
+                                            } else card.flip();
+                                        }
+                                    }
+
+                                    if (this.table[7].cards.length && !this.playerOptions) {
+                                        this.playerOptions = [
+                                            { text: new TextElem(Array.from('higher'), 'left'), action: () => {
+                                                this.guess = 'higher';
+                                                this.nextState = 'roundResult';
+                                            }},
+                                            { text: new TextElem(Array.from('lower'), 'left'), action: () => {
+                                                this.guess = 'lower';
+                                                this.nextState = 'roundResult';
+                                            }}
+                                        ];
+                                        this.playerOptionsIndex = 0;
+                                    }
+                                },
+                                roundResult: function() {
+                                    if (!this.stateBuffer) {
+                                        this.table[7].cards[0].flip();
+                                    }
+
+                                    if (this.stateBuffer === 60) {
+                                        const chloeValue = this.table[2].cards[0].value === 1 ? 14 : this.table[2].cards[0].value;
+                                        const flareValue = this.table[7].cards[0].value === 1 ? 14 : this.table[7].cards[0].value;
+                                        const result =  flareValue - chloeValue;
+                                        if (result === 0) {
+                                            game.playSound('question');
+                                        } else if ((this.guess === 'higher' && result > 0) || (this.guess === 'lower' && result < 0)) {
+                                            event.chloe.shakeBuffer = 15;
+                                            event.chloe.stunBuffer = 60;
+                                            event.chloe.health = Math.max(0, event.chloe.health - 1);
+                                            event.chloe.offset = 3 - Math.round(event.chloe.health * 3 / event.chloe.maxHealth);
+                                            event.chloe.healthBar = event.chloe.health;
+                                            const pos = event.chloe.pos.plus(new Vector2(8, 16));
+                                            game.scene.particles.ray(pos);
+                                            game.scene.particles.impact(pos);
+
+                                            if (!event.chloe.health) {
+                                                game.playSound('cling');
+                                                event.next = true;
+                                            } else game.playSound('damage');
+                                        } else {
+                                            flare.damage = 2;
+                                            flare.playerControl = true;
+                                            flare.takeHit(game, flare);
+                                            flare.playerControl = false;
+                                            flare.damage = 1;
+                                            flare.vel.x = 0;
+                                        }
+                                        this.guess = null;
+                                    }
+
+                                    if (this.stateBuffer === 120) {
+                                        const cards = [this.table[2].cards.pop(), this.table[7].cards.pop()];
+                                        cards.forEach(card => {
+                                            card.flip();
+                                            card.slot = null;
+                                            card.targetSlot = this.table[6];
+                                        });
+                                        game.playSound('step');
+                                    }
+
+                                    if (this.stateBuffer === 180) {
+                                        if (this.table[1].cards.length) this.nextState = 'askForGuess';
+                                        else {
+                                            for (let i = 0; i < 10; i++) {
+                                                const card = this.table[6].cards.pop();
+                                                card.slot = null;
+                                                card.targetSlot = this.table[1];
+                                            }
+                                            game.playSound('step');
+                                        }
+                                    }
+
+                                    if (this.stateBuffer === 240) {
+                                        this.table[1].shuffle();
+                                        this.nextState = 'askForGuess';
+                                    }
+                                },
+                                update: function() {
+                                    this[this.state]();
+
+                                    if (this.playerOptions) {
+                                        if (game.keys.down && !event.downBuffer) {
+                                            this.playerOptionsIndex++;
+                                            game.playSound('menu');
+                                            if (this.playerOptionsIndex >= this.playerOptions.length) this.playerOptionsIndex = 0;
+                                            event.downBuffer = true;
+                                        }
+                                        if (game.keys.up && !event.upBuffer) {
+                                            this.playerOptionsIndex--;
+                                            game.playSound('menu');
+                                            if (this.playerOptionsIndex < 0) this.playerOptionsIndex = this.playerOptions.length - 1;
+                                            event.upBuffer = true;
+                                        }
+                                        if (game.keys.a && !event.aBuffer) {
+                                            game.playSound('select');
+                                            this.playerOptions[this.playerOptionsIndex].action();
+                                            event.aBuffer = true;
+                                        }
+                                    }
+
+                                    this.cards.forEach(card => card.update());
+
+                                    if (this.nextState) this.changeState();
+                                    else this.stateBuffer++;
+                                    this.draw();
+                                },
+                                draw: function() {
+                                    game.scene.customDraw.push(game => {
+                                        this.table.forEach(slot => slot.cards.forEach(card => card.draw(game.ctx2)));
+                                        const slotless = this.cards.filter(card => !card.slot);
+                                        slotless.forEach(card => card.draw(game.ctx2));
+
+                                        if (this.playerOptions) {
+                                            game.ctx2.save();
+                                            game.ctx2.translate(8 * 16, 7.5 * 16);
+                                            game.ctx2.fillStyle = '#000';
+                                            game.ctx2.fillRect(0, 0, 64, this.playerOptions.length * 12 + 6);
+                                            this.playerOptions.forEach((option, i) => {
+                                                if (i === this.playerOptionsIndex) game.ctx2.drawImage(game.assets.images['ui_arrow'], 0, 0, 8, 8, 6, 6 + i * 12, 8, 8);
+                                                option.text.draw(game, game.ctx2, new Vector2(14, 6 + i * 12));
+                                            });
+                                            game.ctx2.restore();
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                        if (!event.hilo.table.length) {
+                            if (event.chloe.healthBar === event.chloe.health) event.hilo.init();
+                        } else event.hilo.update();
+                        
+                        if (event.chloe === game.scene.boss) {
+                            if (event.chloe.healthBar < event.chloe.health) {
+                                event.chloe.healthBar += .25;
+                                if (!(event.timelineFrame % 4)) game.playSound('pew2');
+                            } else {
+                                const amt = .1;
+                                event.chloe.healthBar = (1 - amt) * event.chloe.healthBar + amt * event.chloe.health;
+                                if (Math.abs(event.chloe.health - event.chloe.healthBar) < amt) event.chloe.healthBar = event.chloe.health;
+                            }
+                        }
+                        if (event.chloe.stunBuffer) event.chloe.stunBuffer--;
+                        if (event.chloe.shakeBuffer) event.chloe.shakeBuffer--;
+                        event.chloe.draw();
+                    },
+                    (game, event) => {
+                        const scene = game.scene;
+                        const flare = scene.actors.find(actor => actor instanceof Flare);
+
+                        if (event.timelineFrame === 0) {
+                            scene.blackout = false;
+                            flare.playerControl = true;
+                            scene.boss = null;
+                            scene.bossText = null;
+                            scene.chloeCleared = true;
+
+                            if (!game.saveData.getItem('nuinui-save-item-emblem2')) {
+                                game.scene.actors.push(new EmblemPickup(event.chloe.pos.plus(new Vector2(-8, -8)), 2));
+                            }
+                        }
+
+                        event.chloe.dir = flare.pos.x > event.chloe.pos.x;
+                        
+                        if (event.chloe.stunBuffer) event.chloe.stunBuffer--;
+                        if (event.chloe.shakeBuffer) event.chloe.shakeBuffer--;
+                        event.chloe.draw();
                     }
                 ]
             }
