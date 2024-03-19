@@ -2367,12 +2367,13 @@ const EVENTS = {
 
 
                             // --- debug
-                            // event.flare.pos.x = 4 * 16 * 20;
-                            // event.flare.pos.y = 2.4 * 16 * 12;
+                            // event.flare.pos.x = 6 * 16 * 20;
+                            // event.flare.pos.y = 0 * 16 * 12;
                             // scene.enableHUD = true;
                             // event.flare.animationLocked = false;
                             // event.flare.setAnimation('idle');
                             // event.flare.playerControl = true;
+                            // game.timer = new Date();
                             // event.end = true;
                             // ---
 

@@ -273,7 +273,12 @@ class Item extends Menu {
         cx.save();
         cx.globalAlpha = this.modeAnim;
         const xOffset = Math.round(48 * (1 - Math.pow(2, -10 * this.modeAnim)));
-        cx.drawImage(game.assets.images[game.mode === 'noel' ? 'ui_noel' : 'ui_flare'], 0, 0, 128, 144, game.width - 96 - xOffset, game.height - 144, 128, 144);
+        cx.drawImage(game.assets.images[game.mode === 'noel' ? 'ui_noel' : 'ui_flare'], game.mode === 'cursed' ? 128 : 0, 0, 128, 144, game.width - 96 - xOffset, game.height - 144, 128, 144);
+        
+        if (game.mode === 'cursed') {
+            // smoke particles
+            
+        }
         cx.restore();
     }
 }

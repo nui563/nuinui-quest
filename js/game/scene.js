@@ -231,24 +231,29 @@ class Scene {
             const time = (new Date().getTime() - game.timer.getTime()) / 1000;
             let minutes = ((time / 60) % 60) | 0;
             let seconds = (time % 60) | 0;
+            let milliseconds = (time * 1000) % 1000;
             minutes = ('00' + minutes).slice(-2);
             seconds = ('00' + seconds).slice(-2);
+            milliseconds = ('000' + milliseconds).slice(-3);
 
             if (time < 3600) {
-                cx.drawImage(game.assets.images['ui_timer'], game.width - 39, 2);
+                cx.drawImage(game.assets.images['ui_timer'], game.width - 61, 2);
             } else {
-                cx.drawImage(game.assets.images['ui_timer_wide'], game.width - 57, 2);
+                cx.drawImage(game.assets.images['ui_timer_wide'], game.width - 79, 2);
                 let hours = (time / 3600) | 0;
                 hours = ('00' + hours).slice(-2);
                 hours.split('').forEach((digit, i) => {
-                    cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 53 + 6 * i, 5, 5, 5);
+                    cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 75 + 6 * i, 5, 5, 5);
                 });
             }
             minutes.split('').forEach((digit, i) => {
-                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 35 + 6 * i, 5, 5, 5);
+                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 57 + 6 * i, 5, 5, 5);
             });
             seconds.split('').forEach((digit, i) => {
-                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 17 + 6 * i, 5, 5, 5);
+                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 39 + 6 * i, 5, 5, 5);
+            });
+            milliseconds.split('').forEach((digit, i) => {
+                cx.drawImage(game.assets.images['ui_digit'], 5 * parseInt(digit), 0, 5, 5, game.width - 23 + 6 * i, 5, 5, 5);
             });
         }
 
